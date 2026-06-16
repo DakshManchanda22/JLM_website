@@ -39,9 +39,10 @@ export default defineType({
     defineField({
       name: 'image',
       title: 'Photo',
+      description:
+        'Optional — leaders without a photo show a neutral placeholder until you upload one.',
       type: 'image',
       options: { hotspot: true },
-      validation: (Rule) => Rule.required(),
       fields: [
         { name: 'alt', type: 'string', title: 'Alt text' },
       ],
