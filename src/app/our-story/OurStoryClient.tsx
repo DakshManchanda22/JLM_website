@@ -1,6 +1,6 @@
 'use client'
 
-import { Cormorant_Garamond, DM_Sans } from 'next/font/google'
+import { Anton, Cormorant_Garamond, DM_Sans } from 'next/font/google'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import Footer from '@/components/Footer'
@@ -14,6 +14,12 @@ const cormorant = Cormorant_Garamond({
 const dmSans = DM_Sans({
   subsets: ['latin'],
   variable: '--font-dm-sans',
+})
+
+const anton = Anton({
+  subsets: ['latin'],
+  weight: '400',
+  variable: '--font-anton',
 })
 
 const EASE = [0.16, 1, 0.3, 1] as const
@@ -165,10 +171,9 @@ function MilestoneRow({ item }: { item: Milestone }) {
       <span
         className="block text-[96px] md:text-[128px] leading-none"
         style={{
-          fontFamily: 'var(--font-cormorant)',
+          fontFamily: 'var(--font-anton)',
           color: '#111111',
-          fontWeight: 700,
-          letterSpacing: '-0.02em',
+          letterSpacing: '0.01em',
         }}
       >
         {item.year}
@@ -240,7 +245,7 @@ export default function OurStoryClient({ cms = {} }: { cms?: OurStoryCms }) {
     cms.milestones && cms.milestones.length > 0 ? cms.milestones : DEFAULT_MILESTONES
 
   return (
-    <div className={`${cormorant.variable} ${dmSans.variable} bg-white`}>
+    <div className={`${cormorant.variable} ${dmSans.variable} ${anton.variable} bg-white`}>
       {/* Page header */}
       <div className="pt-16 pb-12 text-center px-6">
         <p

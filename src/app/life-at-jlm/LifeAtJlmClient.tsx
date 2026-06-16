@@ -73,13 +73,6 @@ const EASE = [0.16, 1, 0.3, 1] as const
 
 /* ─────────────────────────── data ─────────────────────────── */
 
-const DEFAULT_ANCHORS = [
-  { id: 'people', num: '/1', label: 'People', img: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=400&h=400&fit=crop&auto=format' },
-  { id: 'values', num: '/2', label: 'Values', img: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=400&h=400&fit=crop&auto=format' },
-  { id: 'workplace', num: '/3', label: 'Workplace', img: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=400&fit=crop&auto=format' },
-  { id: 'together', num: '/4', label: 'Together', img: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=400&h=400&fit=crop&auto=format' },
-]
-
 const DEFAULT_AINT_LIST = [
   { word: 'corporate', caption: 'stiff, formal', icon: '🪑' },
   { word: 'showy', caption: 'loud, flashy', icon: '🎺' },
@@ -95,27 +88,45 @@ const DEFAULT_ARE_LIST = [
 
 const DEFAULT_VALUES = [
   {
-    icon: '🌿',
-    title: 'Quiet quality',
-    body: 'We don\'t shout. We make things that families have trusted for a hundred years — and we keep earning that trust, product by product.',
+    icon: '',
+    title: 'Customer & Quality Focus',
+    body: 'We deliver high-quality products and services to delight our customers by recognising areas of improvement and continuously exploring new ways of improving our offerings.',
     img: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=900&h=1200&fit=crop&auto=format',
   },
   {
-    icon: '🤝',
-    title: 'Family first',
-    body: 'The mothers, fathers and children who use our products are the only audience that matters. Every decision starts and ends with them.',
+    icon: '',
+    title: 'Trust & Empowerment',
+    body: 'We weave employee empowerment into the daily roles of our people. We enable, inspire, and encourage individuals to take steps to improve their work experience, increase their engagement, and help build an inclusive culture.',
+    img: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=900&h=1200&fit=crop&auto=format',
+  },
+  {
+    icon: '',
+    title: 'Cost Focus',
+    body: 'We identify the drivers of cost in the value chain and control them — without compromising on quality or identity.',
+    img: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=900&h=1200&fit=crop&auto=format',
+  },
+  {
+    icon: '',
+    title: 'Corporate Citizenship',
+    body: 'Corporate citizenship is our company\'s responsibility towards society. We adhere to the highest standards in ethical behaviour, environmental sustainability, and legal responsibility — balancing the needs of our customers, our community, and the environment around us.',
+    img: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=900&h=1200&fit=crop&auto=format',
+  },
+  {
+    icon: '',
+    title: 'Care & Respect For People',
+    body: 'We believe in a responsible and supportive environment where people treat each other respectfully regardless of origin, education, religion, beliefs, physical ability, gender, or sexual identity.',
     img: 'https://images.unsplash.com/photo-1591348278863-a8fb3887e2aa?w=900&h=1200&fit=crop&auto=format',
   },
   {
-    icon: '📚',
-    title: 'Heritage in motion',
-    body: 'A century is a long time to listen. We carry that learning into how we work today — and how we plan for the next hundred years.',
+    icon: '',
+    title: 'Learning & Experimentation',
+    body: 'JLM is committed to a culture that encourages professionalism and excellence through learning and development — supporting innovative approaches, fresh solutions, and the continuous search for new ways to advance our goals.',
     img: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=900&h=1200&fit=crop&auto=format',
   },
   {
-    icon: '🌱',
-    title: 'Quietly bold',
-    body: 'We move with care, but we don\'t stand still. New categories, new geographies, new ways of working — always grounded, never reckless.',
+    icon: '',
+    title: 'Executing with Accountability & Collaboration',
+    body: 'Accountability is the duty of every Morisoner to be answerable for their actions and decisions, and to accept responsibility for them. Collaboration between teams reduces redundancy and improves the quality of our work — and wherever possible, we work closely with others to coordinate our efforts.',
     img: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=900&h=1200&fit=crop&auto=format',
   },
 ]
@@ -400,100 +411,42 @@ function Hero() {
   )
 }
 
-/* ─────────────────── ANCHOR TOC (circles) ────────────────── */
+/* ─────────────────── INTRO PARAGRAPH (post-hero) ────────────────── */
 
-function AnchorRoll() {
-  const cms = useLife()
-  const ANCHORS =
-    cms.anchors && cms.anchors.length > 0
-      ? cms.anchors.map((a) => ({
-          id: a.targetId,
-          num: a.num,
-          label: a.label,
-          img: a.image,
-        }))
-      : DEFAULT_ANCHORS
-  const [hovered, setHovered] = useState<string | null>(null)
+function IntroParagraph() {
   return (
     <section
       className="relative w-full"
-      style={{ backgroundColor: '#FFFFFF', padding: '12vh 6vw 14vh' }}
+      style={{ backgroundColor: '#FFFFFF', padding: '14vh 6vw' }}
     >
-      <div className="flex flex-col items-center">
-        <SectionLabel>Contents</SectionLabel>
-        <h2
-          className={`${cormorant.className} mt-3`}
-          style={{
-            fontSize: 'clamp(28px, 3vw, 44px)',
-            color: INK,
-            fontWeight: 300,
-            fontStyle: 'italic',
-          }}
-        >
-          Four ways in
-        </h2>
-      </div>
-
-      <div className="mt-[8vh] grid grid-cols-2 md:grid-cols-4 gap-y-12 gap-x-6">
-        {ANCHORS.map((a) => {
-          const isHovered = hovered === a.id
-          return (
-            <div key={a.id} className="flex flex-col items-center gap-5">
-              <span
-                className={`${cormorant.className} italic`}
-                style={{ fontSize: 44, color: MUTED, fontWeight: 300 }}
-              >
-                {a.num}
-              </span>
-              <a
-                href={`#${a.id}`}
-                onMouseEnter={() => setHovered(a.id)}
-                onMouseLeave={() => setHovered(null)}
-                className="relative block"
-                style={{
-                  width: 'min(180px, 18vw)',
-                  height: 'min(180px, 18vw)',
-                  borderRadius: '50%',
-                  border: `1px solid ${INK}`,
-                  overflow: 'hidden',
-                }}
-              >
-                {/* image fill on hover */}
-                <motion.div
-                  initial={false}
-                  animate={{ scale: isHovered ? 1 : 0.6, opacity: isHovered ? 1 : 0 }}
-                  transition={{ duration: 0.7, ease: EASE }}
-                  className="absolute inset-0"
-                >
-                  <Image
-                    src={a.img}
-                    alt={a.label}
-                    fill
-                    sizes="180px"
-                    style={{ objectFit: 'cover' }}
-                  />
-                  <div className="absolute inset-0" style={{ backgroundColor: 'rgba(17,17,17,0.25)' }} />
-                </motion.div>
-
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <motion.span
-                    initial={false}
-                    animate={{ color: isHovered ? '#FFFFFF' : INK }}
-                    transition={{ duration: 0.4, ease: EASE }}
-                    className={`${dmSans.className} uppercase tracking-[0.22em]`}
-                    style={{ fontSize: 12, fontWeight: 500 }}
-                  >
-                    {a.label}
-                  </motion.span>
-                </div>
-              </a>
-            </div>
-          )
-        })}
-      </div>
+      <motion.p
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: '-80px' }}
+        transition={{ duration: 0.9, ease: EASE }}
+        className={`${cormorant.className} max-w-[1000px] mx-auto text-center`}
+        style={{
+          fontSize: 'clamp(22px, 2.4vw, 34px)',
+          lineHeight: 1.45,
+          fontWeight: 300,
+          color: INK,
+        }}
+      >
+        At JL Morison, we believe that a great organisation is built on both performance and
+        purpose. We&rsquo;ve created a workplace that carries the energy and mobility of a growing
+        company while offering the stability and openness of an established MNC — giving our people
+        a rare kind of foundation to grow from. Collaboration, honest communication, and a
+        genuinely positive culture aren&rsquo;t aspirations here; they&rsquo;re simply how we work.
+        Everything we do is grounded in{' '}
+        <span className="italic" style={{ fontWeight: 400 }}>
+          values we hold ourselves to
+        </span>
+        , every single day.
+      </motion.p>
     </section>
   )
 }
+
 
 /* ───────────── Editorial caption-image strip ─────────────── */
 
@@ -732,8 +685,8 @@ function ValuesBlock() {
   const cms = useLife()
   const LABEL = cms.valuesLabel ?? '/2 Values'
   const HEADLINE =
-    cms.valuesHeadline ?? 'Four things we quietly refuse to compromise on.'
-  const TAGLINE = cms.valuesTagline ?? 'The unsexy work of getting it right.'
+    cms.valuesHeadline ?? 'Seven values we quietly refuse to compromise on.'
+  const TAGLINE = cms.valuesTagline ?? 'All of the above — with long-term thinking.'
   const VALUES = cms.values && cms.values.length > 0 ? cms.values : DEFAULT_VALUES
   const [active, setActive] = useState(0)
   return (
@@ -786,8 +739,7 @@ function ValuesBlock() {
                     0{i + 1}
                   </span>
                   <div className="flex-1">
-                    <div className="flex items-baseline gap-4">
-                      <span style={{ fontSize: 22 }}>{v.icon}</span>
+                    <div className="flex items-baseline">
                       <h3
                         className={`${cormorant.className}`}
                         style={{
@@ -1131,7 +1083,7 @@ export default function LifeAtJlmClient({ cms = {} }: { cms?: LifeCms }) {
       <div className={`${cormorant.variable} ${dmSans.variable}`}>
         {!introDone && <IntroCurtain onDone={() => setIntroDone(true)} />}
         <Hero />
-        <AnchorRoll />
+        <IntroParagraph />
         <CaptionStrip />
         <PeopleBlock />
         <AreArentBlock />
