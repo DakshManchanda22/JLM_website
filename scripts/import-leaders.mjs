@@ -1,30 +1,64 @@
-import Image from 'next/image'
-import Link from 'next/link'
-import { notFound } from 'next/navigation'
-import type { Metadata } from 'next'
-import { fetchLeader, fetchLeaderSlugs } from '@/sanity/queries'
-import { resolveImageUrl } from '@/sanity/resolveImage'
+/**
+ * One-off import: pushes the 7 current leadership team members into Sanity.
+ *
+ * Run once with a write-permission token, then leadership data lives in
+ * Sanity and can be edited from /studio. Photos can be uploaded inside the
+ * Studio after this completes — the page falls back to a neutral placeholder
+ * for any leader whose photo isn't uploaded yet.
+ *
+ * ────────────────────────────────────────────────────────────────
+ * HOW TO RUN
+ *
+ * 1. Get a write token from Sanity:
+ *    https://www.sanity.io/manage → your project → API → Tokens
+ *    → "Add API token" → Name: "import-leaders" → Permissions: "Editor"
+ *    → Copy the token (starts with `sk...`)
+ *
+ * 2. From the project root:
+ *
+ *      SANITY_API_TOKEN=sk... \
+ *      NEXT_PUBLIC_SANITY_PROJECT_ID=abc12345 \
+ *      NEXT_PUBLIC_SANITY_DATASET=production \
+ *      node scripts/import-leaders.mjs
+ *
+ * 3. Refresh /studio → Our People → Leadership Team — all 7 leaders appear.
+ *
+ * 4. Delete the token at sanity.io/manage once the import is done so it
+ *    can't be used again.
+ * ────────────────────────────────────────────────────────────────
+ */
 
-export const revalidate = 60
+import { createClient } from '@sanity/client'
 
-const slugify = (name: string) => name.toLowerCase().replace(/\s+/g, '-')
+const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID
+const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET || 'production'
+const token = process.env.SANITY_API_TOKEN
 
-type LocalLeader = {
-  name: string
-  title: string
-  quote: string
-  image: string
-  linkedin: string
-  email: string
-  bio: string[]
+if (!projectId) {
+  console.error('✘ Missing NEXT_PUBLIC_SANITY_PROJECT_ID')
+  process.exit(1)
+}
+if (!token) {
+  console.error('✘ Missing SANITY_API_TOKEN (needs Editor permission)')
+  process.exit(1)
 }
 
-const FALLBACK_TEAM: LocalLeader[] = [
+const client = createClient({
+  projectId,
+  dataset,
+  apiVersion: '2024-10-01',
+  token,
+  useCdn: false,
+})
+
+const slugify = (name) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+
+const LEADERS = [
   {
     name: 'Sakshi Mody',
     title: 'Promotor',
-    quote: 'Progress rarely arrives with applause; it arrives when you keep going after the excitement fades.',
-    image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=900&q=80',
+    quote:
+      'Progress rarely arrives with applause; it arrives when you keep going after the excitement fades.',
     linkedin: 'https://www.linkedin.com/in/sakshi-mody-01b3512/',
     email: 'sakshi.mody@jlmorison.com',
     bio: [
@@ -39,8 +73,8 @@ const FALLBACK_TEAM: LocalLeader[] = [
   {
     name: 'Sohan Sarda',
     title: 'Executive Director',
-    quote: "The future isn't built in grand moments—it is built in ordinary days repeated with intention.",
-    image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=900&q=80',
+    quote:
+      "The future isn't built in grand moments—it is built in ordinary days repeated with intention.",
     linkedin: 'https://www.linkedin.com/in/sohan-sarda-2b3a4958/',
     email: 'sohan.sarda@jlmorison.com',
     bio: [
@@ -55,7 +89,6 @@ const FALLBACK_TEAM: LocalLeader[] = [
     name: 'Nitin Manchanda',
     title: 'Chief Operating Officer',
     quote: 'Talent may open a door, but curiosity keeps revealing new rooms.',
-    image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=900&q=80',
     linkedin: 'https://www.linkedin.com/in/nitin-manchanda-bb2b84107/',
     email: 'nitin.manchanda@jlmorison.com',
     bio: [
@@ -70,7 +103,6 @@ const FALLBACK_TEAM: LocalLeader[] = [
     name: 'Anand Laxmanan',
     title: 'Head SCM',
     quote: 'A good idea changes your mind; a great idea changes your habits.',
-    image: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=900&q=80',
     linkedin: 'https://www.linkedin.com/in/anand-laxmanan-1b02592b/',
     email: 'anand.laxmanan@jlmorison.com',
     bio: [
@@ -82,8 +114,8 @@ const FALLBACK_TEAM: LocalLeader[] = [
   {
     name: 'Kavita Wagh',
     title: 'Head HR & OD',
-    quote: "The strongest foundations are often invisible, which is why they're easy to underestimate.",
-    image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=900&q=80',
+    quote:
+      "The strongest foundations are often invisible, which is why they're easy to underestimate.",
     linkedin: 'https://www.linkedin.com/in/kavita-wagh-80933026/',
     email: 'kavita.wagh@jlmorison.com',
     bio: [
@@ -96,8 +128,7 @@ const FALLBACK_TEAM: LocalLeader[] = [
     name: 'Ashwani Kumar',
     title: 'Senior Manager IT',
     quote: "Success is not a destination you discover; it's a direction you choose every day.",
-    image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=900&q=80',
-    linkedin: 'https://linkedin.com',
+    linkedin: '',
     email: 'ashwani.kumar@jlmorison.com',
     bio: [
       "Ashwani comes to JLM from Dabur Group where he was heading the IT division for Dabur International (Dubai headquarters), bringing 20+ years of IT experience overall. Ashwani led the implementation of IT strategy, specifically business critical projects and the corporate IT program portfolio for Dabur International and all its subsidiaries across Egypt, Turkey, Nigeria, South Africa, US, UK, Iran, and Pakistan.",
@@ -109,9 +140,8 @@ const FALLBACK_TEAM: LocalLeader[] = [
   {
     name: 'Pratap Nikam',
     title: 'Head Manufacturing',
-    quote: '/* Add quote here */',
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=900&q=80',
-    linkedin: 'https://linkedin.com',
+    quote: '',
+    linkedin: '',
     email: 'pratap.nikam@jlmorison.com',
     bio: [
       "Pratap joined J.L. Morison in March 2023, bringing over 23 years of manufacturing experience in the FMCG industry. At JL Morison he leads factory operations of the Waluj Plant in Maharashtra (manufacturing facility for Bigen Hair Colour) and Rasoi Limited in Kolkata (manufacturing facility for a wide range of baby care products).",
@@ -122,166 +152,35 @@ const FALLBACK_TEAM: LocalLeader[] = [
   },
 ]
 
-/** Resolve a leader from Sanity first, fall back to the hardcoded list. */
-async function resolveLeader(slug: string): Promise<LocalLeader | null> {
-  const PHOTO_PLACEHOLDER =
-    'https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=900&h=1200&fit=crop&auto=format'
+async function main() {
+  const transaction = client.transaction()
 
-  const sanityLeader = await fetchLeader(slug)
-  if (sanityLeader) {
-    return {
-      name: sanityLeader.name,
-      title: sanityLeader.title,
-      quote: sanityLeader.quote ?? '',
-      image: resolveImageUrl(sanityLeader.image, 900) ?? PHOTO_PLACEHOLDER,
-      linkedin: sanityLeader.linkedin ?? '',
-      email: sanityLeader.email ?? '',
-      bio: sanityLeader.bio ?? [],
+  LEADERS.forEach((leader, i) => {
+    const slug = slugify(leader.name)
+    const doc = {
+      _id: `leader.${slug}`,
+      _type: 'leader',
+      name: leader.name,
+      title: leader.title,
+      slug: { _type: 'slug', current: slug },
+      order: i + 1,
+      quote: leader.quote || undefined,
+      linkedin: leader.linkedin || undefined,
+      email: leader.email || undefined,
+      bio: leader.bio,
     }
-  }
-  return FALLBACK_TEAM.find((l) => slugify(l.name) === slug) ?? null
+    // createOrReplace: re-running the script is safe — it updates instead of duplicating
+    transaction.createOrReplace(doc)
+  })
+
+  console.log(`Importing ${LEADERS.length} leaders into Sanity (${projectId}/${dataset})…`)
+  const result = await transaction.commit()
+  console.log(`✓ Done. Documents created/updated: ${result.results.length}`)
+  console.log('  Open /studio → Our People → Leadership Team to verify.')
+  console.log('  Photos can now be uploaded inside Studio per leader.')
 }
 
-export async function generateStaticParams() {
-  const sanitySlugs = await fetchLeaderSlugs()
-  const fallbackSlugs = FALLBACK_TEAM.map((l) => slugify(l.name))
-  const all = Array.from(new Set([...sanitySlugs, ...fallbackSlugs]))
-  return all.map((slug) => ({ slug }))
-}
-
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ slug: string }>
-}): Promise<Metadata> {
-  const { slug } = await params
-  const leader = await resolveLeader(slug)
-  if (!leader) return {}
-  return {
-    title: `${leader.name} — JL Morison (India) Ltd.`,
-    description: leader.bio[0],
-  }
-}
-
-export default async function LeaderProfilePage({
-  params,
-}: {
-  params: Promise<{ slug: string }>
-}) {
-  const { slug } = await params
-  const leader = await resolveLeader(slug)
-  if (!leader) notFound()
-
-  return (
-    <div style={{ backgroundColor: '#111111', minHeight: '100%' }}>
-      <div className="px-6 md:px-12 lg:px-16 pt-12 pb-24">
-
-        {/* Back link */}
-        <Link
-          href="/leadership-team"
-          className="inline-flex items-center gap-2 text-white/40 text-sm hover:text-white/70 transition-colors duration-200 mb-12"
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 12H5M12 5l-7 7 7 7" />
-          </svg>
-          Leadership team
-        </Link>
-
-        <div className="flex flex-col md:flex-row gap-12 md:gap-16 items-start">
-          {/* Photo + social icons */}
-          <div className="flex-shrink-0 w-full md:w-[300px] lg:w-[360px]">
-            <div
-              className="rounded-2xl overflow-hidden"
-              style={{ aspectRatio: '3/4' }}
-            >
-              <div className="relative w-full h-full">
-                <Image
-                  src={leader.image}
-                  alt={leader.name}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 360px"
-                  className="object-cover object-top"
-                  priority
-                />
-              </div>
-            </div>
-
-            {/* LinkedIn + Email icon buttons */}
-            <div className="flex items-center gap-3 mt-5">
-              {leader.linkedin && (
-                <a
-                  href={leader.linkedin}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="LinkedIn"
-                  className="w-11 h-11 rounded-full bg-gray-200 hover:bg-gray-300 text-[#111111] flex items-center justify-center transition-all duration-200 hover:scale-105"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
-                    <rect x="2" y="9" width="4" height="12" />
-                    <circle cx="4" cy="4" r="2" />
-                  </svg>
-                </a>
-              )}
-              {leader.email && (
-                <a
-                  href={`mailto:${leader.email}`}
-                  aria-label="Email"
-                  className="w-11 h-11 rounded-full bg-gray-200 hover:bg-gray-300 text-[#111111] flex items-center justify-center transition-all duration-200 hover:scale-105"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="2" y="4" width="20" height="16" rx="2" />
-                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-                  </svg>
-                </a>
-              )}
-            </div>
-          </div>
-
-          {/* Text */}
-          <div className="flex-1 pt-0 md:pt-6">
-            <p className="text-white/40 text-sm tracking-[0.18em] uppercase mb-3">
-              {leader.title}
-            </p>
-            <h1
-              className="text-white mb-6"
-              style={{
-                fontSize: 'clamp(2.2rem, 5vw, 4rem)',
-                fontWeight: 300,
-                lineHeight: 1.05,
-                letterSpacing: '-0.01em',
-                fontFamily: 'Georgia, serif',
-              }}
-            >
-              {leader.name}
-            </h1>
-
-            {/* Quote — max 2 lines, same width as bio */}
-            <p
-              className="text-white mb-8 overflow-hidden"
-              style={{
-                fontWeight: 900,
-                fontStyle: 'italic',
-                fontSize: 'clamp(1rem, 2vw, 1.25rem)',
-                lineHeight: 1.5,
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
-              }}
-            >
-              &ldquo;{leader.quote}&rdquo;
-            </p>
-
-            <div className="space-y-5">
-              {leader.bio.map((para, i) => (
-                <p key={i} className="text-white/60 text-base leading-[1.8]">
-                  {para}
-                </p>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
+main().catch((err) => {
+  console.error('✘ Import failed:', err.message ?? err)
+  process.exit(1)
+})
