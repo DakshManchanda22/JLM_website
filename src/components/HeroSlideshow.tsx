@@ -4,13 +4,13 @@ import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 
-type Slide = {
+export type Slide = {
   image: string
   brand: string
   tagline: string
 }
 
-const SLIDES: Slide[] = [
+const DEFAULT_SLIDES: Slide[] = [
   {
     image:
       'https://images.unsplash.com/photo-1492725764893-90b379c2b6e7?w=2000&q=80',
@@ -34,7 +34,9 @@ const SLIDES: Slide[] = [
 const SLIDE_DURATION = 5500 // ms
 const EASE = [0.16, 1, 0.3, 1] as const
 
-export default function HeroSlideshow() {
+export default function HeroSlideshow({ slides }: { slides?: Slide[] }) {
+  const SLIDES = slides && slides.length > 0 ? slides : DEFAULT_SLIDES
+
   const [index, setIndex] = useState(0)
   const [paused, setPaused] = useState(false)
 
@@ -45,7 +47,7 @@ export default function HeroSlideshow() {
       SLIDE_DURATION
     )
     return () => window.clearTimeout(id)
-  }, [index, paused])
+  }, [index, paused, SLIDES.length])
 
   const advance = () => setIndex((i) => (i + 1) % SLIDES.length)
   const goTo = (i: number) => setIndex(i)

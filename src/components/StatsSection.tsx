@@ -6,13 +6,13 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 gsap.registerPlugin(ScrollTrigger)
 
-type Stat = {
+export type Stat = {
   number: string
   label: string
   body: string
 }
 
-const STATS: Stat[] = [
+const DEFAULT_STATS: Stat[] = [
   {
     number: '100+',
     label: 'Years',
@@ -37,7 +37,8 @@ const FINAL_TEXT = '#FFFFFF'
 const INITIAL_BORDER = 'rgba(85, 85, 85, 0.2)'
 const FINAL_BORDER = 'rgba(255, 255, 255, 0.35)'
 
-export default function StatsSection() {
+export default function StatsSection({ stats }: { stats?: Stat[] }) {
+  const STATS = stats && stats.length > 0 ? stats : DEFAULT_STATS
   const sectionRef = useRef<HTMLElement>(null)
 
   useEffect(() => {

@@ -5,13 +5,14 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 const slugify = (name: string) => name.toLowerCase().replace(/\s+/g, '-')
 
-type Leader = {
+export type Leader = {
   name: string
   title: string
   image: string
+  slug?: string
 }
 
-const TEAM: Leader[] = [
+const DEFAULT_TEAM: Leader[] = [
   {
     name: 'Sakshi Mody',
     title: 'Promotor',
@@ -66,7 +67,7 @@ const ITEM = {
 }
 
 function LeaderCard({ leader }: { leader: Leader }) {
-  const href = `/leadership-team/${slugify(leader.name)}`
+  const href = `/leadership-team/${leader.slug ?? slugify(leader.name)}`
 
   return (
     <motion.div variants={ITEM} className="group">
@@ -102,7 +103,8 @@ function LeaderCard({ leader }: { leader: Leader }) {
   )
 }
 
-export default function LeadershipGrid() {
+export default function LeadershipGrid({ team }: { team?: Leader[] }) {
+  const TEAM = team && team.length > 0 ? team : DEFAULT_TEAM
   return (
     <section className="px-6 md:px-12 lg:px-16 pt-12 pb-24">
       {/* Heading */}

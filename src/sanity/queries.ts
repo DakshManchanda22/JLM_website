@@ -81,3 +81,184 @@ export async function fetchPostSlugs(): Promise<string[]> {
   if (!client) return []
   return client.fetch(postSlugsQuery)
 }
+
+/* ─────────────────────── Homepage singleton ─────────────────────── */
+
+export type HeroSlide = {
+  image: any
+  brand: string
+  tagline: string
+}
+
+export type BrandCardData = {
+  name: string
+  shortName?: string
+  tagline: string
+  href: string
+  image: any
+}
+
+export type StatData = {
+  number: string
+  label: string
+  body: string
+}
+
+export type Homepage = {
+  heroSlides?: HeroSlide[]
+  quote?: {
+    lines?: string[]
+    attribution?: string
+  }
+  brands?: BrandCardData[]
+  stats?: StatData[]
+}
+
+export const homepageQuery = groq`*[_type == "homepage"][0]{
+  heroSlides[]{
+    image,
+    brand,
+    tagline,
+  },
+  quote{
+    lines,
+    attribution,
+  },
+  brands[]{
+    name,
+    shortName,
+    tagline,
+    href,
+    image,
+  },
+  stats[]{
+    number,
+    label,
+    body,
+  },
+}`
+
+export async function fetchHomepage(): Promise<Homepage | null> {
+  if (!client) return null
+  return client.fetch(homepageQuery)
+}
+
+/* ───────────────────────── Leadership ───────────────────────── */
+
+export type Leader = {
+  name: string
+  slug: string
+  title: string
+  order: number
+  image: any
+  quote?: string
+  linkedin?: string
+  email?: string
+  bio?: string[]
+}
+
+const leaderProjection = groq`
+  name,
+  "slug": slug.current,
+  title,
+  order,
+  image,
+  quote,
+  linkedin,
+  email,
+  bio
+`
+
+export const leaderListQuery = groq`*[_type == "leader" && defined(slug.current)] | order(order asc) {
+  ${leaderProjection}
+}`
+
+export const leaderBySlugQuery = groq`*[_type == "leader" && slug.current == $slug][0]{
+  ${leaderProjection}
+}`
+
+export const leaderSlugsQuery = groq`*[_type == "leader" && defined(slug.current)][].slug.current`
+
+export async function fetchLeaders(): Promise<Leader[]> {
+  if (!client) return []
+  return client.fetch(leaderListQuery)
+}
+
+export async function fetchLeader(slug: string): Promise<Leader | null> {
+  if (!client) return null
+  return client.fetch(leaderBySlugQuery, { slug })
+}
+
+export async function fetchLeaderSlugs(): Promise<string[]> {
+  if (!client) return []
+  return client.fetch(leaderSlugsQuery)
+}
+
+/* ───────────────────────── Life at JL Morison ───────────────────────── */
+
+export type LifeAtJlm = {
+  introImages?: any[]
+  introFinalImage?: any
+  heroImage?: any
+  heroLine1?: string
+  heroLine2?: string
+  heroCaptionSmall?: string
+  heroCaptionLarge?: string
+  anchors?: { num: string; label: string; targetId: string; image: any }[]
+  captionStrip?: { image: any; caption: string }[]
+  peopleLabel?: string
+  peopleHeadline?: string
+  peopleTagline?: string
+  peopleBody?: string
+  arentEyebrow?: string
+  arentHeadline?: string
+  arentBody?: string
+  arentList?: { word: string; caption: string; icon: string }[]
+  areList?: { word: string; caption: string; icon: string }[]
+  valuesLabel?: string
+  valuesHeadline?: string
+  valuesTagline?: string
+  values?: { icon: string; title: string; body: string; image: any }[]
+  workplaceLabel?: string
+  workplaceHeadline?: string
+  workplaceTagline?: string
+  workplaceBody?: string
+  workplaceImages?: { image: any; caption: string }[]
+  togetherLabel?: string
+  togetherHeadline?: string
+  togetherTagline?: string
+  togetherBody?: string
+  togetherBrands?: { name: string; tag: string }[]
+  togetherClosingMark?: string
+  togetherClosingLine?: string
+  togetherCtaLabel?: string
+  togetherCtaHref?: string
+}
+
+export const lifeAtJlmQuery = groq`*[_type == "lifeAtJlm"][0]{
+  introImages,
+  introFinalImage,
+  heroImage,
+  heroLine1,
+  heroLine2,
+  heroCaptionSmall,
+  heroCaptionLarge,
+  anchors[]{ num, label, targetId, image },
+  captionStrip[]{ image, caption },
+  peopleLabel, peopleHeadline, peopleTagline, peopleBody,
+  arentEyebrow, arentHeadline, arentBody,
+  arentList[]{ word, caption, icon },
+  areList[]{ word, caption, icon },
+  valuesLabel, valuesHeadline, valuesTagline,
+  values[]{ icon, title, body, image },
+  workplaceLabel, workplaceHeadline, workplaceTagline, workplaceBody,
+  workplaceImages[]{ image, caption },
+  togetherLabel, togetherHeadline, togetherTagline, togetherBody,
+  togetherBrands[]{ name, tag },
+  togetherClosingMark, togetherClosingLine, togetherCtaLabel, togetherCtaHref,
+}`
+
+export async function fetchLifeAtJlm(): Promise<LifeAtJlm | null> {
+  if (!client) return null
+  return client.fetch(lifeAtJlmQuery)
+}
