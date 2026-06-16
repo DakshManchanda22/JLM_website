@@ -7,7 +7,7 @@ import Footer from '@/components/Footer'
 
 const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
-  weight: ['300', '400', '500'],
+  weight: ['300', '400', '500', '600', '700'],
   variable: '--font-cormorant',
 })
 
@@ -163,8 +163,13 @@ function MilestoneRow({ item }: { item: Milestone }) {
       className="w-full"
     >
       <span
-        className="block text-[96px] md:text-[128px] leading-none font-light"
-        style={{ fontFamily: 'var(--font-cormorant)', color: '#B8956A' }}
+        className="block text-[96px] md:text-[128px] leading-none"
+        style={{
+          fontFamily: 'var(--font-cormorant)',
+          color: '#111111',
+          fontWeight: 700,
+          letterSpacing: '-0.02em',
+        }}
       >
         {item.year}
       </span>
