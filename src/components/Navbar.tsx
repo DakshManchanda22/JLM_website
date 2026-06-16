@@ -185,7 +185,7 @@ export default function Navbar() {
               {ALL_MOBILE.map((label, i) => {
                 const subs = DROPDOWNS[label]
                 const isExpanded = mobileExpanded === label
-                const isJoinUs = label === 'Contact Us'
+                const isPill = label === 'Contact Us'
                 return (
                   <motion.div
                     key={label}
@@ -205,7 +205,7 @@ export default function Navbar() {
                       >
                         {label}
                       </button>
-                    ) : isJoinUs ? (
+                    ) : isPill ? (
                       <Link
                         href="/contact-us"
                         onClick={() => setMobileOpen(false)}

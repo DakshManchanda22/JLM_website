@@ -1,0 +1,1016 @@
+'use client'
+
+import { useEffect, useRef, useState } from 'react'
+import Image from 'next/image'
+import { motion, useInView, AnimatePresence } from 'framer-motion'
+import { Cormorant_Garamond, DM_Sans } from 'next/font/google'
+import Footer from '@/components/Footer'
+
+const cormorant = Cormorant_Garamond({
+  subsets: ['latin'],
+  weight: ['300', '400', '500'],
+  style: ['normal', 'italic'],
+  variable: '--font-cormorant',
+})
+
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600'],
+  variable: '--font-dm-sans',
+})
+
+const BEIGE = '#E8E0D5'
+const INK = '#111111'
+const MUTED = '#555555'
+const EASE = [0.16, 1, 0.3, 1] as const
+
+/* ─────────────────────────── data ─────────────────────────── */
+
+const ANCHORS = [
+  { id: 'people', num: '/1', label: 'People', img: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=400&h=400&fit=crop&auto=format' },
+  { id: 'values', num: '/2', label: 'Values', img: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=400&h=400&fit=crop&auto=format' },
+  { id: 'workplace', num: '/3', label: 'Workplace', img: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=400&fit=crop&auto=format' },
+  { id: 'together', num: '/4', label: 'Together', img: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=400&h=400&fit=crop&auto=format' },
+]
+
+const AINT_LIST = [
+  { word: 'corporate', caption: 'stiff, formal', icon: '🪑' },
+  { word: 'showy', caption: 'loud, flashy', icon: '🎺' },
+  { word: 'siloed', caption: 'closed, guarded', icon: '🧱' },
+]
+
+const ARE_LIST = [
+  { word: 'Considered', caption: 'thoughtful, deliberate', icon: '🧭' },
+  { word: 'Curious', caption: 'always learning', icon: '🔎' },
+  { word: 'Generous', caption: 'time, credit, knowledge', icon: '🤝' },
+  { word: 'Patient', caption: 'good things take time', icon: '⏳' },
+]
+
+const VALUES = [
+  {
+    icon: '🌿',
+    title: 'Quiet quality',
+    body: 'We don\'t shout. We make things that families have trusted for a hundred years — and we keep earning that trust, product by product.',
+    img: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=900&h=1200&fit=crop&auto=format',
+  },
+  {
+    icon: '🤝',
+    title: 'Family first',
+    body: 'The mothers, fathers and children who use our products are the only audience that matters. Every decision starts and ends with them.',
+    img: 'https://images.unsplash.com/photo-1591348278863-a8fb3887e2aa?w=900&h=1200&fit=crop&auto=format',
+  },
+  {
+    icon: '📚',
+    title: 'Heritage in motion',
+    body: 'A century is a long time to listen. We carry that learning into how we work today — and how we plan for the next hundred years.',
+    img: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=900&h=1200&fit=crop&auto=format',
+  },
+  {
+    icon: '🌱',
+    title: 'Quietly bold',
+    body: 'We move with care, but we don\'t stand still. New categories, new geographies, new ways of working — always grounded, never reckless.',
+    img: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=900&h=1200&fit=crop&auto=format',
+  },
+]
+
+/* ─────────────────────── reusable bits ─────────────────────── */
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      className={`${dmSans.className} uppercase tracking-[0.22em] text-[11px] font-medium`}
+      style={{ color: MUTED }}
+    >
+      {children}
+    </div>
+  )
+}
+
+function Sporting({ children }: { children: React.ReactNode }) {
+  return (
+    <p
+      className={`${cormorant.className} italic`}
+      style={{
+        fontWeight: 400,
+        fontSize: 'clamp(20px, 2.2vw, 28px)',
+        color: INK,
+        lineHeight: 1.35,
+      }}
+    >
+      {children}
+    </p>
+  )
+}
+
+/* ───────────────── INTRO CURTAIN (6-photo reveal) ───────────────── */
+
+/* Six layered, slightly-offset team/heritage photos that fade in one
+   by one (~200ms, 950ms, 1750ms, 2330ms, 2850ms, 3200ms), the whole
+   stack slowly zooms scale 1→1.15 over ~4s, a final cover photo fades
+   over the top around 3.5s, then the whole curtain pulls up off-screen
+   at 4.5s to reveal the hero behind it. */
+
+const INTRO_IMAGES = [
+  { src: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=1600&h=1100&fit=crop&auto=format', left: '-1vw', top: '0vw', scale: 0.73 },
+  { src: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1600&h=1100&fit=crop&auto=format', left: '4vw', top: '3vw', scale: 0.76 },
+  { src: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=1600&h=1100&fit=crop&auto=format', left: '-1vw', top: '0vw', scale: 0.76 },
+  { src: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=1600&h=1100&fit=crop&auto=format', left: '-4vw', top: '-0.5vw', scale: 0.74 },
+  { src: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=1600&h=1100&fit=crop&auto=format', left: '8vw', top: '-2vw', scale: 0.74 },
+  { src: 'https://images.unsplash.com/photo-1573497019418-b400bb3ab074?w=1600&h=1100&fit=crop&auto=format', left: '-1vw', top: '3.9vw', scale: 0.74 },
+]
+
+/* slower staggered reveal — each photo pops in with a ~900ms wait */
+const INTRO_DELAYS_MS = [200, 1100, 2000, 2900, 3800, 4700]
+const FINAL_FADE_IN_MS = 5800
+const CURTAIN_LIFT_MS = 7000
+const CURTAIN_DURATION_MS = 1500
+
+function IntroCurtain({ onDone }: { onDone: () => void }) {
+  const [lifted, setLifted] = useState(false)
+  const [visibleCount, setVisibleCount] = useState(0)
+
+  useEffect(() => {
+    const timers: ReturnType<typeof setTimeout>[] = []
+    INTRO_DELAYS_MS.forEach((d, i) => {
+      timers.push(setTimeout(() => setVisibleCount(i + 1), d))
+    })
+    timers.push(setTimeout(() => setLifted(true), CURTAIN_LIFT_MS))
+    timers.push(setTimeout(onDone, CURTAIN_LIFT_MS + CURTAIN_DURATION_MS + 50))
+    return () => timers.forEach(clearTimeout)
+  }, [onDone])
+
+  return (
+    <motion.div
+      initial={{ y: 0 }}
+      animate={{ y: lifted ? '-100vh' : 0 }}
+      transition={{ duration: CURTAIN_DURATION_MS / 1000, ease: [0.77, 0, 0.175, 1] }}
+      className="fixed overflow-hidden"
+      style={{
+        top: 64,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        zIndex: 40,
+        backgroundColor: BEIGE,
+        pointerEvents: 'none',
+      }}
+    >
+      {/* zooming wrap for the stack of photos — keeps scaling for the whole intro */}
+      <motion.div
+        initial={{ scale: 1 }}
+        animate={{ scale: 1.15 }}
+        transition={{ duration: (CURTAIN_LIFT_MS - 200) / 1000, ease: 'linear', delay: 0.2 }}
+        className="absolute inset-0"
+      >
+        {INTRO_IMAGES.map((img, i) => (
+          <div
+            key={i}
+            className="absolute"
+            style={{
+              left: img.left,
+              top: img.top,
+              width: '100%',
+              height: '100vh',
+              transform: `scale(${img.scale})`,
+              transformOrigin: '50% 50%',
+              visibility: i < visibleCount ? 'visible' : 'hidden',
+            }}
+          >
+            <Image
+              src={img.src}
+              alt=""
+              fill
+              priority={i < 3}
+              sizes="100vw"
+              style={{ objectFit: 'cover' }}
+            />
+            {/* subtle warm tint to bind the stack */}
+            <div className="absolute inset-0" style={{ backgroundColor: 'rgba(232,224,213,0.18)' }} />
+          </div>
+        ))}
+      </motion.div>
+
+      {/* final establishing cover, slides in scaling 0.8 → 1 and fading in,
+          then keeps scaling slightly until the curtain lifts */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1.05 }}
+        transition={{
+          opacity: { duration: 0.6, ease: 'easeOut', delay: FINAL_FADE_IN_MS / 1000 },
+          scale: {
+            duration: (CURTAIN_LIFT_MS - FINAL_FADE_IN_MS + 600) / 1000,
+            ease: [0.83, 0, 0.17, 1],
+            delay: (FINAL_FADE_IN_MS - 200) / 1000,
+          },
+        }}
+        className="absolute inset-0"
+      >
+        <Image
+          src="https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=1800&h=1200&fit=crop&auto=format"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          style={{ objectFit: 'cover' }}
+        />
+        <div className="absolute inset-0" style={{ backgroundColor: 'rgba(17,17,17,0.18)' }} />
+      </motion.div>
+    </motion.div>
+  )
+}
+
+/* ─────────────────────────── HERO ──────────────────────────── */
+
+function Hero() {
+  /* Hero is mounted behind the curtain. Headline words animate
+     in once the curtain begins lifting — timed to the curtain. */
+  const HERO_REVEAL_DELAY = CURTAIN_LIFT_MS / 1000 + 0.5 // headline rises as curtain pulls away
+
+  return (
+    <section
+      className="relative w-full"
+      style={{
+        minHeight: '92vh',
+        backgroundColor: BEIGE,
+        overflow: 'hidden',
+      }}
+    >
+      {/* full-bleed group photo background */}
+      <div className="absolute inset-0">
+        <Image
+          src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=2400&h=1600&fit=crop&auto=format"
+          alt="The JL Morison team"
+          fill
+          priority
+          sizes="100vw"
+          style={{ objectFit: 'cover' }}
+        />
+        {/* localised gradient for headline readability — keeps the photo's
+            natural top edge so the navbar curve stays visible */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.18) 35%, rgba(0,0,0,0.55) 100%)',
+          }}
+        />
+      </div>
+
+      {/* centered two-line headline */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center px-[6vw] z-10">
+        <div className="overflow-hidden">
+          <motion.h1
+            initial={{ y: '9vw' }}
+            animate={{ y: 0 }}
+            transition={{ duration: 1.6, ease: [0.696, 0.108, 0.199, 0.897], delay: HERO_REVEAL_DELAY }}
+            className={`${cormorant.className} italic text-center`}
+            style={{
+              fontSize: 'clamp(64px, 12vw, 180px)',
+              lineHeight: 1,
+              fontWeight: 400,
+              color: '#FFFFFF',
+              letterSpacing: '-0.01em',
+              margin: 0,
+            }}
+          >
+            Life at
+          </motion.h1>
+        </div>
+
+        <div className="overflow-hidden">
+          <motion.h1
+            initial={{ y: '9vw' }}
+            animate={{ y: 0 }}
+            transition={{ duration: 1.6, ease: [0.696, 0.108, 0.199, 0.897], delay: HERO_REVEAL_DELAY + 0.2 }}
+            className={`${dmSans.className} text-center`}
+            style={{
+              fontSize: 'clamp(64px, 12vw, 180px)',
+              lineHeight: 1,
+              fontWeight: 300,
+              letterSpacing: '-0.02em',
+              color: '#FFFFFF',
+              marginTop: '-0.4vw',
+            }}
+          >
+            JL&nbsp;Morison
+          </motion.h1>
+        </div>
+      </div>
+
+      {/* bottom caption */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, delay: HERO_REVEAL_DELAY + 1.0 }}
+        className="absolute bottom-[6vh] left-0 right-0 flex flex-col items-center z-10"
+      >
+        <span
+          className={`${dmSans.className} uppercase tracking-[0.24em]`}
+          style={{ fontSize: 11, color: '#FFFFFF', opacity: 0.7 }}
+        >
+          Since 1920
+        </span>
+        <span
+          className={`${cormorant.className} italic mt-2 text-center max-w-[44ch]`}
+          style={{ fontSize: 'clamp(16px, 1.4vw, 20px)', color: '#FFFFFF', opacity: 0.85, fontWeight: 400 }}
+        >
+          A century of building goodness, together.
+        </span>
+      </motion.div>
+    </section>
+  )
+}
+
+/* ─────────────────── ANCHOR TOC (circles) ────────────────── */
+
+function AnchorRoll() {
+  const [hovered, setHovered] = useState<string | null>(null)
+  return (
+    <section
+      className="relative w-full"
+      style={{ backgroundColor: '#FFFFFF', padding: '12vh 6vw 14vh' }}
+    >
+      <div className="flex flex-col items-center">
+        <SectionLabel>Contents</SectionLabel>
+        <h2
+          className={`${cormorant.className} mt-3`}
+          style={{
+            fontSize: 'clamp(28px, 3vw, 44px)',
+            color: INK,
+            fontWeight: 300,
+            fontStyle: 'italic',
+          }}
+        >
+          Four ways in
+        </h2>
+      </div>
+
+      <div className="mt-[8vh] grid grid-cols-2 md:grid-cols-4 gap-y-12 gap-x-6">
+        {ANCHORS.map((a) => {
+          const isHovered = hovered === a.id
+          return (
+            <div key={a.id} className="flex flex-col items-center gap-5">
+              <span
+                className={`${cormorant.className} italic`}
+                style={{ fontSize: 44, color: MUTED, fontWeight: 300 }}
+              >
+                {a.num}
+              </span>
+              <a
+                href={`#${a.id}`}
+                onMouseEnter={() => setHovered(a.id)}
+                onMouseLeave={() => setHovered(null)}
+                className="relative block"
+                style={{
+                  width: 'min(180px, 18vw)',
+                  height: 'min(180px, 18vw)',
+                  borderRadius: '50%',
+                  border: `1px solid ${INK}`,
+                  overflow: 'hidden',
+                }}
+              >
+                {/* image fill on hover */}
+                <motion.div
+                  initial={false}
+                  animate={{ scale: isHovered ? 1 : 0.6, opacity: isHovered ? 1 : 0 }}
+                  transition={{ duration: 0.7, ease: EASE }}
+                  className="absolute inset-0"
+                >
+                  <Image
+                    src={a.img}
+                    alt={a.label}
+                    fill
+                    sizes="180px"
+                    style={{ objectFit: 'cover' }}
+                  />
+                  <div className="absolute inset-0" style={{ backgroundColor: 'rgba(17,17,17,0.25)' }} />
+                </motion.div>
+
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <motion.span
+                    initial={false}
+                    animate={{ color: isHovered ? '#FFFFFF' : INK }}
+                    transition={{ duration: 0.4, ease: EASE }}
+                    className={`${dmSans.className} uppercase tracking-[0.22em]`}
+                    style={{ fontSize: 12, fontWeight: 500 }}
+                  >
+                    {a.label}
+                  </motion.span>
+                </div>
+              </a>
+            </div>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
+/* ───────────── Editorial caption-image strip ─────────────── */
+
+function CaptionStrip() {
+  return (
+    <section
+      className="relative w-full px-[6vw] py-[12vh] grid grid-cols-1 md:grid-cols-2 gap-x-[6vw] gap-y-16"
+      style={{ backgroundColor: '#FFFFFF' }}
+    >
+      {[
+        {
+          src: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=900&h=1100&fit=crop&auto=format',
+          caption: 'Powered by chai (and a little chocolate)',
+          offset: 0,
+        },
+        {
+          src: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=900&h=1100&fit=crop&auto=format',
+          caption: 'Quietly, unmistakably all in',
+          offset: 64,
+        },
+      ].map((it, i) => (
+        <motion.div
+          key={i}
+          initial={{ opacity: 0, y: 60 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-100px' }}
+          transition={{ duration: 1, ease: EASE, delay: i * 0.1 }}
+          style={{ marginTop: it.offset }}
+        >
+          <div
+            className="relative overflow-hidden"
+            style={{ borderRadius: 16, aspectRatio: '4 / 5', backgroundColor: BEIGE }}
+          >
+            <Image src={it.src} alt={it.caption} fill sizes="(max-width: 768px) 90vw, 42vw" style={{ objectFit: 'cover' }} />
+          </div>
+          <p
+            className={`${cormorant.className} italic mt-4`}
+            style={{ fontSize: 20, color: MUTED, fontWeight: 400 }}
+          >
+            {it.caption}
+          </p>
+        </motion.div>
+      ))}
+    </section>
+  )
+}
+
+/* ─────────────────── /1 PEOPLE block ─────────────────── */
+
+function PeopleBlock() {
+  return (
+    <section
+      id="people"
+      className="relative w-full"
+      style={{ backgroundColor: '#FFFFFF', padding: '14vh 6vw' }}
+    >
+      <div className="max-w-[820px] mx-auto text-center">
+        <SectionLabel>/1 People</SectionLabel>
+        <motion.h2
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-80px' }}
+          transition={{ duration: 0.9, ease: EASE }}
+          className={`${cormorant.className} mt-6`}
+          style={{
+            fontSize: 'clamp(40px, 5.4vw, 80px)',
+            lineHeight: 1.04,
+            fontWeight: 300,
+            color: INK,
+          }}
+        >
+          A team that{' '}
+          <span className="italic" style={{ fontWeight: 400 }}>
+            shows up
+          </span>{' '}
+          — for each other, and for the families we serve.
+        </motion.h2>
+        <div className="mt-6">
+          <Sporting>No titles, no posturing — just craft. 🌱</Sporting>
+        </div>
+        <p
+          className={`${dmSans.className} mt-6 max-w-[58ch] mx-auto`}
+          style={{ color: MUTED, fontSize: 15, lineHeight: 1.7 }}
+        >
+          Some of us have been here for decades. Some joined last year. What we share is harder to put on
+          a CV — a quiet patience with the work, respect for the next person’s craft, and a real belief
+          that good products are built by good teams.
+        </p>
+      </div>
+    </section>
+  )
+}
+
+/* ──────────── ARE / AREN'T strikethrough block ──────────── */
+
+function StrikeRow({ word, caption, icon }: { word: string; caption: string; icon: string }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const inView = useInView(ref, { once: true, margin: '-80px' })
+  return (
+    <div ref={ref} className="relative">
+      <SectionLabel>We aren’t</SectionLabel>
+      <div className="relative mt-2 inline-block">
+        <h3
+          className={`${cormorant.className} italic`}
+          style={{
+            fontSize: 'clamp(40px, 5.4vw, 84px)',
+            color: INK,
+            fontWeight: 400,
+            lineHeight: 1,
+          }}
+        >
+          {word}
+        </h3>
+        {/* strikethrough line */}
+        <motion.div
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: inView ? 1 : 0 }}
+          transition={{ duration: 0.9, ease: EASE, delay: 0.2 }}
+          className="absolute left-0 right-0"
+          style={{
+            top: '52%',
+            height: 2,
+            backgroundColor: INK,
+            transformOrigin: 'left center',
+          }}
+        />
+      </div>
+      <div
+        className={`${dmSans.className} mt-3`}
+        style={{ color: MUTED, fontSize: 13, letterSpacing: '0.02em' }}
+      >
+        <span className="mr-2">{icon}</span>
+        <span style={{ textDecoration: 'line-through' }}>{caption}</span>
+      </div>
+    </div>
+  )
+}
+
+function AreRow({ word, caption, icon }: { word: string; caption: string; icon: string }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-60px' }}
+      transition={{ duration: 0.7, ease: EASE }}
+    >
+      <SectionLabel>We are</SectionLabel>
+      <h3
+        className={`${dmSans.className} mt-2`}
+        style={{
+          fontSize: 'clamp(34px, 4.4vw, 64px)',
+          color: INK,
+          fontWeight: 400,
+          letterSpacing: '-0.01em',
+          lineHeight: 1.04,
+        }}
+      >
+        {word}
+      </h3>
+      <div
+        className={`${dmSans.className} mt-3`}
+        style={{ color: MUTED, fontSize: 13 }}
+      >
+        <span className="mr-2">{icon}</span>
+        {caption}
+      </div>
+    </motion.div>
+  )
+}
+
+function AreArentBlock() {
+  return (
+    <section
+      className="relative w-full"
+      style={{ backgroundColor: INK, color: '#FFFFFF', padding: '16vh 6vw' }}
+    >
+      <div className="max-w-[820px]">
+        <p
+          className={`${dmSans.className} uppercase tracking-[0.22em]`}
+          style={{ fontSize: 11, color: '#FFFFFF', opacity: 0.65 }}
+        >
+          Not your average company
+        </p>
+        <h2
+          className={`${cormorant.className} mt-5`}
+          style={{
+            fontSize: 'clamp(42px, 5.6vw, 86px)',
+            lineHeight: 1.04,
+            color: '#FFFFFF',
+            fontWeight: 300,
+          }}
+        >
+          What we{' '}
+          <span className="italic" style={{ fontWeight: 400 }}>
+            are
+          </span>{' '}
+          — and what we’re not.
+        </h2>
+        <p
+          className={`${dmSans.className} mt-6 max-w-[52ch]`}
+          style={{ color: 'rgba(255,255,255,0.72)', fontSize: 15, lineHeight: 1.7 }}
+        >
+          A hundred years has taught us as much about what to avoid as what to chase. We try to be honest
+          about both.
+        </p>
+      </div>
+
+      <div
+        className="mt-[10vh] grid gap-x-10 gap-y-14"
+        style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', color: '#FFFFFF' }}
+      >
+        {AINT_LIST.map((it) => (
+          <StrikeRow key={it.word} {...it} />
+        ))}
+      </div>
+
+      <div className="mt-[14vh] grid gap-x-10 gap-y-14" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
+        {ARE_LIST.map((it) => (
+          <AreRow key={it.word} {...it} />
+        ))}
+      </div>
+    </section>
+  )
+}
+
+/* ────────── /2 VALUES — hover-driven list + image ────────── */
+
+function ValuesBlock() {
+  const [active, setActive] = useState(0)
+  return (
+    <section
+      id="values"
+      className="relative w-full"
+      style={{ backgroundColor: '#FFFFFF', padding: '14vh 6vw' }}
+    >
+      <div className="max-w-[820px]">
+        <SectionLabel>/2 Values</SectionLabel>
+        <h2
+          className={`${cormorant.className} mt-6`}
+          style={{
+            fontSize: 'clamp(40px, 5.4vw, 80px)',
+            lineHeight: 1.04,
+            fontWeight: 300,
+            color: INK,
+          }}
+        >
+          Four things we{' '}
+          <span className="italic" style={{ fontWeight: 400 }}>
+            quietly refuse
+          </span>{' '}
+          to compromise on.
+        </h2>
+        <div className="mt-6">
+          <Sporting>The unsexy work of getting it right.</Sporting>
+        </div>
+      </div>
+
+      <div className="mt-[10vh] grid grid-cols-1 md:grid-cols-12 gap-x-10 gap-y-12">
+        {/* list */}
+        <div className="md:col-span-7">
+          {VALUES.map((v, i) => {
+            const isActive = active === i
+            return (
+              <div
+                key={v.title}
+                onMouseEnter={() => setActive(i)}
+                className="group relative py-8 cursor-default"
+                style={{ borderTop: `1px solid ${isActive ? INK : BEIGE}`, transition: 'border-color 300ms' }}
+              >
+                <div className="flex items-baseline gap-6">
+                  <span
+                    className={`${dmSans.className}`}
+                    style={{
+                      fontSize: 13,
+                      color: MUTED,
+                      letterSpacing: '0.08em',
+                      width: 28,
+                      flexShrink: 0,
+                    }}
+                  >
+                    0{i + 1}
+                  </span>
+                  <div className="flex-1">
+                    <div className="flex items-baseline gap-4">
+                      <span style={{ fontSize: 22 }}>{v.icon}</span>
+                      <h3
+                        className={`${cormorant.className}`}
+                        style={{
+                          fontSize: 'clamp(28px, 3.4vw, 48px)',
+                          color: INK,
+                          fontWeight: 400,
+                          lineHeight: 1.1,
+                          fontStyle: isActive ? 'italic' : 'normal',
+                          transition: 'font-style 200ms',
+                        }}
+                      >
+                        {v.title}
+                      </h3>
+                    </div>
+                    <AnimatePresence initial={false}>
+                      {isActive && (
+                        <motion.p
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.45, ease: EASE }}
+                          className={`${dmSans.className} overflow-hidden`}
+                          style={{ color: MUTED, fontSize: 15, lineHeight: 1.7, maxWidth: '54ch' }}
+                        >
+                          <span className="block pt-4">{v.body}</span>
+                        </motion.p>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+          <div style={{ borderTop: `1px solid ${BEIGE}` }} />
+        </div>
+
+        {/* image reveal */}
+        <div className="md:col-span-5 md:sticky md:top-24 self-start">
+          <div
+            className="relative w-full overflow-hidden"
+            style={{ aspectRatio: '3 / 4', borderRadius: 18, backgroundColor: BEIGE }}
+          >
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={active}
+                initial={{ opacity: 0, scale: 1.04 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.98 }}
+                transition={{ duration: 0.7, ease: EASE }}
+                className="absolute inset-0"
+              >
+                <Image
+                  src={VALUES[active].img}
+                  alt={VALUES[active].title}
+                  fill
+                  sizes="(max-width: 768px) 90vw, 38vw"
+                  style={{ objectFit: 'cover' }}
+                />
+              </motion.div>
+            </AnimatePresence>
+            <div
+              className={`${cormorant.className} italic absolute bottom-5 left-5`}
+              style={{ color: '#FFFFFF', fontSize: 22, textShadow: '0 2px 12px rgba(0,0,0,0.4)' }}
+            >
+              {VALUES[active].title}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ───────────────── /3 WORKPLACE block ───────────────── */
+
+function WorkplaceBlock() {
+  return (
+    <section
+      id="workplace"
+      className="relative w-full"
+      style={{ backgroundColor: BEIGE, padding: '14vh 6vw' }}
+    >
+      <div className="max-w-[820px]">
+        <SectionLabel>/3 Workplace</SectionLabel>
+        <h2
+          className={`${cormorant.className} mt-6`}
+          style={{
+            fontSize: 'clamp(40px, 5.4vw, 80px)',
+            lineHeight: 1.04,
+            fontWeight: 300,
+            color: INK,
+          }}
+        >
+          A working day that{' '}
+          <span className="italic" style={{ fontWeight: 400 }}>
+            makes room
+          </span>{' '}
+          for actual thinking.
+        </h2>
+        <div className="mt-6">
+          <Sporting>Heads-down work. Heads-up culture. 🪟</Sporting>
+        </div>
+        <p
+          className={`${dmSans.className} mt-6 max-w-[58ch]`}
+          style={{ color: MUTED, fontSize: 15, lineHeight: 1.7 }}
+        >
+          We meet when meeting matters. The rest of the time, people are in flow — at the office in
+          Mumbai, at home, on the factory floor, with retailers. Three brands, dozens of small teams, one
+          shared rhythm of careful work.
+        </p>
+      </div>
+
+      <div className="mt-[8vh] grid grid-cols-12 gap-4">
+        {[
+          { src: 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=1200&h=800&fit=crop&auto=format', span: 'col-span-12 md:col-span-7', aspect: '3 / 2', cap: 'The office, Mumbai' },
+          { src: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?w=900&h=1200&fit=crop&auto=format', span: 'col-span-7 md:col-span-5', aspect: '3 / 4', cap: 'Mornings, before chai' },
+          { src: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=900&h=1100&fit=crop&auto=format', span: 'col-span-5 md:col-span-4', aspect: '4 / 5', cap: 'Hands-on always' },
+          { src: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=1200&h=900&fit=crop&auto=format', span: 'col-span-12 md:col-span-8', aspect: '4 / 3', cap: 'Teamwork that travels' },
+        ].map((c, i) => (
+          <motion.figure
+            key={i}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-80px' }}
+            transition={{ duration: 0.9, ease: EASE, delay: i * 0.07 }}
+            className={c.span}
+          >
+            <div
+              className="relative overflow-hidden"
+              style={{ aspectRatio: c.aspect, borderRadius: 14, backgroundColor: '#FFFFFF' }}
+            >
+              <Image src={c.src} alt={c.cap} fill sizes="(max-width: 768px) 90vw, 50vw" style={{ objectFit: 'cover' }} />
+            </div>
+            <figcaption
+              className={`${dmSans.className} mt-2`}
+              style={{ color: MUTED, fontSize: 12, letterSpacing: '0.04em' }}
+            >
+              — {c.cap}
+            </figcaption>
+          </motion.figure>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+/* ───────────────── /4 TOGETHER block ───────────────── */
+
+function TogetherBlock() {
+  return (
+    <section
+      id="together"
+      className="relative w-full"
+      style={{ backgroundColor: '#FFFFFF', padding: '14vh 6vw' }}
+    >
+      <div className="max-w-[820px]">
+        <SectionLabel>/4 Together</SectionLabel>
+        <h2
+          className={`${cormorant.className} mt-6`}
+          style={{
+            fontSize: 'clamp(40px, 5.4vw, 80px)',
+            lineHeight: 1.04,
+            fontWeight: 300,
+            color: INK,
+          }}
+        >
+          Three brands.{' '}
+          <span className="italic" style={{ fontWeight: 400 }}>
+            One company.
+          </span>{' '}
+          Many hands.
+        </h2>
+        <div className="mt-6">
+          <Sporting>And a hundred-year-old habit of doing it together.</Sporting>
+        </div>
+        <p
+          className={`${dmSans.className} mt-6 max-w-[58ch]`}
+          style={{ color: MUTED, fontSize: 15, lineHeight: 1.7 }}
+        >
+          The R&amp;D chemist who refuses to ship a formula that isn’t quite right. The salesperson
+          who knows the shopkeeper by name. The designer obsessing over the spacing of a single line on
+          a Baby Dreams box. None of it works alone, and none of us pretends it does.
+        </p>
+      </div>
+
+      <div className="mt-[10vh] grid grid-cols-1 md:grid-cols-3 gap-6">
+        {[
+          { name: 'Morisons Baby Dreams', tag: 'Baby care, with care.' },
+          { name: 'Emoform', tag: 'A quieter kind of confidence.' },
+          { name: 'Bigen', tag: 'Heritage colour, simply done.' },
+        ].map((b, i) => (
+          <motion.div
+            key={b.name}
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-60px' }}
+            transition={{ duration: 0.7, ease: EASE, delay: i * 0.08 }}
+            className="relative p-7"
+            style={{
+              border: `1px solid ${BEIGE}`,
+              borderRadius: 16,
+              backgroundColor: '#FFFFFF',
+            }}
+          >
+            <span
+              className={`${dmSans.className}`}
+              style={{ color: MUTED, fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase' }}
+            >
+              Brand
+            </span>
+            <h3
+              className={`${cormorant.className} mt-3`}
+              style={{ color: INK, fontSize: 28, fontWeight: 400, lineHeight: 1.15 }}
+            >
+              {b.name}
+            </h3>
+            <p
+              className={`${cormorant.className} italic mt-3`}
+              style={{ color: MUTED, fontSize: 18, fontWeight: 400 }}
+            >
+              {b.tag}
+            </p>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* closing line */}
+      <div className="mt-[16vh] flex flex-col items-center text-center">
+        <span
+          className={`${dmSans.className} uppercase tracking-[0.24em]`}
+          style={{ fontSize: 11, color: MUTED }}
+        >
+          end &lt;life at jlm&gt;
+        </span>
+        <div
+          className="mt-6 w-[40vw] max-w-[400px]"
+          style={{ height: 1, backgroundColor: BEIGE }}
+        />
+        <p
+          className={`${cormorant.className} italic mt-8 max-w-[44ch]`}
+          style={{ fontSize: 'clamp(20px, 2.2vw, 28px)', color: INK, fontWeight: 400, lineHeight: 1.45 }}
+        >
+          Want to build the next hundred years with us?
+        </p>
+        <a
+          href="/contact-us"
+          className={`${dmSans.className} mt-8 inline-block`}
+          style={{
+            border: `1px solid ${INK}`,
+            color: INK,
+            fontSize: 13,
+            padding: '14px 28px',
+            borderRadius: 999,
+            letterSpacing: '0.05em',
+          }}
+        >
+          Get in touch
+        </a>
+      </div>
+    </section>
+  )
+}
+
+/* ─────────────────────────── PAGE ─────────────────────────── */
+
+export default function LifeAtJLMPage() {
+  const [introDone, setIntroDone] = useState(false)
+
+  /* keep page-scroller behaviour from layout (smooth scroll for anchors) */
+  useEffect(() => {
+    const root = document.getElementById('page-scroller')
+    if (!root) return
+    const onClick = (e: MouseEvent) => {
+      const t = e.target as HTMLElement
+      const a = t.closest('a[href^="#"]') as HTMLAnchorElement | null
+      if (!a) return
+      const id = a.getAttribute('href')?.slice(1)
+      if (!id) return
+      const el = document.getElementById(id)
+      if (!el) return
+      e.preventDefault()
+      const top = el.getBoundingClientRect().top + root.scrollTop - 32
+      root.scrollTo({ top, behavior: 'smooth' })
+    }
+    root.addEventListener('click', onClick)
+    return () => root.removeEventListener('click', onClick)
+  }, [])
+
+  /* lock scroll while the intro curtain is playing.
+     IMPORTANT: only touch overflow-y. Clearing the `overflow` shorthand
+     wipes the page-scroller's overflow-x:hidden too, which makes
+     `border-radius` stop clipping children — that's what was killing
+     the navbar's rounded "cap" curve after the curtain lifted. */
+  useEffect(() => {
+    const root = document.getElementById('page-scroller')
+    if (!root) return
+    if (introDone) {
+      root.style.overflowY = 'auto'
+    } else {
+      root.style.overflowY = 'hidden'
+      root.scrollTop = 0
+    }
+    return () => {
+      root.style.overflowY = 'auto'
+    }
+  }, [introDone])
+
+  return (
+    <div className={`${cormorant.variable} ${dmSans.variable}`}>
+      {!introDone && <IntroCurtain onDone={() => setIntroDone(true)} />}
+      <Hero />
+      <AnchorRoll />
+      <CaptionStrip />
+      <PeopleBlock />
+      <AreArentBlock />
+      <ValuesBlock />
+      <WorkplaceBlock />
+      <TogetherBlock />
+      <Footer />
+    </div>
+  )
+}
