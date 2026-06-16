@@ -8,7 +8,8 @@ export default defineType({
   name: 'lifeAtJlm',
   title: 'Life at JL Morison',
   type: 'document',
-  __experimental_actions: ['update', 'publish'] as any,
+  // Singleton behaviour is enforced by the Studio structure config
+  // (see sanity.config.ts), which pins this to a single document id.
   groups: [
     { name: 'intro', title: 'Intro curtain' },
     { name: 'hero', title: 'Hero' },

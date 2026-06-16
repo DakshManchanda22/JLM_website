@@ -9,9 +9,8 @@ export default defineType({
   name: 'homepage',
   title: 'Homepage',
   type: 'document',
-  // Singleton: only one document of this type can exist. Studio shows it as
-  // a single editable page instead of a list.
-  __experimental_actions: ['update', 'publish'] as any,
+  // Singleton behaviour is enforced by the Studio structure config
+  // (see sanity.config.ts), which pins this to a single document id.
   groups: [
     { name: 'hero', title: 'Hero slideshow' },
     { name: 'quote', title: 'Quote' },

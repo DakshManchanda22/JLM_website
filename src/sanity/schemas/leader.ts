@@ -57,8 +57,8 @@ export default defineType({
       name: 'linkedin',
       title: 'LinkedIn URL',
       type: 'url',
-      validation: (Rule) =>
-        Rule.uri({ scheme: ['http', 'https'] }).optional(),
+      // Optional by default; only validates the format if a value is entered
+      validation: (Rule) => Rule.uri({ scheme: ['http', 'https'] }),
     }),
     defineField({
       name: 'email',
