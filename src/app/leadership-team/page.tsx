@@ -16,18 +16,12 @@ export default async function LeadershipTeamPage() {
 
   const team: Leader[] | undefined =
     leaders.length > 0
-      ? leaders
-          .map((l) => {
-            const image = resolveImageUrl(l.image, 900)
-            if (!image) return null
-            return {
-              name: l.name,
-              title: l.title,
-              image,
-              slug: l.slug,
-            }
-          })
-          .filter((x): x is Leader => x !== null)
+      ? leaders.reduce<Leader[]>((acc, l) => {
+          const image = resolveImageUrl(l.image, 900)
+          if (!image) return acc
+          acc.push({ name: l.name, title: l.title, image, slug: l.slug })
+          return acc
+        }, [])
       : undefined
 
   return (
