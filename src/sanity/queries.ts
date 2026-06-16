@@ -262,3 +262,38 @@ export async function fetchLifeAtJlm(): Promise<LifeAtJlm | null> {
   if (!client) return null
   return client.fetch(lifeAtJlmQuery)
 }
+
+/* ───────────────────────── Our Story ───────────────────────── */
+
+export type OurStoryMilestone = {
+  year: string
+  description: string
+  side: 'left' | 'right'
+  image?: any
+  offsetY?: number
+}
+
+export type OurStory = {
+  eyebrow?: string
+  headlineTop?: string
+  headlineBottom?: string
+  milestones?: OurStoryMilestone[]
+}
+
+export const ourStoryQuery = groq`*[_type == "ourStory"][0]{
+  eyebrow,
+  headlineTop,
+  headlineBottom,
+  milestones[]{
+    year,
+    description,
+    side,
+    image,
+    offsetY,
+  },
+}`
+
+export async function fetchOurStory(): Promise<OurStory | null> {
+  if (!client) return null
+  return client.fetch(ourStoryQuery)
+}

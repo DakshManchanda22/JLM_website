@@ -5,6 +5,7 @@ import blockContent from './blockContent'
 import homepage from './homepage'
 import leader from './leader'
 import lifeAtJlm from './lifeAtJlm'
+import ourStory from './ourStory'
 import post from './post'
 import tag from './tag'
 
@@ -16,4 +17,5 @@ export const schemaTypes: SchemaTypeDefinition[] = [
   homepage,
   leader,
   lifeAtJlm,
+  ourStory,
 ]
