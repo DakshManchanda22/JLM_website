@@ -10,7 +10,7 @@ import {
   AnimatePresence,
 } from 'framer-motion'
 
-type Brand = {
+export type Brand = {
   name: string
   shortName: string
   tagline: string
@@ -18,7 +18,7 @@ type Brand = {
   image: string
 }
 
-const BRANDS: Brand[] = [
+const DEFAULT_BRANDS: Brand[] = [
   {
     name: 'Morisons Baby Dreams',
     shortName: 'Baby Dreams',
@@ -214,7 +214,8 @@ function BrandCard({
   )
 }
 
-export default function BrandCards() {
+export default function BrandCards({ brands }: { brands?: Brand[] }) {
+  const BRANDS = brands && brands.length > 0 ? brands : DEFAULT_BRANDS
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
 
   return (

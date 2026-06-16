@@ -34,8 +34,9 @@ Once the dev server is running with those env vars, visit:
 http://localhost:3000/studio
 ```
 
-Sign in with the same JLM account. You'll see three sections in the sidebar:
+Sign in with the same JLM account. You'll see four sections in the sidebar:
 
+- **Homepage** — every editable string and image on the home page (hero slideshow, quote, brand cards, stats). Edit and publish to update the live site within ~60 seconds.
 - **Blog posts** — the articles
 - **Authors** — writer profiles (avatar, bio, role)
 - **Tags** — categories used on the blog index

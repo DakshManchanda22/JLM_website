@@ -6,14 +6,25 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 gsap.registerPlugin(ScrollTrigger)
 
-const LINES: string[] = [
+const DEFAULT_LINES: string[] = [
   'For over a century, we have been',
   'building goodness for every',
   'Indian family — one trusted brand,',
   'one product, one promise at a time.',
 ]
 
-export default function QuoteSection() {
+const DEFAULT_ATTRIBUTION = 'J.L. Morison · Since 1920'
+
+export default function QuoteSection({
+  lines,
+  attribution,
+}: {
+  lines?: string[]
+  attribution?: string
+}) {
+  const LINES = lines && lines.length > 0 ? lines : DEFAULT_LINES
+  const ATTRIBUTION = attribution && attribution.length > 0 ? attribution : DEFAULT_ATTRIBUTION
+
   const sectionRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
@@ -78,7 +89,7 @@ export default function QuoteSection() {
 
         <footer className="mt-10 md:mt-14">
           <span className="block text-[#555555] text-xs tracking-[0.3em] uppercase">
-            J.L. Morison &nbsp;·&nbsp; Since 1920
+            {ATTRIBUTION}
           </span>
         </footer>
       </blockquote>

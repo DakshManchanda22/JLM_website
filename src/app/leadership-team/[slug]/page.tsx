@@ -2,10 +2,24 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
+import { fetchLeader, fetchLeaderSlugs } from '@/sanity/queries'
+import { resolveImageUrl } from '@/sanity/resolveImage'
+
+export const revalidate = 60
 
 const slugify = (name: string) => name.toLowerCase().replace(/\s+/g, '-')
 
-const TEAM = [
+type LocalLeader = {
+  name: string
+  title: string
+  quote: string
+  image: string
+  linkedin: string
+  email: string
+  bio: string[]
+}
+
+const FALLBACK_TEAM: LocalLeader[] = [
   {
     name: 'Sakshi Mody',
     title: 'Promotor',
@@ -108,8 +122,31 @@ const TEAM = [
   },
 ]
 
+/** Resolve a leader from Sanity first, fall back to the hardcoded list. */
+async function resolveLeader(slug: string): Promise<LocalLeader | null> {
+  const sanityLeader = await fetchLeader(slug)
+  if (sanityLeader) {
+    const image = resolveImageUrl(sanityLeader.image, 900)
+    if (image) {
+      return {
+        name: sanityLeader.name,
+        title: sanityLeader.title,
+        quote: sanityLeader.quote ?? '',
+        image,
+        linkedin: sanityLeader.linkedin ?? '',
+        email: sanityLeader.email ?? '',
+        bio: sanityLeader.bio ?? [],
+      }
+    }
+  }
+  return FALLBACK_TEAM.find((l) => slugify(l.name) === slug) ?? null
+}
+
 export async function generateStaticParams() {
-  return TEAM.map((leader) => ({ slug: slugify(leader.name) }))
+  const sanitySlugs = await fetchLeaderSlugs()
+  const fallbackSlugs = FALLBACK_TEAM.map((l) => slugify(l.name))
+  const all = Array.from(new Set([...sanitySlugs, ...fallbackSlugs]))
+  return all.map((slug) => ({ slug }))
 }
 
 export async function generateMetadata({
@@ -118,7 +155,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-  const leader = TEAM.find((l) => slugify(l.name) === slug)
+  const leader = await resolveLeader(slug)
   if (!leader) return {}
   return {
     title: `${leader.name} — JL Morison (India) Ltd.`,
@@ -132,7 +169,7 @@ export default async function LeaderProfilePage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const leader = TEAM.find((l) => slugify(l.name) === slug)
+  const leader = await resolveLeader(slug)
   if (!leader) notFound()
 
   return (
