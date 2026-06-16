@@ -49,6 +49,15 @@ export default defineConfig({
                   .title('Our People')
                   .items([
                     S.listItem()
+                      .title('Our Story')
+                      .id('ourStory')
+                      .child(
+                        S.editor()
+                          .id('ourStory')
+                          .schemaType('ourStory')
+                          .documentId('ourStory'),
+                      ),
+                    S.listItem()
                       .title('Leadership Team')
                       .child(
                         S.documentTypeList('leader')
