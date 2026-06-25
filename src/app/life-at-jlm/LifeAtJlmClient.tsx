@@ -232,7 +232,7 @@ function IntroCurtain({ onDone }: { onDone: () => void }) {
         borderTopLeftRadius: 24,
         borderTopRightRadius: 24,
         zIndex: 40,
-        backgroundColor: BEIGE,
+        backgroundColor: '#FFFFFF',
         pointerEvents: 'none',
       }}
     >

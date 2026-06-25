@@ -76,6 +76,25 @@ export default defineConfig({
                   ]),
               ),
 
+            /* ─────── Our Brands (mirrors navbar dropdown) ─────── */
+            S.listItem()
+              .title('Our Brands')
+              .child(
+                S.list()
+                  .title('Our Brands')
+                  .items([
+                    S.listItem()
+                      .title('Bigen')
+                      .id('bigen')
+                      .child(
+                        S.editor()
+                          .id('bigen')
+                          .schemaType('bigen')
+                          .documentId('bigen'),
+                      ),
+                  ]),
+              ),
+
             S.divider(),
 
             /* ─────── Blog (kept separate, used heavily) ─────── */
