@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { Cormorant_Garamond, DM_Sans } from 'next/font/google'
 import Footer from '@/components/Footer'
+import type { Bigen, BigenReel, BigenFeature, BigenProduct } from '@/sanity/queries'
 
 const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
@@ -21,34 +22,45 @@ const dmSans = DM_Sans({
 
 const EASE = [0.16, 1, 0.3, 1] as const
 
-/* Right-side hero photo (art/Jadeja.png → public/jadeja.png). The lower
-   part is faded to transparent so it melts into the dark hero background. */
-const HERO_IMAGE = '/jadeja.png'
+/* ─────────── Defaults (used when a Sanity field is empty) ─────────── */
+const D = {
+  heroLogo: '/bigen-logo.svg',
+  heroHeadline1: 'Specially',
+  heroHeadline2: 'formulated',
+  heroHeadline3: "for men's beard",
+  heroEyebrow: "Japan's No.1 · Men's Beard",
+  heroCtaLabel: 'Shop now',
+  heroCtaHref: '#',
+  heroImage: '/jadeja.png',
+  videoHeadline: 'Confidence, in one stroke',
+  videoUrl:
+    'https://storage.googleapis.com/jlm_website_v2/BIGEN%20JADEJA%2010%20SEC%20English%20new%20PW%20%20HD%205.mp4',
+  ritualHeadlinePlain: 'Salon-like finish',
+  ritualHeadlineItalic1: 'in just',
+  ritualHeadlineItalic2: '10 minutes',
+  ritualBody:
+    'Smooth, controlled application that behaves the way you want it to — start to grey-free in the time it takes to read the morning headlines.',
+  ritualImage: '/2-trim.png',
+  shineBannerTop: 'Darker, bolder beard',
+  shineBannerBottom: 'In just 1 stroke',
+  shineHeadline: 'Gives a natural shine\nto your beard',
+  shineBody:
+    'With the goodness of olive oil and taurine, every stroke conditions as it colours — for a softer, healthier-looking beard with a subtle, natural sheen.',
+  shineHighlight: 'olive oil',
+  shinePillLabel: 'No Ammonia formula',
+  shineImage: '/4-trim.png',
+  testimonialsHeadline: 'Decades of Trust. Endorsed by icons.',
+  rangeEyebrow: "The Men's Range",
+  rangeHeadline: 'Explore our entire product range',
+}
 
-/* Video section. Paste the Google Cloud Storage public video URL here once
-   it's uploaded. It auto-plays (muted) when scrolled into view; controls
-   appear on hover (desktop) or tap (mobile). */
-const VIDEO_SRC =
-  'https://storage.googleapis.com/jlm_website_v2/BIGEN%20JADEJA%2010%20SEC%20English%20new%20PW%20%20HD%205.mp4'
-
-/* Right-side PNG for the "Effortless ritual" section. Drop your file in
-   /public and set the path here (e.g. '/bigen-pack.png'). */
-const RITUAL_IMAGE = '/2-trim.png'
-
-const RITUAL_FEATURES = [
-  { label: 'Leaves no stains', icon: 'sparkle' as const },
-  { label: 'Non-drip cream', icon: 'drop' as const },
-  { label: 'Mess-free application', icon: 'sparkle' as const },
+const DEFAULT_RITUAL_FEATURES: BigenFeature[] = [
+  { label: 'Leaves no stains', icon: 'sparkle' },
+  { label: 'Non-drip cream', icon: 'drop' },
+  { label: 'Mess-free application', icon: 'sparkle' },
 ]
 
-/* Customer video testimonials — Instagram reels. Each card shows the reel's
-   own thumbnail and plays inline (Instagram's embed UI). Marketing overrides
-   the headline + reel links from Sanity (Bigen document). */
-type Reel = { url: string; name?: string }
-
-const DEFAULT_TESTIMONIALS_HEADLINE = 'Decades of Trust. Endorsed by icons.'
-
-const DEFAULT_REELS: Reel[] = [
+const DEFAULT_REELS: BigenReel[] = [
   { url: 'https://www.instagram.com/reel/DLU2lZiNZLW/' },
   { url: 'https://www.instagram.com/reel/DKrg_FStMLF/' },
   { url: 'https://www.instagram.com/reel/DUqS6xViPnq/' },
@@ -61,10 +73,63 @@ const DEFAULT_REELS: Reel[] = [
   { url: 'https://www.instagram.com/reel/C7wj2GDPRjH/' },
 ]
 
+const DEFAULT_PRODUCTS: BigenProduct[] = [
+  {
+    name: 'Beard Oil',
+    desc: 'Argan & rosehip for a shiny, smooth, conditioned beard.',
+    image: '/beard%20oil.jpg',
+    href: '#',
+  },
+  {
+    name: 'Beard Colour',
+    desc: 'No-ammonia cream for beard, moustache & sideburns.',
+    image: '/beard%20colour.jpg',
+    href: '#',
+  },
+  {
+    name: 'Speedy Colour',
+    desc: 'Greys gone in 10 minutes with olive oil & taurine.',
+    image: '/speedy%20colour.jpg',
+    href: '#',
+  },
+  {
+    name: 'Speedy Hair Colour Conditioner',
+    desc: 'Darkens grey hair in 5 minutes, with natural herbs.',
+    image: '/hair%20conditioner.jpg',
+    href: '#',
+  },
+]
+
 /* Build the Instagram embed URL from a reel/post/tv link. */
 function reelEmbedUrl(url: string): string | null {
   const m = url.match(/instagram\.com\/(?:reel|reels|p|tv)\/([^/?#]+)/i)
   return m ? `https://www.instagram.com/reel/${m[1]}/embed` : null
+}
+
+/* Render text with line breaks (\n → <br/>). */
+function renderMultiline(text: string): ReactNode {
+  return text.split('\n').map((line, i, arr) => (
+    <span key={i}>
+      {line}
+      {i < arr.length - 1 && <br />}
+    </span>
+  ))
+}
+
+/* Render body text, highlighting the first occurrence of `word` in gold. */
+function renderHighlighted(text: string, word?: string): ReactNode {
+  if (!word) return text
+  const idx = text.toLowerCase().indexOf(word.toLowerCase())
+  if (idx === -1) return text
+  return (
+    <>
+      {text.slice(0, idx)}
+      <span className="font-semibold text-[#e6c068]">
+        {text.slice(idx, idx + word.length)}
+      </span>
+      {text.slice(idx + word.length)}
+    </>
+  )
 }
 
 const fadeUp = {
@@ -134,24 +199,23 @@ function MinutesRings() {
             strokeDasharray="150 400"
           />
         </motion.svg>
-
       </div>
     </div>
   )
 }
 
-export default function BigenClient({
-  testimonialsHeadline,
-  reels,
-}: {
-  testimonialsHeadline?: string
-  reels?: Reel[]
-}) {
+export default function BigenClient({ cms }: { cms: Bigen }) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [showControls, setShowControls] = useState(false)
 
-  /* Auto-play (muted) when the video scrolls into view, pause when it leaves.
-     Observes within #page-scroller, the app's actual scroll container. */
+  const videoUrl = cms.videoUrl || D.videoUrl
+  const ritualImage = cms.ritualImage || D.ritualImage
+  const features =
+    cms.ritualFeatures && cms.ritualFeatures.length
+      ? cms.ritualFeatures
+      : DEFAULT_RITUAL_FEATURES
+
+  /* Auto-play (muted) when the video scrolls into view, pause when it leaves. */
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
@@ -164,10 +228,7 @@ export default function BigenClient({
           video.pause()
         }
       },
-      {
-        root: document.getElementById('page-scroller'),
-        threshold: 0.5,
-      }
+      { root: document.getElementById('page-scroller'), threshold: 0.5 }
     )
 
     observer.observe(video)
@@ -181,7 +242,6 @@ export default function BigenClient({
     >
       {/* HERO */}
       <section className="relative min-h-[calc(100vh-64px)] overflow-hidden">
-        {/* Warm dark gradient backdrop — deep brown edges, gold glow upper-right */}
         <div
           className="absolute inset-0"
           style={{
@@ -189,7 +249,6 @@ export default function BigenClient({
               'radial-gradient(120% 95% at 78% 18%, #6b4d1f 0%, #4a3414 26%, #2a1c0b 55%, #160e06 100%)',
           }}
         />
-        {/* Subtle vignette to deepen the corners */}
         <div
           className="absolute inset-0"
           style={{
@@ -203,12 +262,9 @@ export default function BigenClient({
             {/* ── LEFT: copy ── */}
             <div className="relative z-10 max-w-xl">
               {/* Bigen logo */}
-              <motion.div
-                {...fadeUp}
-                transition={{ duration: 0.6, ease: EASE }}
-              >
+              <motion.div {...fadeUp} transition={{ duration: 0.6, ease: EASE }}>
                 <Image
-                  src="/bigen-logo.svg"
+                  src={cms.heroLogo || D.heroLogo}
                   alt="Bigen"
                   width={423}
                   height={206}
@@ -225,10 +281,10 @@ export default function BigenClient({
                 style={{ fontFamily: 'var(--font-cormorant)' }}
               >
                 <span className="block text-[clamp(2.25rem,4.8vw,4rem)] font-light text-[#f6efe0]">
-                  Specially
+                  {cms.heroHeadline1 || D.heroHeadline1}
                 </span>
                 <span className="block text-[clamp(2.25rem,4.8vw,4rem)] font-light text-[#f6efe0]">
-                  formulated
+                  {cms.heroHeadline2 || D.heroHeadline2}
                 </span>
                 <span
                   className="block text-[clamp(2.25rem,4.8vw,4rem)] font-light italic bg-clip-text text-transparent"
@@ -237,11 +293,11 @@ export default function BigenClient({
                       'linear-gradient(95deg, #f5e487 0%, #d8b04a 60%, #c79a3a 100%)',
                   }}
                 >
-                  for men&apos;s beard
+                  {cms.heroHeadline3 || D.heroHeadline3}
                 </span>
               </motion.h1>
 
-              {/* Japan's No.1 */}
+              {/* eyebrow pill */}
               <motion.div
                 {...fadeUp}
                 transition={{ duration: 0.7, ease: EASE, delay: 0.16 }}
@@ -249,27 +305,26 @@ export default function BigenClient({
               >
                 <span className="h-2 w-2 rounded-full bg-[#f0d985]" />
                 <span className="text-sm md:text-[15px] font-semibold uppercase tracking-[0.22em] text-[#f0e3c4]">
-                  Japan&apos;s No.1 · Men&apos;s Beard
+                  {cms.heroEyebrow || D.heroEyebrow}
                 </span>
               </motion.div>
 
-              {/* CTAs */}
+              {/* CTA */}
               <motion.div
                 {...fadeUp}
                 transition={{ duration: 0.7, ease: EASE, delay: 0.24 }}
                 className="mt-10 flex flex-wrap items-center gap-4"
               >
                 <a
-                  href="#"
+                  href={cms.heroCtaHref || D.heroCtaHref}
                   className="group inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-sm font-semibold text-[#2a1d09] bg-gradient-to-b from-[#f5e487] to-[#d8b04a] shadow-[0_0_30px_-8px_rgba(245,228,135,0.75)] hover:brightness-105 transition"
                 >
-                  Shop now
+                  {cms.heroCtaLabel || D.heroCtaLabel}
                   <span className="transition-transform group-hover:translate-x-1">
                     →
                   </span>
                 </a>
               </motion.div>
-
             </div>
 
             {/* ── RIGHT: hero photo ── */}
@@ -279,7 +334,6 @@ export default function BigenClient({
               transition={{ duration: 0.9, ease: EASE, delay: 0.1 }}
               className="relative h-[60vh] lg:h-[calc(100vh-64px)] hidden lg:block"
             >
-              {/* the photo, faded out toward the bottom */}
               <div
                 className="absolute inset-0"
                 style={{
@@ -290,7 +344,7 @@ export default function BigenClient({
                 }}
               >
                 <Image
-                  src={HERO_IMAGE}
+                  src={cms.heroImage || D.heroImage}
                   alt="Bigen men's beard colour"
                   fill
                   priority
@@ -313,7 +367,7 @@ export default function BigenClient({
           className="text-center text-[clamp(2.25rem,5vw,3.75rem)] font-light text-[#f6efe0]"
           style={{ fontFamily: 'var(--font-cormorant)' }}
         >
-          Confidence, in one stroke
+          {cms.videoHeadline || D.videoHeadline}
         </motion.h2>
 
         <motion.div
@@ -345,17 +399,16 @@ export default function BigenClient({
             ))}
           </svg>
 
-          {/* Hover (desktop) reveals controls; tap toggles them on mobile */}
           <div
             className="absolute inset-0"
             onMouseEnter={() => setShowControls(true)}
             onMouseLeave={() => setShowControls(false)}
             onClick={() => setShowControls((v) => !v)}
           >
-            {VIDEO_SRC ? (
+            {videoUrl ? (
               <video
                 ref={videoRef}
-                src={VIDEO_SRC}
+                src={videoUrl}
                 muted
                 loop
                 playsInline
@@ -364,7 +417,6 @@ export default function BigenClient({
                 className="absolute inset-0 h-full w-full object-cover"
               />
             ) : (
-              /* placeholder until the GCS video URL is added to VIDEO_SRC */
               <div className="absolute inset-0 flex items-center justify-center">
                 <span className="text-sm uppercase tracking-[0.2em] text-[#a99a76]">
                   Video coming soon
@@ -372,11 +424,10 @@ export default function BigenClient({
               </div>
             )}
           </div>
-
         </motion.div>
       </section>
 
-      {/* EFFORTLESS RITUAL */}
+      {/* 10-MINUTE RITUAL */}
       <section className="bg-[#0c0703] px-4 pb-4 md:px-6 md:pb-6">
         <motion.div
           initial={{ opacity: 0, y: 32 }}
@@ -392,51 +443,53 @@ export default function BigenClient({
                 className="text-[clamp(2.25rem,4.5vw,3.75rem)] font-semibold leading-[1.05] text-[#1d1408]"
                 style={{ fontFamily: 'var(--font-cormorant)' }}
               >
-                Salon-like finish{' '}
-                <span className="italic text-[#b8923f]">in just</span>
+                {cms.ritualHeadlinePlain || D.ritualHeadlinePlain}{' '}
+                <span className="italic text-[#b8923f]">
+                  {cms.ritualHeadlineItalic1 || D.ritualHeadlineItalic1}
+                </span>
                 <span className="mt-1 block italic text-[#b8923f]">
-                  10 minutes
+                  {cms.ritualHeadlineItalic2 || D.ritualHeadlineItalic2}
                 </span>
               </h2>
 
               <p className="mt-7 max-w-md text-[15px] md:text-base leading-relaxed text-[#6b5d45]">
-                Smooth, controlled application that behaves the way you want it
-                to — start to grey-free in the time it takes to read the morning
-                headlines.
+                {cms.ritualBody || D.ritualBody}
               </p>
 
               {/* feature pills */}
               <div className="mt-9 flex flex-wrap gap-3.5">
-                {RITUAL_FEATURES.map((f) => (
-                  <div
-                    key={f.label}
-                    className="inline-flex items-center gap-3 rounded-full bg-white px-3 py-2.5 pr-6 shadow-[0_8px_24px_-12px_rgba(40,29,9,0.3)]"
-                  >
-                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-b from-[#f0d985] to-[#c79a3a] text-[#2a1d09]">
-                      {f.icon === 'drop' ? (
-                        <svg width="9" height="11" viewBox="0 0 9 11" fill="currentColor">
-                          <path d="M0 0.5L9 5.5L0 10.5V0.5Z" />
-                        </svg>
-                      ) : (
-                        <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
-                          <path d="M7 0L8.4 5.6L14 7L8.4 8.4L7 14L5.6 8.4L0 7L5.6 5.6L7 0Z" />
-                        </svg>
-                      )}
-                    </span>
-                    <span className="text-sm font-semibold text-[#2a1d09]">
-                      {f.label}
-                    </span>
-                  </div>
-                ))}
+                {features
+                  .filter((f) => f.label)
+                  .map((f, i) => (
+                    <div
+                      key={`${f.label}-${i}`}
+                      className="inline-flex items-center gap-3 rounded-full bg-white px-3 py-2.5 pr-6 shadow-[0_8px_24px_-12px_rgba(40,29,9,0.3)]"
+                    >
+                      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-b from-[#f0d985] to-[#c79a3a] text-[#2a1d09]">
+                        {f.icon === 'drop' ? (
+                          <svg width="9" height="11" viewBox="0 0 9 11" fill="currentColor">
+                            <path d="M0 0.5L9 5.5L0 10.5V0.5Z" />
+                          </svg>
+                        ) : (
+                          <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+                            <path d="M7 0L8.4 5.6L14 7L8.4 8.4L7 14L5.6 8.4L0 7L5.6 5.6L7 0Z" />
+                          </svg>
+                        )}
+                      </span>
+                      <span className="text-sm font-semibold text-[#2a1d09]">
+                        {f.label}
+                      </span>
+                    </div>
+                  ))}
               </div>
             </div>
 
             {/* RIGHT: animated "10 minutes" rings behind the product shot */}
             <div className="relative flex min-h-[420px] items-center justify-center lg:min-h-[520px]">
               <MinutesRings />
-              {RITUAL_IMAGE && (
+              {ritualImage && (
                 <Image
-                  src={RITUAL_IMAGE}
+                  src={ritualImage}
                   alt="Bigen men's beard colour"
                   width={400}
                   height={508}
@@ -467,7 +520,7 @@ export default function BigenClient({
               {/* punch banner — gold brushstroke highlight on the second line */}
               <div className="leading-[1.05]">
                 <p className="text-[clamp(1.5rem,2.6vw,2.25rem)] font-extrabold uppercase tracking-tight text-[#f6efe0]">
-                  Darker, bolder beard
+                  {cms.shineBannerTop || D.shineBannerTop}
                 </p>
                 <span
                   className="mt-2 inline-block px-4 py-1.5 text-[clamp(1.5rem,2.6vw,2.25rem)] font-extrabold uppercase tracking-tight text-[#241606]"
@@ -478,7 +531,7 @@ export default function BigenClient({
                       'polygon(0 0, 95% 0, 100% 42%, 97% 100%, 0 100%, 2% 50%)',
                   }}
                 >
-                  In just 1 stroke
+                  {cms.shineBannerBottom || D.shineBannerBottom}
                 </span>
               </div>
 
@@ -486,16 +539,14 @@ export default function BigenClient({
                 className="mt-8 text-[clamp(2.25rem,4.5vw,3.75rem)] font-light leading-[1.08] text-[#f6efe0]"
                 style={{ fontFamily: 'var(--font-cormorant)' }}
               >
-                Gives a natural shine
-                <br />
-                to your beard
+                {renderMultiline(cms.shineHeadline || D.shineHeadline)}
               </h2>
 
               <p className="mt-7 max-w-md text-[15px] md:text-base leading-relaxed text-[#cdbf9f]">
-                With the goodness of{' '}
-                <span className="font-semibold text-[#e6c068]">olive oil</span>{' '}
-                and taurine, every stroke conditions as it colours — for a
-                softer, healthier-looking beard with a subtle, natural sheen.
+                {renderHighlighted(
+                  cms.shineBody || D.shineBody,
+                  cms.shineHighlight ?? D.shineHighlight
+                )}
               </p>
 
               {/* white pill */}
@@ -506,7 +557,7 @@ export default function BigenClient({
                   </svg>
                 </span>
                 <span className="text-base font-semibold text-[#2a1d09]">
-                  No Ammonia formula
+                  {cms.shinePillLabel || D.shinePillLabel}
                 </span>
               </div>
             </div>
@@ -521,7 +572,7 @@ export default function BigenClient({
                 }}
               />
               <Image
-                src="/4-trim.png"
+                src={cms.shineImage || D.shineImage}
                 alt="Bigen men's beard colour pack"
                 width={588}
                 height={558}
@@ -534,8 +585,11 @@ export default function BigenClient({
 
       {/* TESTIMONIALS (Instagram reels) + PRODUCT RANGE — one panel */}
       <ReelsSection
-        headline={testimonialsHeadline || DEFAULT_TESTIMONIALS_HEADLINE}
-        reels={reels && reels.length ? reels : DEFAULT_REELS}
+        headline={cms.testimonialsHeadline || D.testimonialsHeadline}
+        reels={cms.reels && cms.reels.length ? cms.reels : DEFAULT_REELS}
+        rangeEyebrow={cms.rangeEyebrow || D.rangeEyebrow}
+        rangeHeadline={cms.rangeHeadline || D.rangeHeadline}
+        products={cms.products && cms.products.length ? cms.products : DEFAULT_PRODUCTS}
       />
 
       {/* cream backdrop so the footer's rounded top corners blend with the
@@ -552,9 +606,15 @@ export default function BigenClient({
 function ReelsSection({
   headline,
   reels,
+  rangeEyebrow,
+  rangeHeadline,
+  products,
 }: {
   headline: string
-  reels: Reel[]
+  reels: BigenReel[]
+  rangeEyebrow: string
+  rangeHeadline: string
+  products: BigenProduct[]
 }) {
   const trackRef = useRef<HTMLDivElement>(null)
 
@@ -625,11 +685,7 @@ function ReelsSection({
                 className="flex h-11 w-11 items-center justify-center rounded-full border border-[#111111]/15 text-[#111111] transition hover:bg-[#111111] hover:text-white"
               >
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                  {dir === -1 ? (
-                    <path d="M10 3L5 8l5 5" />
-                  ) : (
-                    <path d="M6 3l5 5-5 5" />
-                  )}
+                  {dir === -1 ? <path d="M10 3L5 8l5 5" /> : <path d="M6 3l5 5-5 5" />}
                 </svg>
               </button>
             ))}
@@ -665,7 +721,11 @@ function ReelsSection({
         </div>
 
         {/* ── Product range, same panel ── */}
-        <ProductRange />
+        <ProductRange
+          eyebrow={rangeEyebrow}
+          headline={rangeHeadline}
+          products={products}
+        />
       </div>
     </section>
   )
@@ -673,42 +733,21 @@ function ReelsSection({
 
 /* ───────────────────────── Product range ───────────────────────── */
 
-type Product = { name: string; desc: string; image?: string; href: string }
-
-const PRODUCTS: Product[] = [
-  {
-    name: 'Beard Oil',
-    desc: 'Argan & rosehip for a shiny, smooth, conditioned beard.',
-    image: '/beard%20oil.jpg',
-    href: '#',
-  },
-  {
-    name: 'Beard Colour',
-    desc: 'No-ammonia cream for beard, moustache & sideburns.',
-    image: '/beard%20colour.jpg',
-    href: '#',
-  },
-  {
-    name: 'Speedy Colour',
-    desc: 'Greys gone in 10 minutes with olive oil & taurine.',
-    image: '/speedy%20colour.jpg',
-    href: '#',
-  },
-  {
-    name: 'Speedy Hair Colour Conditioner',
-    desc: 'Darkens grey hair in 5 minutes, with natural herbs.',
-    image: '/hair%20conditioner.jpg',
-    href: '#',
-  },
-]
-
-function ProductRange() {
+function ProductRange({
+  eyebrow,
+  headline,
+  products,
+}: {
+  eyebrow: string
+  headline: string
+  products: BigenProduct[]
+}) {
   return (
     <div className="mt-24 md:mt-32">
       {/* heading */}
       <div className="mx-auto max-w-3xl text-center">
         <p className="text-[12px] font-semibold uppercase tracking-[0.28em] text-[#b8923f]">
-          The Men&apos;s Range
+          {eyebrow}
         </p>
         <motion.h2
           initial={{ opacity: 0, y: 24 }}
@@ -718,61 +757,63 @@ function ProductRange() {
           className="mt-5 text-[clamp(2.25rem,5vw,4rem)] font-semibold leading-[1.05] text-[#1d1408]"
           style={{ fontFamily: 'var(--font-cormorant)' }}
         >
-          Explore our entire product range
+          {headline}
         </motion.h2>
       </div>
 
       {/* cards */}
       <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {PRODUCTS.map((p, i) => (
-            <motion.div
-              key={p.name}
-              initial={{ opacity: 0, y: 28 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-60px' }}
-              transition={{ duration: 0.6, ease: EASE, delay: i * 0.08 }}
-              className="flex flex-col overflow-hidden rounded-3xl bg-[#e7dcc4]"
-            >
-              {/* image area */}
-              <div className="relative flex h-72 items-center justify-center overflow-hidden bg-white">
-                {p.image ? (
-                  <Image
-                    src={p.image}
-                    alt={p.name}
-                    fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                    className="object-contain p-4"
-                  />
-                ) : (
-                  <span className="text-xs uppercase tracking-[0.18em] text-[#b8923f]/70">
-                    {p.name}
-                  </span>
-                )}
-              </div>
-
-              {/* info */}
-              <div className="flex flex-1 flex-col bg-white p-7">
-                <h3
-                  className="text-xl font-semibold leading-snug text-[#1d1408]"
-                  style={{ fontFamily: 'var(--font-cormorant)' }}
-                >
+        {products.map((p, i) => (
+          <motion.div
+            key={`${p.name}-${i}`}
+            initial={{ opacity: 0, y: 28 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-60px' }}
+            transition={{ duration: 0.6, ease: EASE, delay: i * 0.08 }}
+            className="flex flex-col overflow-hidden rounded-3xl bg-[#e7dcc4]"
+          >
+            {/* image area */}
+            <div className="relative flex h-72 items-center justify-center overflow-hidden bg-white">
+              {p.image ? (
+                <Image
+                  src={p.image}
+                  alt={p.name || 'Bigen product'}
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                  className="object-contain p-4"
+                />
+              ) : (
+                <span className="text-xs uppercase tracking-[0.18em] text-[#b8923f]/70">
                   {p.name}
-                </h3>
+                </span>
+              )}
+            </div>
+
+            {/* info */}
+            <div className="flex flex-1 flex-col bg-white p-7">
+              <h3
+                className="text-xl font-semibold leading-snug text-[#1d1408]"
+                style={{ fontFamily: 'var(--font-cormorant)' }}
+              >
+                {p.name}
+              </h3>
+              {p.desc && (
                 <p className="mt-3 text-sm leading-relaxed text-[#6b5d45]">
                   {p.desc}
                 </p>
-                <a
-                  href={p.href}
-                  className="group mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[#b8923f] hover:text-[#9a7b3e]"
-                >
-                  Shop now
-                  <span className="transition-transform group-hover:translate-x-1">
-                    →
-                  </span>
-                </a>
-              </div>
-            </motion.div>
-          ))}
+              )}
+              <a
+                href={p.href || '#'}
+                className="group mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[#b8923f] hover:text-[#9a7b3e]"
+              >
+                Shop now
+                <span className="transition-transform group-hover:translate-x-1">
+                  →
+                </span>
+              </a>
+            </div>
+          </motion.div>
+        ))}
       </div>
     </div>
   )
