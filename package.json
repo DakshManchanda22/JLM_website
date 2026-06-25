@@ -23,14 +23,18 @@
     "styled-components": "^6.4.2"
   },
   "devDependencies": {
+    "@sanity/block-tools": "^3.70.0",
+    "@sanity/schema": "^3.99.0",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "eslint": "^8",
     "eslint-config-next": "14.2.35",
+    "jsdom": "^29.1.1",
     "playwright": "^1.60.0",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "xlsx": "^0.18.5"
   }
 }

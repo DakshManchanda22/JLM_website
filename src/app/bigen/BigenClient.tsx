@@ -30,7 +30,7 @@ const D = {
   heroHeadline3: "for men's beard",
   heroEyebrow: "Japan's No.1 · Men's Beard",
   heroCtaLabel: 'Shop now',
-  heroCtaHref: '#',
+  heroCtaHref: 'https://www.amazon.in/s?k=bigen',
   heroImage: '/jadeja.png',
   videoHeadline: 'Confidence, in one stroke',
   videoUrl:
@@ -78,25 +78,25 @@ const DEFAULT_PRODUCTS: BigenProduct[] = [
     name: 'Beard Oil',
     desc: 'Argan & rosehip for a shiny, smooth, conditioned beard.',
     image: '/beard%20oil.jpg',
-    href: '#',
+    href: 'https://www.amazon.in/dp/B0BLSSWY2Y',
   },
   {
     name: 'Beard Colour',
     desc: 'No-ammonia cream for beard, moustache & sideburns.',
     image: '/beard%20colour.jpg',
-    href: '#',
+    href: 'https://www.amazon.in/dp/B00EIMAA3S',
   },
   {
     name: 'Speedy Colour',
     desc: 'Greys gone in 10 minutes with olive oil & taurine.',
     image: '/speedy%20colour.jpg',
-    href: '#',
+    href: 'https://www.amazon.in/dp/B00DRE3NZA',
   },
   {
     name: 'Speedy Hair Colour Conditioner',
     desc: 'Darkens grey hair in 5 minutes, with natural herbs.',
     image: '/hair%20conditioner.jpg',
-    href: '#',
+    href: 'https://www.amazon.in/dp/B007E9E16O',
   },
 ]
 
@@ -317,6 +317,8 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
               >
                 <a
                   href={cms.heroCtaHref || D.heroCtaHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="group inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-sm font-semibold text-[#2a1d09] bg-gradient-to-b from-[#f5e487] to-[#d8b04a] shadow-[0_0_30px_-8px_rgba(245,228,135,0.75)] hover:brightness-105 transition"
                 >
                   {cms.heroCtaLabel || D.heroCtaLabel}
@@ -624,13 +626,18 @@ function ReelsSection({
     el.scrollBy({ left: dir * Math.min(el.clientWidth * 0.8, 640), behavior: 'smooth' })
   }
 
-  /* Auto-advance one card every few seconds; loops back at the end and
-     pauses while the user is hovering or interacting with the carousel. */
+  /* Auto-advance one card every few seconds — but only kick in 6 seconds
+     after the carousel has scrolled into view. Loops at the end and pauses
+     while the user hovers or interacts. */
   useEffect(() => {
     const el = trackRef.current
     if (!el) return
 
     let paused = false
+    let started = false
+    let startTimer: ReturnType<typeof setTimeout> | undefined
+    let intervalId: ReturnType<typeof setInterval> | undefined
+
     const pause = () => {
       paused = true
     }
@@ -641,7 +648,7 @@ function ReelsSection({
     el.addEventListener('mouseleave', resume)
     el.addEventListener('touchstart', pause, { passive: true })
 
-    const id = setInterval(() => {
+    const advance = () => {
       if (paused) return
       const card = el.firstElementChild as HTMLElement | null
       const step = card ? card.offsetWidth + 20 : el.clientWidth * 0.8
@@ -650,10 +657,27 @@ function ReelsSection({
       } else {
         el.scrollBy({ left: step, behavior: 'smooth' })
       }
-    }, 4000)
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !started) {
+          started = true
+          observer.disconnect()
+          startTimer = setTimeout(() => {
+            advance()
+            intervalId = setInterval(advance, 4000)
+          }, 6000)
+        }
+      },
+      { root: document.getElementById('page-scroller'), threshold: 0.3 }
+    )
+    observer.observe(el)
 
     return () => {
-      clearInterval(id)
+      observer.disconnect()
+      clearTimeout(startTimer)
+      clearInterval(intervalId)
       el.removeEventListener('mouseenter', pause)
       el.removeEventListener('mouseleave', resume)
       el.removeEventListener('touchstart', pause)
@@ -804,6 +828,8 @@ function ProductRange({
               )}
               <a
                 href={p.href || '#'}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="group mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[#b8923f] hover:text-[#9a7b3e]"
               >
                 Shop now

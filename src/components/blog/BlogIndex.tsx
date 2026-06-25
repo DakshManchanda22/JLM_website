@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Abril_Fatface, Cormorant_Garamond, DM_Sans } from 'next/font/google'
 import { motion } from 'framer-motion'
 
@@ -31,9 +31,13 @@ type Props = {
   categories: string[]
 }
 
+const PAGE_SIZE = 12
+
 export default function BlogIndex({ posts, categories }: Props) {
   const [filter, setFilter] = useState<string>(ALL)
   const [query, setQuery] = useState('')
+  const [page, setPage] = useState(1)
+  const gridTopRef = useRef<HTMLDivElement>(null)
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -50,8 +54,23 @@ export default function BlogIndex({ posts, categories }: Props) {
     })
   }, [filter, query, posts])
 
-  const featured = filtered.find((p) => p.featured) ?? filtered[0]
-  const rest = filtered.filter((p) => p !== featured)
+  // reset to first page whenever the filter or search changes
+  useEffect(() => {
+    setPage(1)
+  }, [filter, query])
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const safePage = Math.min(page, totalPages)
+  const pageItems = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE)
+
+  // the newest post on the first page is shown as a wide "featured" card
+  const featured = safePage === 1 ? pageItems[0] : undefined
+  const rest = safePage === 1 ? pageItems.slice(1) : pageItems
+
+  const goToPage = (p: number) => {
+    setPage(p)
+    gridTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
 
   return (
     <div className={`${dmSans.className} bg-[#FFFDFA] min-h-screen`}>
@@ -121,7 +140,7 @@ export default function BlogIndex({ posts, categories }: Props) {
         </aside>
 
         {/* ── Grid ── */}
-        <div className="flex flex-col gap-8">
+        <div ref={gridTopRef} className="flex flex-col gap-8 scroll-mt-24">
           {filtered.length === 0 && (
             <div className="bg-white rounded-3xl p-12 text-center border border-[#E8E0D5]">
               <p className={`${cormorant.className} text-2xl text-[#111111]`}>No posts found.</p>
@@ -131,7 +150,7 @@ export default function BlogIndex({ posts, categories }: Props) {
             </div>
           )}
 
-          {featured && filtered.length > 0 && <FeaturedCard post={featured} />}
+          {featured && <FeaturedCard post={featured} />}
 
           {rest.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
@@ -139,6 +158,10 @@ export default function BlogIndex({ posts, categories }: Props) {
                 <PostCard key={post._id} post={post} />
               ))}
             </div>
+          )}
+
+          {totalPages > 1 && (
+            <Pagination page={safePage} totalPages={totalPages} onChange={goToPage} />
           )}
         </div>
       </div>
@@ -149,6 +172,85 @@ export default function BlogIndex({ posts, categories }: Props) {
         <Footer />
       </div>
     </div>
+  )
+}
+
+/** Build a compact page list with ellipses, e.g. [1, '…', 5, 6, 7, '…', 14]. */
+function pageRange(current: number, total: number): (number | '…')[] {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
+  const pages: (number | '…')[] = [1]
+  const start = Math.max(2, current - 1)
+  const end = Math.min(total - 1, current + 1)
+  if (start > 2) pages.push('…')
+  for (let i = start; i <= end; i++) pages.push(i)
+  if (end < total - 1) pages.push('…')
+  pages.push(total)
+  return pages
+}
+
+function Pagination({
+  page,
+  totalPages,
+  onChange,
+}: {
+  page: number
+  totalPages: number
+  onChange: (p: number) => void
+}) {
+  const arrowBase =
+    'inline-flex items-center justify-center h-9 px-3 rounded-full border border-[#E8E0D5] text-sm transition-colors'
+  return (
+    <nav
+      className="mt-6 flex items-center justify-center gap-1.5 flex-wrap"
+      aria-label="Blog pagination"
+    >
+      <button
+        onClick={() => onChange(page - 1)}
+        disabled={page === 1}
+        className={`${arrowBase} ${
+          page === 1
+            ? 'text-[#BBBBBB] cursor-not-allowed'
+            : 'text-[#111111] hover:bg-[#F3EEE6]'
+        }`}
+        aria-label="Previous page"
+      >
+        ←
+      </button>
+
+      {pageRange(page, totalPages).map((p, i) =>
+        p === '…' ? (
+          <span key={`gap-${i}`} className="px-2 text-[#888888] select-none">
+            …
+          </span>
+        ) : (
+          <button
+            key={p}
+            onClick={() => onChange(p)}
+            aria-current={p === page ? 'page' : undefined}
+            className={`inline-flex items-center justify-center h-9 min-w-9 px-3 rounded-full text-sm transition-colors ${
+              p === page
+                ? 'bg-[#111111] text-white'
+                : 'text-[#555555] hover:bg-[#F3EEE6] hover:text-[#111111]'
+            }`}
+          >
+            {p}
+          </button>
+        ),
+      )}
+
+      <button
+        onClick={() => onChange(page + 1)}
+        disabled={page === totalPages}
+        className={`${arrowBase} ${
+          page === totalPages
+            ? 'text-[#BBBBBB] cursor-not-allowed'
+            : 'text-[#111111] hover:bg-[#F3EEE6]'
+        }`}
+        aria-label="Next page"
+      >
+        →
+      </button>
+    </nav>
   )
 }
 

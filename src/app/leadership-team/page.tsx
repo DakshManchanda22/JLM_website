@@ -14,9 +14,8 @@ export const metadata: Metadata = {
 export default async function LeadershipTeamPage() {
   const leaders = await fetchLeaders()
 
-  /* Neutral grayscale placeholder for leaders whose photo isn't uploaded yet.
-     The grid styles a grayscale + zoom effect on hover, so a single muted
-     photo blends in until a real headshot is added in Studio. */
+  /* Neutral placeholder for leaders whose photo isn't uploaded yet —
+     a single muted headshot until a real one is added in Studio. */
   const PHOTO_PLACEHOLDER =
     'https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=900&h=1200&fit=crop&auto=format'
 
@@ -31,7 +30,7 @@ export default async function LeadershipTeamPage() {
       : undefined
 
   return (
-    <div style={{ backgroundColor: '#111111', minHeight: '100%' }}>
+    <div style={{ backgroundColor: '#FFFFFF', minHeight: '100%' }}>
       <LeadershipGrid team={team} />
     </div>
   )

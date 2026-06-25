@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Abril_Fatface, Cormorant_Garamond } from 'next/font/google'
@@ -12,15 +12,15 @@ gsap.registerPlugin(ScrollTrigger)
 const abrilFatface = Abril_Fatface({ subsets: ['latin'], weight: '400' })
 const cormorant = Cormorant_Garamond({ subsets: ['latin'], weight: ['600', '700'] })
 
-type Post = {
+export type Post = {
   title: string
   excerpt: string
   category: string
   href: string
   image: string
   author: string
-  avatar: string
-  readTime: string
+  avatar?: string
+  readTime?: string
   publishedAt: string
 }
 
@@ -82,20 +82,25 @@ const POSTS: Post[] = [
   },
 ]
 
-const HOMEPAGE_LIMIT = 4
-const RECENT_POSTS = [...POSTS]
-  .sort((a, b) => +new Date(b.publishedAt) - +new Date(a.publishedAt))
-  .slice(0, HOMEPAGE_LIMIT)
-const LOOPED = [...RECENT_POSTS, ...RECENT_POSTS]
+const HOMEPAGE_LIMIT = 6
 const PINK = '#F9A8BB'
 const HEADING = 'Smart Mums Blog.'
 
-export default function BlogSection() {
+export default function BlogSection({ posts }: { posts?: Post[] }) {
   const trackRef = useRef<HTMLDivElement>(null)
   const headingRef = useRef<HTMLHeadingElement>(null)
   const posRef = useRef(0)
   const pausedRef = useRef(false)
   const rafRef = useRef<number>(0)
+
+  // most-recent-first; fall back to the built-in demo posts if none supplied
+  const looped = useMemo(() => {
+    const source = posts && posts.length ? posts : POSTS
+    const recent = [...source]
+      .sort((a, b) => +new Date(b.publishedAt) - +new Date(a.publishedAt))
+      .slice(0, HOMEPAGE_LIMIT)
+    return [...recent, ...recent]
+  }, [posts])
 
   /* Auto-scroll ticker */
   useEffect(() => {
@@ -189,7 +194,7 @@ export default function BlogSection() {
           className="flex pb-2"
           style={{ width: 'max-content', willChange: 'transform', paddingLeft: '24px' }}
         >
-          {LOOPED.map((post, i) => (
+          {looped.map((post, i) => (
             <Link
               key={`${post.href}-${i}`}
               href={post.href}
@@ -249,29 +254,33 @@ export default function BlogSection() {
                 {/* Author row */}
                 <div className="mt-auto pt-4 flex items-center justify-between">
                   <div className="flex items-center gap-2 min-w-0">
-                    <div className="relative w-7 h-7 rounded-full overflow-hidden flex-shrink-0">
-                      <Image
-                        src={post.avatar}
-                        alt={post.author}
-                        fill
-                        sizes="28px"
-                        className="object-cover"
-                        draggable={false}
-                      />
-                    </div>
+                    {post.avatar && (
+                      <div className="relative w-7 h-7 rounded-full overflow-hidden flex-shrink-0">
+                        <Image
+                          src={post.avatar}
+                          alt={post.author}
+                          fill
+                          sizes="28px"
+                          className="object-cover"
+                          draggable={false}
+                        />
+                      </div>
+                    )}
                     <p className="text-[12px] text-[#555555] truncate">
                       by <span className="text-[#111111]">{post.author}</span>{' '}
                       <span className="text-[#888888]">in</span>{' '}
                       <span className="text-[#111111]">{post.category}</span>
                     </p>
                   </div>
-                  <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
-                    <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                      <circle cx="7" cy="7" r="6" stroke="#555555" strokeWidth="1.2" />
-                      <path d="M7 3.5V7L9.25 8.5" stroke="#555555" strokeWidth="1.2" strokeLinecap="round" />
-                    </svg>
-                    <span className="text-[12px] text-[#555555]">{post.readTime}</span>
-                  </div>
+                  {post.readTime && (
+                    <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
+                      <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                        <circle cx="7" cy="7" r="6" stroke="#555555" strokeWidth="1.2" />
+                        <path d="M7 3.5V7L9.25 8.5" stroke="#555555" strokeWidth="1.2" strokeLinecap="round" />
+                      </svg>
+                      <span className="text-[12px] text-[#555555]">{post.readTime}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </Link>
