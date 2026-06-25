@@ -345,17 +345,68 @@ export type BigenReel = {
   name?: string
 }
 
+export type BigenFeature = { label?: string; icon?: 'sparkle' | 'drop' }
+
+export type BigenProduct = {
+  name?: string
+  desc?: string
+  image?: string
+  href?: string
+}
+
 export type Bigen = {
+  // hero
+  heroLogo?: string
+  heroHeadline1?: string
+  heroHeadline2?: string
+  heroHeadline3?: string
+  heroEyebrow?: string
+  heroCtaLabel?: string
+  heroCtaHref?: string
+  heroImage?: string
+  // video
+  videoHeadline?: string
+  videoUrl?: string
+  // ritual
+  ritualHeadlinePlain?: string
+  ritualHeadlineItalic1?: string
+  ritualHeadlineItalic2?: string
+  ritualBody?: string
+  ritualFeatures?: BigenFeature[]
+  ritualImage?: string
+  // shine
+  shineBannerTop?: string
+  shineBannerBottom?: string
+  shineHeadline?: string
+  shineBody?: string
+  shineHighlight?: string
+  shinePillLabel?: string
+  shineImage?: string
+  // testimonials
   testimonialsHeadline?: string
   reels?: BigenReel[]
+  // range
+  rangeEyebrow?: string
+  rangeHeadline?: string
+  products?: BigenProduct[]
 }
 
 export const bigenQuery = groq`*[_type == "bigen"][0]{
+  "heroLogo": heroLogo.asset->url,
+  heroHeadline1, heroHeadline2, heroHeadline3, heroEyebrow,
+  heroCtaLabel, heroCtaHref,
+  "heroImage": heroImage.asset->url,
+  videoHeadline, videoUrl,
+  ritualHeadlinePlain, ritualHeadlineItalic1, ritualHeadlineItalic2, ritualBody,
+  ritualFeatures[]{ label, icon },
+  "ritualImage": ritualImage.asset->url,
+  shineBannerTop, shineBannerBottom, shineHeadline, shineBody, shineHighlight,
+  shinePillLabel,
+  "shineImage": shineImage.asset->url,
   testimonialsHeadline,
-  reels[]{
-    url,
-    name,
-  },
+  reels[]{ url, name },
+  rangeEyebrow, rangeHeadline,
+  products[]{ name, desc, href, "image": image.asset->url },
 }`
 
 export async function fetchBigen(): Promise<Bigen | null> {

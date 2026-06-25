@@ -11,12 +11,6 @@ export const metadata: Metadata = {
 export const revalidate = 60
 
 export default async function BigenPage() {
-  const data = await fetchBigen()
-
-  return (
-    <BigenClient
-      testimonialsHeadline={data?.testimonialsHeadline}
-      reels={data?.reels}
-    />
-  )
+  const cms = await fetchBigen()
+  return <BigenClient cms={cms ?? {}} />
 }
