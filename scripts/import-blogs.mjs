@@ -344,6 +344,12 @@ async function importOne(row, i) {
     finalBlocks.push(block)
   }
 
+  // never let the body start with an inline image (or blank blocks)
+  const hasText = (b) =>
+    b._type === 'block' && (b.children || []).map((c) => c.text || '').join('').trim() !== ''
+  const firstText = finalBlocks.findIndex(hasText)
+  if (firstText > 0) finalBlocks.splice(0, firstText)
+
   const document = {
     _id: docId(slug),
     _type: 'post',
