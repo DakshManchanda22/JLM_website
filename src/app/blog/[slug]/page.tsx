@@ -6,7 +6,6 @@ import { Cormorant_Garamond, DM_Sans } from 'next/font/google'
 
 import AuthorCard from '@/components/blog/AuthorCard'
 import PortableBody from '@/components/blog/PortableBody'
-import HeroParallax from '@/components/blog/HeroParallax'
 import Footer from '@/components/Footer'
 import { fetchPost, fetchPostSlugs } from '@/sanity/queries'
 import { demoPostBySlug, demoPostSlugs } from '@/sanity/demoContent'
@@ -66,7 +65,7 @@ export default async function BlogPostPage({ params }: { params: Params }) {
     : demoPostBySlug(params.slug)
   if (!post) notFound()
 
-  const coverUrl = resolveImageUrl(post.coverImage, 2400)
+  const coverUrl = resolveImageUrl(post.coverImage, 1600)
   const avatarUrl = resolveImageUrl(post.author?.avatar, 240)
 
   return (
@@ -129,13 +128,24 @@ export default async function BlogPostPage({ params }: { params: Params }) {
         </div>
       </header>
 
-      {/* ─── Full-bleed hero with parallax ─── */}
+      {/* ─── Cover image — contained, static (no zoom, with side margins) ─── */}
       {coverUrl && (
-        <HeroParallax src={coverUrl} alt={post.coverImage?.alt ?? post.title} />
+        <figure className="max-w-[920px] mx-auto px-6 mt-2 md:mt-4">
+          <div className="relative w-full aspect-[16/9] overflow-hidden rounded-2xl">
+            <Image
+              src={coverUrl}
+              alt={post.coverImage?.alt ?? post.title}
+              fill
+              priority
+              sizes="(max-width: 920px) 100vw, 920px"
+              className="object-cover"
+            />
+          </div>
+        </figure>
       )}
 
       {/* ─── Body in narrow reading column ─── */}
-      <div className="max-w-[680px] mx-auto px-6 pt-16 md:pt-24 pb-16">
+      <div className="max-w-[680px] mx-auto px-6 pt-12 md:pt-16 pb-16">
         <PortableBody value={post.body} />
       </div>
 
