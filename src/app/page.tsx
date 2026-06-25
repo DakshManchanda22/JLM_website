@@ -2,9 +2,9 @@ import HeroSlideshow, { type Slide } from '@/components/HeroSlideshow'
 import QuoteSection from '@/components/QuoteSection'
 import BrandCards, { type Brand } from '@/components/BrandCards'
 import StatsSection, { type Stat } from '@/components/StatsSection'
-import BlogSection from '@/components/BlogSection'
+import BlogSection, { type Post as BlogPost } from '@/components/BlogSection'
 import Footer from '@/components/Footer'
-import { fetchHomepage } from '@/sanity/queries'
+import { fetchHomepage, fetchPosts } from '@/sanity/queries'
 import { resolveImageUrl } from '@/sanity/resolveImage'
 
 // Revalidate every 60s so Sanity edits surface without redeploys
@@ -12,6 +12,22 @@ export const revalidate = 60
 
 export default async function Home() {
   const homepage = await fetchHomepage()
+
+  /* Most recent blog posts (already ordered newest-first) for the homepage */
+  const recentPosts: BlogPost[] = (await fetchPosts())
+    .map((p) => ({
+      title: p.title,
+      excerpt: p.excerpt ?? '',
+      category: p.tags?.[0]?.title ?? 'Others',
+      href: `/blog/${p.slug}`,
+      image: resolveImageUrl(p.coverImage, 900) ?? '',
+      author: p.author?.name ?? '',
+      avatar: resolveImageUrl(p.author?.avatar, 120),
+      readTime: p.readTime ? `${p.readTime} min.` : undefined,
+      publishedAt: p.publishedAt,
+    }))
+    .filter((p) => p.image)
+    .slice(0, 6)
 
   /* Resolve Sanity image asset refs into URLs for the client components */
   const heroSlides: Slide[] | undefined = homepage?.heroSlides
@@ -51,7 +67,7 @@ export default async function Home() {
       />
       <BrandCards brands={brands} />
       <StatsSection stats={stats} />
-      <BlogSection />
+      <BlogSection posts={recentPosts} />
       <div style={{ backgroundColor: '#F9A8BB' }}>
         <Footer />
       </div>

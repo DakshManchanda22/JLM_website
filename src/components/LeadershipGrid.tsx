@@ -82,20 +82,20 @@ function LeaderCard({ leader }: { leader: Leader }) {
             alt={leader.name}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-cover object-top grayscale group-hover:grayscale-0 transition-all duration-700 ease-out group-hover:scale-[1.04]"
+            className="object-cover object-top transition-transform duration-700 ease-out group-hover:scale-[1.04]"
             draggable={false}
           />
           {/* Bottom gradient for depth */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/15 via-transparent to-transparent" />
         </div>
       </Link>
 
       {/* Name + title — also clickable */}
       <Link href={href} className="block mt-4 px-0.5 group/text">
-        <p className="text-white text-base font-medium leading-snug group-hover/text:text-white/80 transition-colors duration-200">
+        <p className="text-[#111111] text-base font-medium leading-snug group-hover/text:text-[#111111]/70 transition-colors duration-200">
           {leader.name}
         </p>
-        <p className="text-white/45 text-sm leading-snug mt-1">
+        <p className="text-[#555555] text-sm leading-snug mt-1">
           {leader.title}
         </p>
       </Link>
@@ -112,7 +112,7 @@ export default function LeadershipGrid({ team }: { team?: Leader[] }) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="text-white mb-12 md:mb-16 font-serif"
+        className="text-[#111111] mb-12 md:mb-16 font-serif"
         style={{
           fontSize: 'clamp(2.5rem, 6vw, 5rem)',
           fontWeight: 400,

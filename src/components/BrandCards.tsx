@@ -182,10 +182,10 @@ function BrandCard({
             }}
           >
             <span
-              className="block text-white font-black uppercase leading-none tracking-tight whitespace-nowrap drop-shadow-[0_4px_24px_rgba(0,0,0,0.45)]"
-              style={{ fontSize: 'clamp(2.25rem, 5vw, 5rem)' }}
+              className="block text-center text-white font-black uppercase leading-[0.92] tracking-tight drop-shadow-[0_4px_24px_rgba(0,0,0,0.45)]"
+              style={{ fontSize: 'clamp(2.25rem, 5vw, 5rem)', maxWidth: '7em' }}
             >
-              {brand.shortName}
+              {brand.name}
             </span>
           </motion.div>
         )}
