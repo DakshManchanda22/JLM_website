@@ -265,35 +265,100 @@ export async function fetchLifeAtJlm(): Promise<LifeAtJlm | null> {
 
 /* ───────────────────────── Our Story ───────────────────────── */
 
-export type OurStoryMilestone = {
-  year: string
-  description: string
-  side: 'left' | 'right'
+export type OurStoryJourneyStage = {
+  period?: string
+  name: string
+  note?: string
+}
+
+export type OurStoryEra = {
+  number: string
+  dateRange: string
+  title: string
+  body: string
   image?: any
-  offsetY?: number
+}
+
+export type OurStoryPillar = {
+  name: string
+  description?: string
 }
 
 export type OurStory = {
+  // Hero
   eyebrow?: string
   headlineTop?: string
   headlineBottom?: string
-  milestones?: OurStoryMilestone[]
+  heroTagline?: string
+  establishedMark?: string
+  // Journey
+  journeyEyebrow?: string
+  journeyHeadline?: string
+  journeyStages?: OurStoryJourneyStage[]
+  // Eras
+  erasEyebrow?: string
+  erasHeadline?: string
+  eras?: OurStoryEra[]
+  // Pillars
+  pillarsEyebrow?: string
+  pillarsHeadline?: string
+  pillars?: OurStoryPillar[]
+  // Closing
+  closingLine?: string
+  closingSubline?: string
 }
 
 export const ourStoryQuery = groq`*[_type == "ourStory"][0]{
   eyebrow,
   headlineTop,
   headlineBottom,
-  milestones[]{
-    year,
-    description,
-    side,
+  heroTagline,
+  establishedMark,
+  journeyEyebrow,
+  journeyHeadline,
+  journeyStages[]{ period, name, note },
+  erasEyebrow,
+  erasHeadline,
+  eras[]{
+    number,
+    dateRange,
+    title,
+    body,
     image,
-    offsetY,
   },
+  pillarsEyebrow,
+  pillarsHeadline,
+  pillars[]{ name, description },
+  closingLine,
+  closingSubline,
 }`
 
 export async function fetchOurStory(): Promise<OurStory | null> {
   if (!client) return null
   return client.fetch(ourStoryQuery)
+}
+
+/* ─────────────────────────── Bigen ─────────────────────────── */
+
+export type BigenReel = {
+  url: string
+  name?: string
+}
+
+export type Bigen = {
+  testimonialsHeadline?: string
+  reels?: BigenReel[]
+}
+
+export const bigenQuery = groq`*[_type == "bigen"][0]{
+  testimonialsHeadline,
+  reels[]{
+    url,
+    name,
+  },
+}`
+
+export async function fetchBigen(): Promise<Bigen | null> {
+  if (!client) return null
+  return client.fetch(bigenQuery)
 }
