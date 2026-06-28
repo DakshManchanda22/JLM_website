@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: 'Building goodness for every Indian family since 1920.',
 }
 
-const NAV_HEIGHT = 64
+const NAV_HEIGHT = 56
 
 export default function RootLayout({
   children,

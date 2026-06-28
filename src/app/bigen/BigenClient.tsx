@@ -3,15 +3,20 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { Cormorant_Garamond, DM_Sans } from 'next/font/google'
+import { DM_Sans } from 'next/font/google'
+import localFont from 'next/font/local'
+import { PortableText, type PortableTextComponents } from '@portabletext/react'
 import Footer from '@/components/Footer'
 import type { Bigen, BigenReel, BigenFeature, BigenProduct } from '@/sanity/queries'
 
-const cormorant = Cormorant_Garamond({
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
-  style: ['normal', 'italic'],
-  variable: '--font-cormorant',
+// Google Sans (self-hosted) — bold, modern sans for a confident, manly look
+const googleSans = localFont({
+  src: [
+    { path: '../fonts/GoogleSans-500.woff2', weight: '500', style: 'normal' },
+    { path: '../fonts/GoogleSans-700.woff2', weight: '700', style: 'normal' },
+  ],
+  variable: '--font-google-sans',
+  display: 'swap',
 })
 
 const dmSans = DM_Sans({
@@ -46,7 +51,6 @@ const D = {
   shineHeadline: 'Gives a natural shine\nto your beard',
   shineBody:
     'With the goodness of olive oil and taurine, every stroke conditions as it colours — for a softer, healthier-looking beard with a subtle, natural sheen.',
-  shineHighlight: 'olive oil',
   shinePillLabel: 'No Ammonia formula',
   shineImage: '/4-trim.png',
   testimonialsHeadline: 'Decades of Trust. Endorsed by icons.',
@@ -116,20 +120,29 @@ function renderMultiline(text: string): ReactNode {
   ))
 }
 
-/* Render body text, highlighting the first occurrence of `word` in gold. */
-function renderHighlighted(text: string, word?: string): ReactNode {
-  if (!word) return text
-  const idx = text.toLowerCase().indexOf(word.toLowerCase())
-  if (idx === -1) return text
-  return (
-    <>
-      {text.slice(0, idx)}
-      <span className="font-semibold text-[#e6c068]">
-        {text.slice(idx, idx + word.length)}
-      </span>
-      {text.slice(idx + word.length)}
-    </>
-  )
+/* Portable Text rendering for the editable rich-text fields: each block is a
+   line; Bold/Italic and the Gold/Dark/Muted colour marks come from Studio. */
+const richComponents: PortableTextComponents = {
+  block: {
+    normal: ({ children }) => <span className="block">{children}</span>,
+  },
+  marks: {
+    strong: ({ children }) => <strong className="font-bold">{children}</strong>,
+    em: ({ children }) => <em className="italic">{children}</em>,
+    gold: ({ children }) => <span style={{ color: '#c79a3a' }}>{children}</span>,
+    dark: ({ children }) => <span style={{ color: '#1d1408' }}>{children}</span>,
+    muted: ({ children }) => <span style={{ color: '#6b5d45' }}>{children}</span>,
+  },
+}
+
+/* Render an editable rich-text field, falling back to a default string when the
+   Sanity field is empty. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function RichText({ value, fallback }: { value?: any; fallback: string }): ReactNode {
+  if (Array.isArray(value) && value.length > 0) {
+    return <PortableText value={value} components={richComponents} />
+  }
+  return renderMultiline(fallback)
 }
 
 const fadeUp = {
@@ -237,11 +250,11 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
 
   return (
     <div
-      className={`${cormorant.variable} ${dmSans.variable} relative`}
+      className={`${googleSans.variable} ${dmSans.variable} relative`}
       style={{ fontFamily: 'var(--font-dm-sans)' }}
     >
       {/* HERO */}
-      <section className="relative min-h-[calc(100vh-64px)] overflow-hidden">
+      <section className="relative overflow-hidden">
         <div
           className="absolute inset-0"
           style={{
@@ -258,7 +271,7 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
         />
 
         <div className="relative mx-auto max-w-[1400px] px-6 md:px-12 lg:px-16">
-          <div className="grid lg:grid-cols-2 items-center gap-10 min-h-[calc(100vh-64px)] py-16 lg:py-0">
+          <div className="grid lg:grid-cols-2 items-center gap-10 min-h-[48vh] lg:min-h-[54vh] py-8 lg:py-10">
             {/* ── LEFT: copy ── */}
             <div className="relative z-10 max-w-xl">
               {/* Bigen logo */}
@@ -269,7 +282,7 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
                   width={423}
                   height={206}
                   priority
-                  className="h-20 md:h-24 w-auto"
+                  className="h-28 md:h-36 w-auto"
                 />
               </motion.div>
 
@@ -278,16 +291,16 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
                 {...fadeUp}
                 transition={{ duration: 0.7, ease: EASE, delay: 0.08 }}
                 className="mt-6 leading-[0.95]"
-                style={{ fontFamily: 'var(--font-cormorant)' }}
+                style={{ fontFamily: 'var(--font-google-sans)' }}
               >
-                <span className="block text-[clamp(2.25rem,4.8vw,4rem)] font-light text-[#f6efe0]">
+                <span className="block text-[clamp(2.25rem,4.8vw,4rem)] font-bold text-[#f6efe0]">
                   {cms.heroHeadline1 || D.heroHeadline1}
                 </span>
-                <span className="block text-[clamp(2.25rem,4.8vw,4rem)] font-light text-[#f6efe0]">
+                <span className="block text-[clamp(2.25rem,4.8vw,4rem)] font-bold text-[#f6efe0]">
                   {cms.heroHeadline2 || D.heroHeadline2}
                 </span>
                 <span
-                  className="block text-[clamp(2.25rem,4.8vw,4rem)] font-light italic bg-clip-text text-transparent"
+                  className="block text-[clamp(2.25rem,4.8vw,4rem)] font-bold bg-clip-text text-transparent"
                   style={{
                     backgroundImage:
                       'linear-gradient(95deg, #f5e487 0%, #d8b04a 60%, #c79a3a 100%)',
@@ -296,61 +309,53 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
                   {cms.heroHeadline3 || D.heroHeadline3}
                 </span>
               </motion.h1>
-
-              {/* eyebrow pill */}
-              <motion.div
-                {...fadeUp}
-                transition={{ duration: 0.7, ease: EASE, delay: 0.16 }}
-                className="mt-6 inline-flex items-center gap-2.5 rounded-full border border-[#d8b86a]/40 px-5 py-2.5"
-              >
-                <span className="h-2 w-2 rounded-full bg-[#f0d985]" />
-                <span className="text-sm md:text-[15px] font-semibold uppercase tracking-[0.22em] text-[#f0e3c4]">
-                  {cms.heroEyebrow || D.heroEyebrow}
-                </span>
-              </motion.div>
-
-              {/* CTA */}
-              <motion.div
-                {...fadeUp}
-                transition={{ duration: 0.7, ease: EASE, delay: 0.24 }}
-                className="mt-10 flex flex-wrap items-center gap-4"
-              >
-                <a
-                  href={cms.heroCtaHref || D.heroCtaHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-sm font-semibold text-[#2a1d09] bg-gradient-to-b from-[#f5e487] to-[#d8b04a] shadow-[0_0_30px_-8px_rgba(245,228,135,0.75)] hover:brightness-105 transition"
-                >
-                  {cms.heroCtaLabel || D.heroCtaLabel}
-                  <span className="transition-transform group-hover:translate-x-1">
-                    →
-                  </span>
-                </a>
-              </motion.div>
             </div>
 
-            {/* ── RIGHT: hero photo ── */}
+            {/* ── RIGHT: hero photo with big gold "Japan's No.1" behind ── */}
             <motion.div
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.9, ease: EASE, delay: 0.1 }}
-              className="relative h-[60vh] lg:h-[calc(100vh-64px)] hidden lg:block"
+              className="relative h-[58vh] lg:h-[72vh] hidden lg:block self-end -mb-8 lg:-mb-10"
             >
+              {/* Big gold JAPAN'S NO.1 wordmark behind the photo */}
               <div
-                className="absolute inset-0"
-                style={{
-                  WebkitMaskImage:
-                    'linear-gradient(to bottom, #000 0%, #000 58%, rgba(0,0,0,0.45) 82%, transparent 100%)',
-                  maskImage:
-                    'linear-gradient(to bottom, #000 0%, #000 58%, rgba(0,0,0,0.45) 82%, transparent 100%)',
-                }}
+                aria-hidden
+                className="pointer-events-none absolute inset-0 z-0 flex flex-col items-center justify-center -translate-y-[18%] select-none"
+                style={{ fontFamily: 'var(--font-dm-sans)' }}
               >
+                <span
+                  className="font-extrabold uppercase leading-[0.95] tracking-tight bg-clip-text text-transparent"
+                  style={{
+                    fontSize: 'clamp(2.4rem, 6.5vw, 5rem)',
+                    backgroundImage:
+                      'linear-gradient(180deg, #fff6cf 0%, #f7e489 22%, #e6c25a 46%, #cf9f37 64%, #a9781f 84%, #f0d885 100%)',
+                  }}
+                >
+                  Japan&rsquo;s
+                </span>
+                <span
+                  className="font-extrabold uppercase leading-[0.8] tracking-[-0.02em] bg-clip-text text-transparent"
+                  style={{
+                    fontSize: 'clamp(6rem, 17vw, 12.5rem)',
+                    backgroundImage:
+                      'linear-gradient(180deg, #fff6cf 0%, #f7e489 22%, #e6c25a 46%, #cf9f37 64%, #a9781f 84%, #f0d885 100%)',
+                    filter: 'drop-shadow(0 6px 30px rgba(240,200,90,0.35))',
+                  }}
+                >
+                  No.1
+                </span>
+              </div>
+
+              {/* Jadeja photo in front — fully opaque, anchored so his bottom
+                  pixel sits flush with the section's lower edge */}
+              <div className="absolute inset-0 z-10">
                 <Image
                   src={cms.heroImage || D.heroImage}
                   alt="Bigen men's beard colour"
                   fill
                   priority
-                  sizes="(max-width: 1024px) 0px, 50vw"
+                  sizes="(max-width: 1024px) 0px, 55vw"
                   className="object-contain object-bottom"
                 />
               </div>
@@ -366,10 +371,10 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-80px' }}
           transition={{ duration: 0.7, ease: EASE }}
-          className="text-center text-[clamp(2.25rem,5vw,3.75rem)] font-light text-[#f6efe0]"
-          style={{ fontFamily: 'var(--font-cormorant)' }}
+          className="text-center text-[clamp(2.25rem,5vw,3.75rem)] font-bold text-[#f6efe0]"
+          style={{ fontFamily: 'var(--font-google-sans)' }}
         >
-          {cms.videoHeadline || D.videoHeadline}
+          <RichText value={cms.videoHeadline} fallback={D.videoHeadline} />
         </motion.h2>
 
         <motion.div
@@ -443,19 +448,17 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
             <div className="max-w-xl">
               <h2
                 className="text-[clamp(2.25rem,4.5vw,3.75rem)] font-semibold leading-[1.05] text-[#1d1408]"
-                style={{ fontFamily: 'var(--font-cormorant)' }}
+                style={{ fontFamily: 'var(--font-google-sans)' }}
               >
-                {cms.ritualHeadlinePlain || D.ritualHeadlinePlain}{' '}
-                <span className="italic text-[#b8923f]">
-                  {cms.ritualHeadlineItalic1 || D.ritualHeadlineItalic1}
-                </span>
+                {cms.ritualHeadlinePlain || D.ritualHeadlinePlain}
                 <span className="mt-1 block italic text-[#b8923f]">
+                  {cms.ritualHeadlineItalic1 || D.ritualHeadlineItalic1}{' '}
                   {cms.ritualHeadlineItalic2 || D.ritualHeadlineItalic2}
                 </span>
               </h2>
 
               <p className="mt-7 max-w-md text-[15px] md:text-base leading-relaxed text-[#6b5d45]">
-                {cms.ritualBody || D.ritualBody}
+                <RichText value={cms.ritualBody} fallback={D.ritualBody} />
               </p>
 
               {/* feature pills */}
@@ -538,17 +541,14 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
               </div>
 
               <h2
-                className="mt-8 text-[clamp(2.25rem,4.5vw,3.75rem)] font-light leading-[1.08] text-[#f6efe0]"
-                style={{ fontFamily: 'var(--font-cormorant)' }}
+                className="mt-8 text-[clamp(1.875rem,3.6vw,3rem)] font-bold leading-[1.1] text-[#f6efe0] text-balance"
+                style={{ fontFamily: 'var(--font-google-sans)' }}
               >
-                {renderMultiline(cms.shineHeadline || D.shineHeadline)}
+                <RichText value={cms.shineHeadline} fallback={D.shineHeadline} />
               </h2>
 
               <p className="mt-7 max-w-md text-[15px] md:text-base leading-relaxed text-[#cdbf9f]">
-                {renderHighlighted(
-                  cms.shineBody || D.shineBody,
-                  cms.shineHighlight ?? D.shineHighlight
-                )}
+                <RichText value={cms.shineBody} fallback={D.shineBody} />
               </p>
 
               {/* white pill */}
@@ -587,10 +587,9 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
 
       {/* TESTIMONIALS (Instagram reels) + PRODUCT RANGE — one panel */}
       <ReelsSection
-        headline={cms.testimonialsHeadline || D.testimonialsHeadline}
+        headline={cms.testimonialsHeadline}
         reels={cms.reels && cms.reels.length ? cms.reels : DEFAULT_REELS}
-        rangeEyebrow={cms.rangeEyebrow || D.rangeEyebrow}
-        rangeHeadline={cms.rangeHeadline || D.rangeHeadline}
+        rangeHeadline={cms.rangeHeadline}
         products={cms.products && cms.products.length ? cms.products : DEFAULT_PRODUCTS}
       />
 
@@ -608,14 +607,14 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
 function ReelsSection({
   headline,
   reels,
-  rangeEyebrow,
   rangeHeadline,
   products,
 }: {
-  headline: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  headline?: any[]
   reels: BigenReel[]
-  rangeEyebrow: string
-  rangeHeadline: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  rangeHeadline?: any[]
   products: BigenProduct[]
 }) {
   const trackRef = useRef<HTMLDivElement>(null)
@@ -693,10 +692,10 @@ function ReelsSection({
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-80px' }}
             transition={{ duration: 0.7, ease: EASE }}
-            className="max-w-2xl text-[clamp(2rem,4.2vw,3.5rem)] font-semibold leading-[1.05] text-[#111111]"
-            style={{ fontFamily: 'var(--font-cormorant)' }}
+            className="text-[clamp(1.5rem,3.2vw,2.875rem)] font-semibold leading-[1.05] text-[#111111] md:whitespace-nowrap"
+            style={{ fontFamily: 'var(--font-google-sans)' }}
           >
-            {headline}
+            <RichText value={headline} fallback={D.testimonialsHeadline} />
           </motion.h2>
 
           {/* arrows — desktop */}
@@ -719,7 +718,7 @@ function ReelsSection({
         {/* track */}
         <div
           ref={trackRef}
-          className="hide-scrollbar mt-12 flex snap-x snap-mandatory gap-5 overflow-x-auto pb-2"
+          className="hide-scrollbar mt-16 flex snap-x snap-mandatory gap-5 overflow-x-auto pb-2 md:mt-20"
         >
           {reels.map((reel, i) => {
             const embed = reelEmbedUrl(reel.url)
@@ -745,11 +744,7 @@ function ReelsSection({
         </div>
 
         {/* ── Product range, same panel ── */}
-        <ProductRange
-          eyebrow={rangeEyebrow}
-          headline={rangeHeadline}
-          products={products}
-        />
+        <ProductRange headline={rangeHeadline} products={products} />
       </div>
     </section>
   )
@@ -758,30 +753,26 @@ function ReelsSection({
 /* ───────────────────────── Product range ───────────────────────── */
 
 function ProductRange({
-  eyebrow,
   headline,
   products,
 }: {
-  eyebrow: string
-  headline: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  headline?: any[]
   products: BigenProduct[]
 }) {
   return (
     <div className="mt-24 md:mt-32">
       {/* heading */}
       <div className="mx-auto max-w-3xl text-center">
-        <p className="text-[12px] font-semibold uppercase tracking-[0.28em] text-[#b8923f]">
-          {eyebrow}
-        </p>
         <motion.h2
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-80px' }}
           transition={{ duration: 0.7, ease: EASE }}
-          className="mt-5 text-[clamp(2.25rem,5vw,4rem)] font-semibold leading-[1.05] text-[#1d1408]"
-          style={{ fontFamily: 'var(--font-cormorant)' }}
+          className="text-[clamp(2.25rem,5vw,4rem)] font-semibold leading-[1.05] text-[#1d1408]"
+          style={{ fontFamily: 'var(--font-google-sans)' }}
         >
-          {headline}
+          <RichText value={headline} fallback={D.rangeHeadline} />
         </motion.h2>
       </div>
 
@@ -817,7 +808,7 @@ function ProductRange({
             <div className="flex flex-1 flex-col bg-white p-7">
               <h3
                 className="text-xl font-semibold leading-snug text-[#1d1408]"
-                style={{ fontFamily: 'var(--font-cormorant)' }}
+                style={{ fontFamily: 'var(--font-google-sans)' }}
               >
                 {p.name}
               </h3>
@@ -840,6 +831,40 @@ function ProductRange({
             </div>
           </motion.div>
         ))}
+      </div>
+
+      {/* Follow us */}
+      <div className="mt-24 flex flex-col items-center text-center md:mt-32">
+        <h3
+          className="text-[clamp(1.6rem,3vw,2.5rem)] font-bold text-[#1d1408]"
+          style={{ fontFamily: 'var(--font-google-sans)' }}
+        >
+          Join the community
+        </h3>
+        <a
+          href="https://www.instagram.com/bigenindia"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Follow Bigen on Instagram"
+          className="mt-7 inline-flex h-14 w-14 items-center justify-center rounded-full text-white shadow-[0_12px_30px_-10px_rgba(40,29,9,0.55)] transition-transform hover:scale-105"
+          style={{ background: 'linear-gradient(135deg, #c79a3a 0%, #1d1408 100%)' }}
+        >
+          <svg
+            width="26"
+            height="26"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <rect x="3" y="3" width="18" height="18" rx="5" />
+            <circle cx="12" cy="12" r="4" />
+            <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+          </svg>
+        </a>
       </div>
     </div>
   )

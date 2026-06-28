@@ -24,24 +24,21 @@ const DEFAULT_BRANDS: Brand[] = [
     shortName: 'Baby Dreams',
     tagline: 'Care your baby deserves.',
     href: '/brands/morisons-baby-dreams',
-    image:
-      'https://images.unsplash.com/photo-1546015720-b8b30df5aa27?w=1600&q=80',
+    image: '/morisons-baby-dreams-homepage.jpg',
   },
   {
     name: 'Emoform',
     shortName: 'Emoform',
     tagline: 'Dental health, perfected.',
     href: '/brands/emoform',
-    image:
-      'https://images.unsplash.com/photo-1606811971618-4486d14f3f99?w=1600&q=80',
+    image: '/emoform-homepage.jpg',
   },
   {
     name: 'Bigen',
     shortName: 'Bigen',
     tagline: 'Colour with confidence.',
     href: '/brands/bigen',
-    image:
-      'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=1600&q=80',
+    image: '/bigen-homepage.jpg',
   },
 ]
 
@@ -161,7 +158,7 @@ function BrandCard({
             >
               <p
                 className="text-white/90 font-black uppercase leading-[0.95] tracking-tight"
-                style={{ fontSize: 'clamp(1.4rem, 2.4vw, 2.25rem)' }}
+                style={{ fontSize: 'clamp(1.85rem, 3.2vw, 3rem)' }}
               >
                 {brand.name}
               </p>

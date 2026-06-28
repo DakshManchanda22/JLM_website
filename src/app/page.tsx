@@ -1,10 +1,10 @@
-import HeroSlideshow, { type Slide } from '@/components/HeroSlideshow'
+import HeroSlideshow, { type Slide, type HeroVideo } from '@/components/HeroSlideshow'
 import QuoteSection from '@/components/QuoteSection'
 import BrandCards, { type Brand } from '@/components/BrandCards'
 import StatsSection, { type Stat } from '@/components/StatsSection'
-import BlogSection, { type Post as BlogPost } from '@/components/BlogSection'
+import HomeFeatures from '@/components/HomeFeatures'
 import Footer from '@/components/Footer'
-import { fetchHomepage, fetchPosts } from '@/sanity/queries'
+import { fetchHomepage } from '@/sanity/queries'
 import { resolveImageUrl } from '@/sanity/resolveImage'
 
 // Revalidate every 60s so Sanity edits surface without redeploys
@@ -12,22 +12,6 @@ export const revalidate = 60
 
 export default async function Home() {
   const homepage = await fetchHomepage()
-
-  /* Most recent blog posts (already ordered newest-first) for the homepage */
-  const recentPosts: BlogPost[] = (await fetchPosts())
-    .map((p) => ({
-      title: p.title,
-      excerpt: p.excerpt ?? '',
-      category: p.tags?.[0]?.title ?? 'Others',
-      href: `/blog/${p.slug}`,
-      image: resolveImageUrl(p.coverImage, 900) ?? '',
-      author: p.author?.name ?? '',
-      avatar: resolveImageUrl(p.author?.avatar, 120),
-      readTime: p.readTime ? `${p.readTime} min.` : undefined,
-      publishedAt: p.publishedAt,
-    }))
-    .filter((p) => p.image)
-    .slice(0, 6)
 
   /* Resolve Sanity image asset refs into URLs for the client components */
   const heroSlides: Slide[] | undefined = homepage?.heroSlides
@@ -37,6 +21,20 @@ export default async function Home() {
       return { image: url, brand: s.brand, tagline: s.tagline }
     })
     .filter((x): x is Slide => x !== null)
+
+  /* The Sanity switch decides the hero: OFF = video, ON = photo carousel.
+     The video only plays when the carousel is OFF and a link/file is set. */
+  const useCarousel = homepage?.heroUseCarousel ?? false
+  const hv = homepage?.heroVideo
+  const heroVideo: HeroVideo | undefined =
+    !useCarousel && hv?.videoUrl
+      ? {
+          videoUrl: hv.videoUrl,
+          poster: resolveImageUrl(hv.poster, 2000),
+          brand: hv.brand,
+          tagline: hv.tagline,
+        }
+      : undefined
 
   const brands: Brand[] | undefined = homepage?.brands
     ?.map((b) => {
@@ -60,15 +58,19 @@ export default async function Home() {
 
   return (
     <>
-      <HeroSlideshow slides={heroSlides} />
+      <HeroSlideshow
+        slides={heroSlides}
+        video={heroVideo}
+        intervalMs={(homepage?.heroSlideInterval ?? 5) * 1000}
+      />
       <QuoteSection
         lines={homepage?.quote?.lines}
         attribution={homepage?.quote?.attribution}
       />
       <BrandCards brands={brands} />
       <StatsSection stats={stats} />
-      <BlogSection posts={recentPosts} />
-      <div style={{ backgroundColor: '#F9A8BB' }}>
+      <HomeFeatures />
+      <div style={{ backgroundColor: '#FFFFFF' }}>
         <Footer />
       </div>
     </>

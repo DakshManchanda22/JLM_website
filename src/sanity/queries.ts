@@ -104,8 +104,18 @@ export type StatData = {
   body: string
 }
 
+export type HeroVideo = {
+  videoUrl?: string
+  poster?: any
+  brand?: string
+  tagline?: string
+}
+
 export type Homepage = {
+  heroUseCarousel?: boolean
+  heroVideo?: HeroVideo
   heroSlides?: HeroSlide[]
+  heroSlideInterval?: number
   quote?: {
     lines?: string[]
     attribution?: string
@@ -115,6 +125,14 @@ export type Homepage = {
 }
 
 export const homepageQuery = groq`*[_type == "homepage"][0]{
+  heroUseCarousel,
+  heroSlideInterval,
+  heroVideo{
+    "videoUrl": coalesce(videoFile.asset->url, videoUrl),
+    poster,
+    brand,
+    tagline,
+  },
   heroSlides[]{
     image,
     brand,
@@ -365,29 +383,28 @@ export type Bigen = {
   heroCtaHref?: string
   heroImage?: string
   // video
-  videoHeadline?: string
+  videoHeadline?: any[]
   videoUrl?: string
   // ritual
   ritualHeadlinePlain?: string
   ritualHeadlineItalic1?: string
   ritualHeadlineItalic2?: string
-  ritualBody?: string
+  ritualBody?: any[]
   ritualFeatures?: BigenFeature[]
   ritualImage?: string
   // shine
   shineBannerTop?: string
   shineBannerBottom?: string
-  shineHeadline?: string
-  shineBody?: string
-  shineHighlight?: string
+  shineHeadline?: any[]
+  shineBody?: any[]
   shinePillLabel?: string
   shineImage?: string
   // testimonials
-  testimonialsHeadline?: string
+  testimonialsHeadline?: any[]
   reels?: BigenReel[]
   // range
   rangeEyebrow?: string
-  rangeHeadline?: string
+  rangeHeadline?: any[]
   products?: BigenProduct[]
 }
 
@@ -400,7 +417,7 @@ export const bigenQuery = groq`*[_type == "bigen"][0]{
   ritualHeadlinePlain, ritualHeadlineItalic1, ritualHeadlineItalic2, ritualBody,
   ritualFeatures[]{ label, icon },
   "ritualImage": ritualImage.asset->url,
-  shineBannerTop, shineBannerBottom, shineHeadline, shineBody, shineHighlight,
+  shineBannerTop, shineBannerBottom, shineHeadline, shineBody,
   shinePillLabel,
   "shineImage": shineImage.asset->url,
   testimonialsHeadline,
