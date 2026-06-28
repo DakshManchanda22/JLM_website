@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -8,6 +8,13 @@ export type Slide = {
   image: string
   brand: string
   tagline: string
+}
+
+export type HeroVideo = {
+  videoUrl: string
+  poster?: string
+  brand?: string
+  tagline?: string
 }
 
 const DEFAULT_SLIDES: Slide[] = [
@@ -34,7 +41,20 @@ const DEFAULT_SLIDES: Slide[] = [
 const SLIDE_DURATION = 5500 // ms
 const EASE = [0.16, 1, 0.3, 1] as const
 
-export default function HeroSlideshow({ slides }: { slides?: Slide[] }) {
+export default function HeroSlideshow({
+  slides,
+  video,
+  intervalMs = SLIDE_DURATION,
+}: {
+  slides?: Slide[]
+  video?: HeroVideo
+  intervalMs?: number
+}) {
+  /* A video set in Sanity replaces the image slideshow entirely */
+  if (video?.videoUrl) {
+    return <HeroVideoPlayer video={video} />
+  }
+
   const SLIDES = slides && slides.length > 0 ? slides : DEFAULT_SLIDES
 
   const [index, setIndex] = useState(0)
@@ -44,10 +64,10 @@ export default function HeroSlideshow({ slides }: { slides?: Slide[] }) {
     if (paused) return
     const id = window.setTimeout(
       () => setIndex((i) => (i + 1) % SLIDES.length),
-      SLIDE_DURATION
+      intervalMs
     )
     return () => window.clearTimeout(id)
-  }, [index, paused, SLIDES.length])
+  }, [index, paused, SLIDES.length, intervalMs])
 
   const advance = () => setIndex((i) => (i + 1) % SLIDES.length)
   const goTo = (i: number) => setIndex(i)
@@ -146,6 +166,96 @@ export default function HeroSlideshow({ slides }: { slides?: Slide[] }) {
           />
         ))}
       </div>
+    </section>
+  )
+}
+
+/* ───────────────────────── Hero video ───────────────────────── */
+
+function HeroVideoPlayer({ video }: { video: HeroVideo }) {
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const [muted, setMuted] = useState(true)
+
+  const toggleMute = () => {
+    const el = videoRef.current
+    if (!el) return
+    const next = !muted
+    el.muted = next
+    if (!next) {
+      // Ensure it's actually playing with sound after the user opts in
+      el.play().catch(() => {})
+    }
+    setMuted(next)
+  }
+
+  return (
+    <section
+      className="relative w-full overflow-hidden bg-[#111111]"
+      style={{ height: '100vh' }}
+    >
+      <video
+        ref={videoRef}
+        className="absolute inset-0 h-full w-full object-cover"
+        src={video.videoUrl}
+        poster={video.poster}
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="auto"
+      />
+
+      {/* Bottom-weighted dark gradient for headline legibility */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent" />
+
+      {/* Mute / unmute toggle */}
+      <button
+        onClick={toggleMute}
+        aria-label={muted ? 'Unmute video' : 'Mute video'}
+        className="absolute bottom-7 right-5 md:right-8 z-20 flex items-center gap-2 rounded-full border border-white/30 bg-black/30 backdrop-blur px-4 py-2 text-white/90 text-xs tracking-[0.2em] uppercase hover:bg-black/50 hover:text-white transition-colors"
+      >
+        {muted ? (
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M11 5L6 9H2v6h4l5 4V5Z" />
+            <line x1="22" y1="9" x2="16" y2="15" />
+            <line x1="16" y1="9" x2="22" y2="15" />
+          </svg>
+        ) : (
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M11 5L6 9H2v6h4l5 4V5Z" />
+            <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+            <path d="M18.5 5.5a9 9 0 0 1 0 13" />
+          </svg>
+        )}
+        <span>{muted ? 'Sound off' : 'Sound on'}</span>
+      </button>
+
+      {/* Headline overlay — bottom-left, huge (only if text is set) */}
+      {(video.brand || video.tagline) && (
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.65, ease: EASE }}
+          className="absolute bottom-16 left-6 md:left-12 right-6 md:right-32 z-10"
+        >
+          {video.tagline && (
+            <p className="text-white/70 text-xs tracking-[0.3em] uppercase mb-3 md:mb-5">
+              {video.tagline}
+            </p>
+          )}
+          {video.brand && (
+            <h1
+              className="text-white font-black uppercase leading-[0.92] tracking-tight"
+              style={{
+                fontSize: 'clamp(2.75rem, 8.5vw, 9rem)',
+                letterSpacing: '-0.02em',
+              }}
+            >
+              {video.brand}
+            </h1>
+          )}
+        </motion.div>
+      )}
     </section>
   )
 }

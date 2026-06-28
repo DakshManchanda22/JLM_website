@@ -1,6 +1,32 @@
 import { defineType, defineField, defineArrayMember } from 'sanity'
 
 /**
+ * Inline rich text for headlines / copy: lets editors make selected words
+ * Bold, Italic, or apply a brand Colour (Gold / Dark / Muted) from the toolbar.
+ * Returns a fresh field config each call so schema objects aren't shared.
+ */
+const richText = () => ({
+  type: 'array' as const,
+  of: [
+    defineArrayMember({
+      type: 'block',
+      styles: [{ title: 'Normal', value: 'normal' }],
+      lists: [],
+      marks: {
+        decorators: [
+          { title: 'Bold', value: 'strong' },
+          { title: 'Italic', value: 'em' },
+          { title: 'Gold', value: 'gold' },
+          { title: 'Dark', value: 'dark' },
+          { title: 'Muted', value: 'muted' },
+        ],
+        annotations: [],
+      },
+    }),
+  ],
+})
+
+/**
  * Bigen brand page — singleton document.
  * Every text string and image on the /bigen page lives here so marketing can
  * edit copy, swap images and reorder products/reels without touching code.
@@ -75,7 +101,7 @@ export default defineType({
       name: 'videoHeadline',
       title: 'Video headline',
       group: 'video',
-      type: 'string',
+      ...richText(),
     }),
     defineField({
       name: 'videoUrl',
@@ -108,8 +134,7 @@ export default defineType({
       name: 'ritualBody',
       title: 'Body text',
       group: 'ritual',
-      type: 'text',
-      rows: 3,
+      ...richText(),
     }),
     defineField({
       name: 'ritualFeatures',
@@ -164,21 +189,13 @@ export default defineType({
       name: 'shineHeadline',
       title: 'Headline',
       group: 'shine',
-      type: 'string',
+      ...richText(),
     }),
     defineField({
       name: 'shineBody',
       title: 'Body text',
       group: 'shine',
-      type: 'text',
-      rows: 3,
-    }),
-    defineField({
-      name: 'shineHighlight',
-      title: 'Word to highlight in body (gold)',
-      group: 'shine',
-      type: 'string',
-      description: 'e.g. "olive oil" — highlighted gold wherever it appears in the body.',
+      ...richText(),
     }),
     defineField({
       name: 'shinePillLabel',
@@ -199,7 +216,7 @@ export default defineType({
       name: 'testimonialsHeadline',
       title: 'Testimonials headline',
       group: 'testimonials',
-      type: 'string',
+      ...richText(),
     }),
     defineField({
       name: 'reels',
@@ -249,7 +266,7 @@ export default defineType({
       name: 'rangeHeadline',
       title: 'Headline',
       group: 'range',
-      type: 'string',
+      ...richText(),
     }),
     defineField({
       name: 'products',

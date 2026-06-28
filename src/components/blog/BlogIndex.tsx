@@ -7,7 +7,6 @@ import { Abril_Fatface, Cormorant_Garamond, DM_Sans } from 'next/font/google'
 import { motion } from 'framer-motion'
 
 import Footer from '@/components/Footer'
-import SubscribePopup from '@/components/SubscribePopup'
 import type { PostListItem } from '@/sanity/queries'
 
 const abrilFatface = Abril_Fatface({ subsets: ['latin'], weight: '400' })
@@ -74,8 +73,6 @@ export default function BlogIndex({ posts, categories }: Props) {
 
   return (
     <div className={`${dmSans.className} bg-[#FFFDFA] min-h-screen`}>
-      <SubscribePopup />
-
       {/* Heading */}
       <div className="px-6 md:px-12 pt-16 md:pt-20 pb-10 md:pb-14 text-center max-w-5xl mx-auto">
         <p className="text-xs tracking-[0.3em] uppercase text-[#7A6438] mb-5">Our Journal</p>
@@ -165,8 +162,6 @@ export default function BlogIndex({ posts, categories }: Props) {
           )}
         </div>
       </div>
-
-      <SubscribeBanner />
 
       <div style={{ backgroundColor: '#E8E0D5' }}>
         <Footer />
@@ -362,79 +357,6 @@ function PostCard({ post }: { post: IndexPost }) {
         </div>
       </div>
     </Link>
-  )
-}
-
-function SubscribeBanner() {
-  const [email, setEmail] = useState('')
-  const [submitted, setSubmitted] = useState(false)
-
-  const onSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    setSubmitted(true)
-  }
-
-  return (
-    <section style={{ backgroundColor: '#E8E0D5' }} className="text-[#111111]">
-      <div className="max-w-7xl mx-auto px-6 md:px-12 py-16 md:py-24 grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-center">
-        <div>
-          <p className="text-[11px] tracking-[0.3em] uppercase text-[#7A6438] mb-5">Stay in the loop</p>
-          <h2
-            className={`${cormorant.className} text-[#111111] font-medium leading-[1.05]`}
-            style={{ fontSize: 'clamp(2rem, 4.2vw, 3.5rem)' }}
-          >
-            Stories worth slowing down for, delivered to your inbox.
-          </h2>
-          <p className="mt-5 text-[#5A5346] text-[15px] leading-relaxed max-w-md">
-            The Smart Mums journal — gentle parenting, science-backed care, and the small wins from
-            the JL Morison family. One thoughtful letter, no clutter.
-          </p>
-        </div>
-        <div className="md:pl-6">
-          {submitted ? (
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, ease: EASE }}
-              className="bg-white/60 border border-[#D6CCBA] rounded-xl px-6 py-8 text-center"
-            >
-              <div className="mx-auto w-12 h-12 rounded-full bg-[#111111] text-white flex items-center justify-center mb-3">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                  <path d="M5 12L10 17L19 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </div>
-              <p className={`${cormorant.className} text-2xl text-[#111111]`}>Thank you for subscribing.</p>
-              <p className="text-sm text-[#5A5346] mt-1">We&rsquo;ll be in touch with our next letter.</p>
-            </motion.div>
-          ) : (
-            <form onSubmit={onSubmit} className="flex flex-col gap-3">
-              <label htmlFor="banner-email" className="sr-only">Email</label>
-              <input
-                id="banner-email"
-                type="email"
-                required
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-white text-[#111111] placeholder:text-[#888888] rounded-md px-5 py-4 text-[15px] border border-[#D6CCBA] focus:outline-none focus:ring-2 focus:ring-[#7A6438] focus:border-transparent transition"
-              />
-              <button
-                type="submit"
-                className="w-full bg-[#111111] hover:bg-[#2A2520] text-white text-[15px] font-medium tracking-wide py-4 rounded-md transition-colors"
-              >
-                Subscribe
-              </button>
-              <p className="text-[12px] text-[#5A5346] mt-1">
-                By subscribing, you accept our{' '}
-                <Link href="/terms" className="underline underline-offset-2 hover:text-[#111111]">Terms</Link>{' '}
-                &amp;{' '}
-                <Link href="/privacy" className="underline underline-offset-2 hover:text-[#111111]">Privacy Policy</Link>.
-              </p>
-            </form>
-          )}
-        </div>
-      </div>
-    </section>
   )
 }
 
