@@ -50,11 +50,21 @@ export default function HeroSlideshow({
   video?: HeroVideo
   intervalMs?: number
 }) {
-  /* A video set in Sanity replaces the image slideshow entirely */
+  /* A video set in Sanity replaces the image slideshow entirely. Each branch
+     is its own component so hooks are never called conditionally. */
   if (video?.videoUrl) {
     return <HeroVideoPlayer video={video} />
   }
+  return <ImageSlideshow slides={slides} intervalMs={intervalMs} />
+}
 
+function ImageSlideshow({
+  slides,
+  intervalMs,
+}: {
+  slides?: Slide[]
+  intervalMs: number
+}) {
   const SLIDES = slides && slides.length > 0 ? slides : DEFAULT_SLIDES
 
   const [index, setIndex] = useState(0)
