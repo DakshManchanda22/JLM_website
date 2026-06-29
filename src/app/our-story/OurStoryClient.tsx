@@ -40,6 +40,7 @@ export type Era = {
   title: string
   body: string
   image?: string
+  lqip?: string
 }
 
 export type JourneyStage = {
@@ -404,6 +405,9 @@ function ChapterRow({
                       fill
                       sizes="(max-width: 768px) 90vw, 340px"
                       style={{ objectFit: 'cover' }}
+                      {...(chapter.lqip
+                        ? { placeholder: 'blur' as const, blurDataURL: chapter.lqip }
+                        : {})}
                     />
                   </div>
                 </div>

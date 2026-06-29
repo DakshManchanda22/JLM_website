@@ -2,7 +2,7 @@ import BlogIndex from '@/components/blog/BlogIndex'
 import { isSanityConfigured } from '@/sanity/env'
 import { fetchPosts, type PostListItem } from '@/sanity/queries'
 import { demoPosts } from '@/sanity/demoContent'
-import { resolveImageUrl } from '@/sanity/resolveImage'
+import { resolveImage, resolveImageUrl } from '@/sanity/resolveImage'
 
 export const revalidate = 60
 
@@ -16,9 +16,11 @@ export default async function BlogPage() {
 }
 
 function toIndexPost(p: PostListItem) {
+  const cover = resolveImage(p.coverImage, 1400)
   return {
     ...p,
-    coverUrl: resolveImageUrl(p.coverImage, 1400),
+    coverUrl: cover?.url,
+    coverLqip: cover?.lqip,
     avatarUrl: resolveImageUrl(p.author?.avatar, 120),
     category: p.tags?.[0]?.title ?? 'Others',
   }

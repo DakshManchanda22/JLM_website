@@ -1,19 +1,23 @@
 import OurStoryClient, { type Era, type OurStoryCms } from './OurStoryClient'
 import { fetchOurStory } from '@/sanity/queries'
-import { resolveImageUrl } from '@/sanity/resolveImage'
+import { resolveImage } from '@/sanity/resolveImage'
 
 export const revalidate = 60
 
 export default async function OurStoryPage() {
   const data = await fetchOurStory()
 
-  const eras: Era[] | undefined = data?.eras?.map((e) => ({
-    number: e.number,
-    dateRange: e.dateRange,
-    title: e.title,
-    body: e.body,
-    image: resolveImageUrl(e.image, 1400),
-  }))
+  const eras: Era[] | undefined = data?.eras?.map((e) => {
+    const r = resolveImage(e.image, 1400)
+    return {
+      number: e.number,
+      dateRange: e.dateRange,
+      title: e.title,
+      body: e.body,
+      image: r?.url,
+      lqip: r?.lqip,
+    }
+  })
 
   const cms: OurStoryCms = {
     eyebrow: data?.eyebrow,

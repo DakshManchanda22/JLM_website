@@ -10,7 +10,7 @@ import Footer from '@/components/Footer'
 import { fetchPost, fetchPostSlugs } from '@/sanity/queries'
 import { demoPostBySlug, demoPostSlugs } from '@/sanity/demoContent'
 import { isSanityConfigured } from '@/sanity/env'
-import { resolveImageUrl } from '@/sanity/resolveImage'
+import { resolveImage, resolveImageUrl } from '@/sanity/resolveImage'
 
 const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
@@ -65,7 +65,8 @@ export default async function BlogPostPage({ params }: { params: Params }) {
     : demoPostBySlug(params.slug)
   if (!post) notFound()
 
-  const coverUrl = resolveImageUrl(post.coverImage, 1600)
+  const cover = resolveImage(post.coverImage, 1600)
+  const coverUrl = cover?.url
   const avatarUrl = resolveImageUrl(post.author?.avatar, 240)
 
   return (
@@ -139,6 +140,9 @@ export default async function BlogPostPage({ params }: { params: Params }) {
               priority
               sizes="(max-width: 920px) 100vw, 920px"
               className="object-cover"
+              {...(cover?.lqip
+                ? { placeholder: 'blur' as const, blurDataURL: cover.lqip }
+                : {})}
             />
           </div>
         </figure>

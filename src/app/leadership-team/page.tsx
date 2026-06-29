@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import LeadershipGrid, { type Leader } from '@/components/LeadershipGrid'
 import { fetchLeaders } from '@/sanity/queries'
-import { resolveImageUrl } from '@/sanity/resolveImage'
+import { resolveImage } from '@/sanity/resolveImage'
 
 export const revalidate = 60
 
@@ -21,12 +21,16 @@ export default async function LeadershipTeamPage() {
 
   const team: Leader[] | undefined =
     leaders.length > 0
-      ? leaders.map((l) => ({
-          name: l.name,
-          title: l.title,
-          image: resolveImageUrl(l.image, 900) ?? PHOTO_PLACEHOLDER,
-          slug: l.slug,
-        }))
+      ? leaders.map((l) => {
+          const r = resolveImage(l.image, 900)
+          return {
+            name: l.name,
+            title: l.title,
+            image: r?.url ?? PHOTO_PLACEHOLDER,
+            lqip: r?.lqip,
+            slug: l.slug,
+          }
+        })
       : undefined
 
   return (

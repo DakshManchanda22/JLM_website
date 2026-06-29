@@ -5,4 +5,5 @@ import { dataset, projectId } from './env'
 
 const builder = createImageUrlBuilder({ projectId, dataset })
 
-export const urlFor = (source: Image) => builder.image(source).auto('format').fit('max')
+export const urlFor = (source: Image) =>
+  builder.image(source).auto('format').fit('max').quality(75)

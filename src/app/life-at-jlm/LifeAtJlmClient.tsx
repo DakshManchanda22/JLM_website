@@ -15,6 +15,7 @@ export type LifeCms = {
   introImages?: { url: string }[]
   introFinalImage?: string
   heroImage?: string
+  heroImageLqip?: string
   heroLine1?: string
   heroLine2?: string
   heroCaptionSmall?: string
@@ -334,6 +335,9 @@ function Hero() {
           priority
           sizes="100vw"
           style={{ objectFit: 'cover' }}
+          {...(cms.heroImageLqip
+            ? { placeholder: 'blur' as const, blurDataURL: cms.heroImageLqip }
+            : {})}
         />
         {/* localised gradient for headline readability — keeps the photo's
             natural top edge so the navbar curve stays visible */}

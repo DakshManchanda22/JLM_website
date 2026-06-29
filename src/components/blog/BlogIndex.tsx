@@ -21,6 +21,7 @@ const ALL = 'All Category' as const
 
 type IndexPost = PostListItem & {
   coverUrl?: string
+  coverLqip?: string
   avatarUrl?: string
   category: string
 }
@@ -265,6 +266,9 @@ function FeaturedCard({ post }: { post: IndexPost }) {
               fill
               sizes="(max-width: 768px) 100vw, 50vw"
               className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+              {...(post.coverLqip
+                ? { placeholder: 'blur' as const, blurDataURL: post.coverLqip }
+                : {})}
             />
           )}
         </div>
@@ -314,6 +318,9 @@ function PostCard({ post }: { post: IndexPost }) {
             fill
             sizes="(max-width: 768px) 100vw, 33vw"
             className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
+            {...(post.coverLqip
+              ? { placeholder: 'blur' as const, blurDataURL: post.coverLqip }
+              : {})}
           />
         )}
       </div>
