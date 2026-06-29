@@ -31,14 +31,14 @@ const DEFAULT_BRANDS: Brand[] = [
     name: 'Emoform',
     shortName: 'Emoform',
     tagline: 'Dental health, perfected.',
-    href: '/brands/emoform',
+    href: '/emoform',
     image: '/emoform-homepage.jpg',
   },
   {
     name: 'Bigen',
     shortName: 'Bigen',
     tagline: 'Colour with confidence.',
-    href: '/brands/bigen',
+    href: '/bigen',
     image: '/bigen-homepage.jpg',
   },
 ]

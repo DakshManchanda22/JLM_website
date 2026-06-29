@@ -456,3 +456,78 @@ export async function fetchBigen(): Promise<Bigen | null> {
     }),
   }
 }
+
+/* ─────────────────────────── Emoform ─────────────────────────── */
+
+export type EmoformStepView = {
+  tag?: string
+  title?: string
+  sub?: string
+  image?: string
+  imageLqip?: string
+  points?: string[]
+}
+
+export type EmoformView = {
+  heroLine1?: string
+  heroLine2?: string
+  heroFlag?: string
+  heroImage?: string
+  heroImageLqip?: string
+  featuresTitleTop?: string
+  featuresTitleBottom?: string
+  features?: string[]
+  featuresImage?: string
+  featuresImageLqip?: string
+  steps?: EmoformStepView[]
+  ctaTitle?: string
+  ctaSubtext?: string
+  ctaButtonLabel?: string
+  ctaButtonHref?: string
+}
+
+export const emoformQuery = groq`*[_type == "emoform"][0]{
+  heroLine1, heroLine2, heroFlag,
+  heroImage{ ${imageWithLqip} },
+  featuresTitleTop, featuresTitleBottom, features,
+  featuresImage{ ${imageWithLqip} },
+  steps[]{ tag, title, sub, image{ ${imageWithLqip} }, points },
+  ctaTitle, ctaSubtext, ctaButtonLabel, ctaButtonHref,
+}`
+
+export async function fetchEmoform(): Promise<EmoformView | null> {
+  if (!client) return null
+  const raw: any = await client.fetch(emoformQuery)
+  if (!raw) return null
+
+  const hero = resolveImage(raw.heroImage, 1600)
+  const feat = resolveImage(raw.featuresImage, 1200)
+
+  return {
+    heroLine1: raw.heroLine1,
+    heroLine2: raw.heroLine2,
+    heroFlag: raw.heroFlag,
+    heroImage: hero?.url,
+    heroImageLqip: hero?.lqip,
+    featuresTitleTop: raw.featuresTitleTop,
+    featuresTitleBottom: raw.featuresTitleBottom,
+    features: raw.features,
+    featuresImage: feat?.url,
+    featuresImageLqip: feat?.lqip,
+    steps: (raw.steps || []).map((st: any) => {
+      const im = resolveImage(st.image, 1400)
+      return {
+        tag: st.tag,
+        title: st.title,
+        sub: st.sub,
+        image: im?.url,
+        imageLqip: im?.lqip,
+        points: st.points,
+      }
+    }),
+    ctaTitle: raw.ctaTitle,
+    ctaSubtext: raw.ctaSubtext,
+    ctaButtonLabel: raw.ctaButtonLabel,
+    ctaButtonHref: raw.ctaButtonHref,
+  }
+}

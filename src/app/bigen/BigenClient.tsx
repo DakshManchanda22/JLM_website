@@ -8,6 +8,9 @@ import localFont from 'next/font/local'
 import { PortableText, type PortableTextComponents } from '@portabletext/react'
 import Footer from '@/components/Footer'
 import type { Bigen, BigenReel, BigenFeature, BigenProduct } from '@/sanity/queries'
+// Static import → Next generates a tiny blur placeholder at build, so the hero
+// shows an instant blur-up while the full image loads.
+import jadejaHero from '../../../public/jadeja.png'
 
 // Google Sans (self-hosted) — bold, modern sans for a confident, manly look
 const googleSans = localFont({
@@ -223,6 +226,17 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
 
   const videoUrl = cms.videoUrl || D.videoUrl
   const ritualImage = cms.ritualImage || D.ritualImage
+
+  // Hero: use the CMS image when set (with its LQIP if available), otherwise the
+  // statically-imported default which carries its own build-time blur placeholder.
+  const heroImageProps = cms.heroImage
+    ? {
+        src: cms.heroImage,
+        ...(cms.heroImageLqip
+          ? { placeholder: 'blur' as const, blurDataURL: cms.heroImageLqip }
+          : {}),
+      }
+    : { src: jadejaHero, placeholder: 'blur' as const }
   const features =
     cms.ritualFeatures && cms.ritualFeatures.length
       ? cms.ritualFeatures
@@ -351,15 +365,12 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
                   pixel sits flush with the section's lower edge */}
               <div className="absolute inset-0 z-10">
                 <Image
-                  src={cms.heroImage || D.heroImage}
+                  {...heroImageProps}
                   alt="Bigen men's beard colour"
                   fill
                   priority
                   sizes="(max-width: 1024px) 0px, 55vw"
                   className="object-contain object-bottom"
-                  {...(cms.heroImageLqip
-                    ? { placeholder: 'blur' as const, blurDataURL: cms.heroImageLqip }
-                    : {})}
                 />
               </div>
             </motion.div>

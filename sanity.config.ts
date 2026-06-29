@@ -92,6 +92,15 @@ export default defineConfig({
                           .schemaType('bigen')
                           .documentId('bigen'),
                       ),
+                    S.listItem()
+                      .title('Emoform')
+                      .id('emoform')
+                      .child(
+                        S.editor()
+                          .id('emoform')
+                          .schemaType('emoform')
+                          .documentId('emoform'),
+                      ),
                   ]),
               ),
 
