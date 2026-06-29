@@ -451,7 +451,17 @@ function Chapters({ cms }: { cms: OurStoryCms }) {
   const eras = cms.eras && cms.eras.length > 0 ? cms.eras : DEFAULT_ERAS
   const stages = cms.journeyStages && cms.journeyStages.length > 0 ? cms.journeyStages : DEFAULT_STAGES
   const chapters: Chapter[] = eras.map((e, i) => ({ ...e, role: stages[i]?.name }))
-  const [active, setActive] = useState(0)
+  /* Each row opens its own drawer below on hover. We never auto-collapse the
+     rows above, so the hovered heading never jumps upward (it just drops its
+     content beneath it, the way the first row already does). */
+  const [open, setOpen] = useState<Set<number>>(() => new Set([0]))
+  const openRow = (i: number) =>
+    setOpen((prev) => {
+      if (prev.has(i)) return prev
+      const next = new Set(prev)
+      next.add(i)
+      return next
+    })
 
   return (
     <section className="relative w-full" style={{ backgroundColor: INK, padding: '14vh 5vw 12vh' }}>
@@ -486,8 +496,8 @@ function Chapters({ cms }: { cms: OurStoryCms }) {
             <ChapterRow
               key={`${c.number}-${i}`}
               chapter={c}
-              active={active === i}
-              onActivate={() => setActive(i)}
+              active={open.has(i)}
+              onActivate={() => openRow(i)}
               reduce={reduce}
             />
           ))}
