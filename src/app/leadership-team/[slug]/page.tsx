@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { fetchLeader, fetchLeaderSlugs } from '@/sanity/queries'
-import { resolveImageUrl } from '@/sanity/resolveImage'
+import { resolveImage } from '@/sanity/resolveImage'
 
 export const revalidate = 60
 
@@ -14,6 +14,7 @@ type LocalLeader = {
   title: string
   quote: string
   image: string
+  lqip?: string
   linkedin: string
   email: string
   bio: string[]
@@ -129,11 +130,13 @@ async function resolveLeader(slug: string): Promise<LocalLeader | null> {
 
   const sanityLeader = await fetchLeader(slug)
   if (sanityLeader) {
+    const r = resolveImage(sanityLeader.image, 900)
     return {
       name: sanityLeader.name,
       title: sanityLeader.title,
       quote: sanityLeader.quote ?? '',
-      image: resolveImageUrl(sanityLeader.image, 900) ?? PHOTO_PLACEHOLDER,
+      image: r?.url ?? PHOTO_PLACEHOLDER,
+      lqip: r?.lqip,
       linkedin: sanityLeader.linkedin ?? '',
       email: sanityLeader.email ?? '',
       bio: sanityLeader.bio ?? [],
@@ -202,6 +205,9 @@ export default async function LeaderProfilePage({
                   sizes="(max-width: 768px) 100vw, 360px"
                   className="object-cover object-top"
                   priority
+                  {...(leader.lqip
+                    ? { placeholder: 'blur' as const, blurDataURL: leader.lqip }
+                    : {})}
                 />
               </div>
             </div>

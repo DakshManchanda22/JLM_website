@@ -16,6 +16,7 @@ export type Brand = {
   tagline: string
   href: string
   image: string
+  lqip?: string
 }
 
 const DEFAULT_BRANDS: Brand[] = [
@@ -137,6 +138,9 @@ function BrandCard({
           fill
           sizes="(max-width: 768px) 100vw, 40vw"
           className="object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.04]"
+          {...(brand.lqip
+            ? { placeholder: 'blur' as const, blurDataURL: brand.lqip }
+            : {})}
         />
 
         {/* Dark wash — lighter when active so image reads through */}

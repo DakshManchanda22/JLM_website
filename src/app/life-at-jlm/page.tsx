@@ -1,6 +1,6 @@
 import LifeAtJlmClient, { type LifeCms } from './LifeAtJlmClient'
 import { fetchLifeAtJlm } from '@/sanity/queries'
-import { resolveImageUrl } from '@/sanity/resolveImage'
+import { resolveImage, resolveImageUrl } from '@/sanity/resolveImage'
 
 export const revalidate = 60
 
@@ -19,7 +19,8 @@ export default async function LifeAtJlmPage() {
           })
           .filter((x): x is { url: string } => x !== null),
         introFinalImage: resolveImageUrl(data.introFinalImage, 1800),
-        heroImage: resolveImageUrl(data.heroImage, 2400),
+        heroImage: resolveImage(data.heroImage, 2400)?.url,
+        heroImageLqip: resolveImage(data.heroImage, 2400)?.lqip,
         heroLine1: data.heroLine1,
         heroLine2: data.heroLine2,
         heroCaptionSmall: data.heroCaptionSmall,

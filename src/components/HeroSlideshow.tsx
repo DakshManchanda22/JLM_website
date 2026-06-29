@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 export type Slide = {
   image: string
+  lqip?: string
   brand: string
   tagline: string
 }
@@ -108,6 +109,9 @@ function ImageSlideshow({
             priority
             sizes="100vw"
             className="object-cover"
+            {...(slide.lqip
+              ? { placeholder: 'blur' as const, blurDataURL: slide.lqip }
+              : {})}
           />
           {/* Bottom-weighted dark gradient for headline legibility */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent" />

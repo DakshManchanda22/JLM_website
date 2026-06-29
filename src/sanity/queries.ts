@@ -2,6 +2,7 @@
 import { groq } from 'next-sanity'
 
 import { client } from './client'
+import { imageWithLqip, resolveImage } from './resolveImage'
 
 export type PostListItem = {
   _id: string
@@ -39,7 +40,7 @@ const postProjection = groq`
   title,
   "slug": slug.current,
   excerpt,
-  coverImage,
+  coverImage{ ${imageWithLqip} },
   publishedAt,
   readTime,
   featured,
@@ -134,7 +135,7 @@ export const homepageQuery = groq`*[_type == "homepage"][0]{
     tagline,
   },
   heroSlides[]{
-    image,
+    image{ ${imageWithLqip} },
     brand,
     tagline,
   },
@@ -147,7 +148,7 @@ export const homepageQuery = groq`*[_type == "homepage"][0]{
     shortName,
     tagline,
     href,
-    image,
+    image{ ${imageWithLqip} },
   },
   stats[]{
     number,
@@ -180,7 +181,7 @@ const leaderProjection = groq`
   "slug": slug.current,
   title,
   order,
-  image,
+  image{ ${imageWithLqip} },
   quote,
   linkedin,
   email,
@@ -256,7 +257,7 @@ export type LifeAtJlm = {
 export const lifeAtJlmQuery = groq`*[_type == "lifeAtJlm"][0]{
   introImages,
   introFinalImage,
-  heroImage,
+  heroImage{ ${imageWithLqip} },
   heroLine1,
   heroLine2,
   heroCaptionSmall,
@@ -342,7 +343,7 @@ export const ourStoryQuery = groq`*[_type == "ourStory"][0]{
     dateRange,
     title,
     body,
-    image,
+    image{ ${imageWithLqip} },
   },
   pillarsEyebrow,
   pillarsHeadline,
@@ -369,6 +370,7 @@ export type BigenProduct = {
   name?: string
   desc?: string
   image?: string
+  lqip?: string
   href?: string
 }
 
@@ -382,6 +384,7 @@ export type Bigen = {
   heroCtaLabel?: string
   heroCtaHref?: string
   heroImage?: string
+  heroImageLqip?: string
   // video
   videoHeadline?: any[]
   videoUrl?: string
@@ -392,6 +395,7 @@ export type Bigen = {
   ritualBody?: any[]
   ritualFeatures?: BigenFeature[]
   ritualImage?: string
+  ritualImageLqip?: string
   // shine
   shineBannerTop?: string
   shineBannerBottom?: string
@@ -399,6 +403,7 @@ export type Bigen = {
   shineBody?: any[]
   shinePillLabel?: string
   shineImage?: string
+  shineImageLqip?: string
   // testimonials
   testimonialsHeadline?: any[]
   reels?: BigenReel[]
@@ -412,21 +417,42 @@ export const bigenQuery = groq`*[_type == "bigen"][0]{
   "heroLogo": heroLogo.asset->url,
   heroHeadline1, heroHeadline2, heroHeadline3, heroEyebrow,
   heroCtaLabel, heroCtaHref,
-  "heroImage": heroImage.asset->url,
+  heroImage{ ${imageWithLqip} },
   videoHeadline, videoUrl,
   ritualHeadlinePlain, ritualHeadlineItalic1, ritualHeadlineItalic2, ritualBody,
   ritualFeatures[]{ label, icon },
-  "ritualImage": ritualImage.asset->url,
+  ritualImage{ ${imageWithLqip} },
   shineBannerTop, shineBannerBottom, shineHeadline, shineBody,
   shinePillLabel,
-  "shineImage": shineImage.asset->url,
+  shineImage{ ${imageWithLqip} },
   testimonialsHeadline,
   reels[]{ url, name },
   rangeEyebrow, rangeHeadline,
-  products[]{ name, desc, href, "image": image.asset->url },
+  products[]{ name, desc, href, image{ ${imageWithLqip} } },
 }`
 
 export async function fetchBigen(): Promise<Bigen | null> {
   if (!client) return null
-  return client.fetch(bigenQuery)
+  const raw: any = await client.fetch(bigenQuery)
+  if (!raw) return null
+
+  // Route Sanity images through urlFor (auto-format, width cap, quality) and
+  // surface their LQIP blur placeholders. Local/default paths are untouched.
+  const hero = resolveImage(raw.heroImage, 1600)
+  const ritual = resolveImage(raw.ritualImage, 1400)
+  const shine = resolveImage(raw.shineImage, 1400)
+
+  return {
+    ...raw,
+    heroImage: hero?.url,
+    heroImageLqip: hero?.lqip,
+    ritualImage: ritual?.url,
+    ritualImageLqip: ritual?.lqip,
+    shineImage: shine?.url,
+    shineImageLqip: shine?.lqip,
+    products: (raw.products || []).map((p: any) => {
+      const r = resolveImage(p.image, 800)
+      return { ...p, image: r?.url, lqip: r?.lqip }
+    }),
+  }
 }

@@ -357,6 +357,9 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
                   priority
                   sizes="(max-width: 1024px) 0px, 55vw"
                   className="object-contain object-bottom"
+                  {...(cms.heroImageLqip
+                    ? { placeholder: 'blur' as const, blurDataURL: cms.heroImageLqip }
+                    : {})}
                 />
               </div>
             </motion.div>
@@ -499,6 +502,9 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
                   width={400}
                   height={508}
                   className="relative z-10 h-auto w-full max-w-[430px] object-contain"
+                  {...(cms.ritualImageLqip
+                    ? { placeholder: 'blur' as const, blurDataURL: cms.ritualImageLqip }
+                    : {})}
                 />
               )}
             </div>
@@ -579,6 +585,9 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
                 width={588}
                 height={558}
                 className="relative z-10 h-auto w-full max-w-[580px] object-contain"
+                {...(cms.shineImageLqip
+                  ? { placeholder: 'blur' as const, blurDataURL: cms.shineImageLqip }
+                  : {})}
               />
             </div>
           </div>
@@ -796,6 +805,9 @@ function ProductRange({
                   fill
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                   className="object-contain p-4"
+                  {...(p.lqip
+                    ? { placeholder: 'blur' as const, blurDataURL: p.lqip }
+                    : {})}
                 />
               ) : (
                 <span className="text-xs uppercase tracking-[0.18em] text-[#b8923f]/70">
