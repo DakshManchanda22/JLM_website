@@ -18,6 +18,7 @@ export default defineType({
     { name: 'quote', title: 'Quote' },
     { name: 'brands', title: 'Brand cards' },
     { name: 'stats', title: 'Stats' },
+    { name: 'features', title: 'Feature sections' },
   ],
   fields: [
     /* ─────────────── Hero mode switch ─────────────── */
@@ -226,6 +227,20 @@ export default defineType({
 
     /* ─────────────── Stats section ─────────────── */
     defineField({
+      name: 'statsHeading',
+      title: 'Stats — section heading',
+      description: 'Large editorial heading above the metric cards.',
+      type: 'string',
+      group: 'stats',
+    }),
+    defineField({
+      name: 'statsNote',
+      title: 'Stats — small note',
+      description: 'Small uppercase note shown to the right of the heading, e.g. "Since 1920".',
+      type: 'string',
+      group: 'stats',
+    }),
+    defineField({
       name: 'stats',
       title: 'Stat cards',
       type: 'array',
@@ -260,6 +275,75 @@ export default defineType({
           ],
           preview: {
             select: { title: 'number', subtitle: 'label' },
+          },
+        }),
+      ],
+    }),
+
+    /* ─────────────── Feature sections ─────────────── */
+    defineField({
+      name: 'features',
+      title: 'Feature sections',
+      description:
+        'The large image + text sections near the bottom of the homepage. Each one ' +
+        'alternates the image left/right and links somewhere with a button.',
+      type: 'array',
+      group: 'features',
+      validation: (Rule) => Rule.max(6),
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'feature',
+          fields: [
+            defineField({
+              name: 'eyebrow',
+              title: 'Eyebrow',
+              description: 'Small uppercase label above the headline.',
+              type: 'string',
+            }),
+            defineField({
+              name: 'headline',
+              title: 'Headline',
+              type: 'string',
+              validation: (Rule) => Rule.required(),
+            }),
+            defineField({
+              name: 'body',
+              title: 'Body copy',
+              type: 'text',
+              rows: 3,
+            }),
+            defineField({
+              name: 'ctaLabel',
+              title: 'Button label',
+              type: 'string',
+              validation: (Rule) => Rule.required(),
+            }),
+            defineField({
+              name: 'href',
+              title: 'Button link',
+              description: 'e.g. /life-at-jlm or a full https:// URL',
+              type: 'string',
+              validation: (Rule) => Rule.required(),
+            }),
+            defineField({
+              name: 'image',
+              title: 'Image',
+              type: 'image',
+              options: { hotspot: true },
+              validation: (Rule) => Rule.required(),
+            }),
+            defineField({
+              name: 'imageRight',
+              title: 'Show image on the right',
+              description: 'ON → image on the right, text on the left. OFF → image on the left.',
+              type: 'boolean',
+              initialValue: false,
+              options: { layout: 'switch' },
+            }),
+          ],
+          preview: {
+            select: { title: 'headline', subtitle: 'eyebrow', media: 'image' },
           },
         }),
       ],

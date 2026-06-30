@@ -137,7 +137,7 @@ export default function Navbar() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-[#111111]">
         <div ref={navRef} onMouseLeave={() => setActiveDropdown(null)}>
           {/* TOP BAR */}
-          <div className="relative flex items-center justify-between h-14 px-5 md:px-8">
+          <div className="relative flex items-center justify-between h-[var(--nav-h)] px-5 md:px-8">
             {/* Hamburger — mobile */}
             <button
               onClick={() => setMobileOpen(true)}
@@ -203,7 +203,7 @@ export default function Navbar() {
               aria-label="JL Morison home"
               className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
             >
-              <Logo className="h-8 w-auto text-white" />
+              <Logo className="h-7 md:h-8 w-auto text-white" />
             </Link>
 
             {/* RIGHT — desktop */}
@@ -243,9 +243,9 @@ export default function Navbar() {
             transition={{ duration: 0.4, ease: EASE }}
             className="fixed inset-0 z-[100] bg-[#111111] flex flex-col"
           >
-            <div className="flex items-center justify-between h-14 px-5 border-b border-white/10">
+            <div className="flex items-center justify-between h-[var(--nav-h)] px-5 border-b border-white/10">
               <div className="w-6" />
-              <Logo className="h-8 w-auto text-white" />
+              <Logo className="h-7 md:h-8 w-auto text-white" />
               <button
                 onClick={() => setMobileOpen(false)}
                 aria-label="Close menu"

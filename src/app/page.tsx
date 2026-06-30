@@ -2,7 +2,7 @@ import HeroSlideshow, { type Slide, type HeroVideo } from '@/components/HeroSlid
 import QuoteSection from '@/components/QuoteSection'
 import BrandCards, { type Brand } from '@/components/BrandCards'
 import StatsSection, { type Stat } from '@/components/StatsSection'
-import HomeFeatures from '@/components/HomeFeatures'
+import HomeFeatures, { type HomeFeature } from '@/components/HomeFeatures'
 import Footer from '@/components/Footer'
 import { fetchHomepage } from '@/sanity/queries'
 import { resolveImage, resolveImageUrl } from '@/sanity/resolveImage'
@@ -55,6 +55,24 @@ export default async function Home() {
     body: s.body,
   }))
 
+  const features: HomeFeature[] | undefined = homepage?.features?.flatMap((f) => {
+    const r = resolveImage(f.image, 1400)
+    return r
+      ? [
+          {
+            eyebrow: f.eyebrow,
+            headline: f.headline,
+            body: f.body,
+            ctaLabel: f.ctaLabel,
+            href: f.href,
+            image: r.url,
+            lqip: r.lqip,
+            imageRight: f.imageRight,
+          },
+        ]
+      : []
+  })
+
   return (
     <>
       <HeroSlideshow
@@ -67,8 +85,12 @@ export default async function Home() {
         attribution={homepage?.quote?.attribution}
       />
       <BrandCards brands={brands} />
-      <StatsSection stats={stats} />
-      <HomeFeatures />
+      <StatsSection
+        stats={stats}
+        heading={homepage?.statsHeading}
+        note={homepage?.statsNote}
+      />
+      <HomeFeatures features={features} />
       <div style={{ backgroundColor: '#FFFFFF' }}>
         <Footer />
       </div>

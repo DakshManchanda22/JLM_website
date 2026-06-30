@@ -42,6 +42,7 @@ export default defineType({
     { name: 'shine', title: 'Natural shine' },
     { name: 'testimonials', title: 'Reels / testimonials' },
     { name: 'range', title: 'Product range' },
+    { name: 'social', title: 'Social links' },
   ],
   fields: [
     /* ───────────── Hero ───────────── */
@@ -291,6 +292,24 @@ export default defineType({
           preview: { select: { title: 'name', subtitle: 'desc', media: 'image' } },
         }),
       ],
+    }),
+
+    /* ───────────── Social links ───────────── */
+    defineField({
+      name: 'instagramUrl',
+      title: 'Instagram page URL',
+      description: 'The “Join the community” Instagram icon links here.',
+      group: 'social',
+      type: 'url',
+      validation: (Rule) => Rule.uri({ scheme: ['https'] }),
+    }),
+    defineField({
+      name: 'facebookUrl',
+      title: 'Facebook page URL',
+      description: 'The “Join the community” Facebook icon links here.',
+      group: 'social',
+      type: 'url',
+      validation: (Rule) => Rule.uri({ scheme: ['https'] }),
     }),
   ],
   preview: {

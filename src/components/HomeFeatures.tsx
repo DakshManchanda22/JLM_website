@@ -8,18 +8,19 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 gsap.registerPlugin(ScrollTrigger)
 
-type Feature = {
-  eyebrow: string
+export type HomeFeature = {
+  eyebrow?: string
   headline: string
   body?: string
   ctaLabel: string
   href: string
   image: string
+  lqip?: string
   /** When true the image sits on the right, text on the left. */
   imageRight?: boolean
 }
 
-const FEATURES: Feature[] = [
+const DEFAULT_FEATURES: HomeFeature[] = [
   {
     eyebrow: 'Our people',
     headline: 'Life at J.L. Morison, where everyday goodness begins.',
@@ -42,7 +43,12 @@ const FEATURES: Feature[] = [
   },
 ]
 
-export default function HomeFeatures() {
+export default function HomeFeatures({
+  features,
+}: {
+  features?: HomeFeature[]
+}) {
+  const FEATURES = features && features.length > 0 ? features : DEFAULT_FEATURES
   const rootRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -98,6 +104,9 @@ export default function HomeFeatures() {
                 fill
                 sizes="(max-width: 768px) 100vw, 50vw"
                 className="object-cover"
+                {...(f.lqip
+                  ? { placeholder: 'blur' as const, blurDataURL: f.lqip }
+                  : {})}
               />
             </div>
 

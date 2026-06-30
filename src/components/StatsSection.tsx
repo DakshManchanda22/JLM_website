@@ -46,8 +46,21 @@ function parseNumber(raw: string) {
   return { prefix: m[1], value: parseFloat(m[2]), suffix: m[3], decimals }
 }
 
-export default function StatsSection({ stats }: { stats?: Stat[] }) {
+const DEFAULT_HEADING = 'A century of everyday goodness'
+const DEFAULT_NOTE = 'Since 1920'
+
+export default function StatsSection({
+  stats,
+  heading,
+  note,
+}: {
+  stats?: Stat[]
+  heading?: string
+  note?: string
+}) {
   const STATS = stats && stats.length > 0 ? stats : DEFAULT_STATS
+  const HEADING = heading && heading.length > 0 ? heading : DEFAULT_HEADING
+  const NOTE = note && note.length > 0 ? note : DEFAULT_NOTE
   const sectionRef = useRef<HTMLElement>(null)
 
   /* Fade-up reveal of the heading + cards, and count-up of the numbers */
@@ -122,13 +135,13 @@ export default function StatsSection({ stats }: { stats?: Stat[] }) {
             className="font-serif font-light tracking-tight leading-[0.95] text-[#111111] max-w-[16ch]"
             style={{ fontSize: 'clamp(2.25rem, 5vw, 4.5rem)' }}
           >
-            A century of everyday goodness
+            {HEADING}
           </h2>
           <p
             data-stat-reveal
             className="text-[#555555] text-xs tracking-[0.3em] uppercase mb-2"
           >
-            Since 1920
+            {NOTE}
           </p>
         </div>
 

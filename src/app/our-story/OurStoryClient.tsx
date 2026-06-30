@@ -306,12 +306,14 @@ type Chapter = Era & { role?: string }
 function ChapterRow({
   chapter,
   active,
-  onActivate,
+  onOpen,
+  onToggle,
   reduce,
 }: {
   chapter: Chapter
   active: boolean
-  onActivate: () => void
+  onOpen: () => void
+  onToggle: () => void
   reduce: boolean
 }) {
   return (
@@ -323,9 +325,9 @@ function ChapterRow({
     >
       <button
         type="button"
-        onMouseEnter={onActivate}
-        onFocus={onActivate}
-        onClick={onActivate}
+        onMouseEnter={onOpen}
+        onFocus={onOpen}
+        onClick={onToggle}
         aria-expanded={active}
         className="w-full text-left"
         style={{ padding: '24px 0', background: 'none', border: 'none', cursor: 'pointer' }}
@@ -368,13 +370,26 @@ function ChapterRow({
               width: 20,
               height: 20,
               flexShrink: 0,
-              transform: active ? 'rotate(90deg)' : 'rotate(0deg)',
-              transition: 'transform 0.5s cubic-bezier(0.16,1,0.3,1)',
+              transition: 'opacity 0.45s ease',
               opacity: active ? 0.9 : 0.5,
             }}
           >
+            {/* horizontal bar — always shown */}
             <span style={{ position: 'absolute', top: '50%', left: 0, width: '100%', height: 1, backgroundColor: '#FFFFFF' }} />
-            <span style={{ position: 'absolute', left: '50%', top: 0, height: '100%', width: 1, backgroundColor: '#FFFFFF' }} />
+            {/* vertical bar — collapses when open, so + becomes - */}
+            <span
+              style={{
+                position: 'absolute',
+                left: '50%',
+                top: 0,
+                height: '100%',
+                width: 1,
+                backgroundColor: '#FFFFFF',
+                transformOrigin: 'center',
+                transform: active ? 'scaleY(0)' : 'scaleY(1)',
+                transition: 'transform 0.45s cubic-bezier(0.16,1,0.3,1)',
+              }}
+            />
           </span>
         </div>
       </button>
@@ -462,6 +477,13 @@ function Chapters({ cms }: { cms: OurStoryCms }) {
       next.add(i)
       return next
     })
+  const toggleRow = (i: number) =>
+    setOpen((prev) => {
+      const next = new Set(prev)
+      if (next.has(i)) next.delete(i)
+      else next.add(i)
+      return next
+    })
 
   return (
     <section className="relative w-full" style={{ backgroundColor: INK, padding: '14vh 5vw 12vh' }}>
@@ -497,7 +519,8 @@ function Chapters({ cms }: { cms: OurStoryCms }) {
               key={`${c.number}-${i}`}
               chapter={c}
               active={open.has(i)}
-              onActivate={() => openRow(i)}
+              onOpen={() => openRow(i)}
+              onToggle={() => toggleRow(i)}
               reduce={reduce}
             />
           ))}

@@ -8,9 +8,6 @@ import localFont from 'next/font/local'
 import { PortableText, type PortableTextComponents } from '@portabletext/react'
 import Footer from '@/components/Footer'
 import type { Bigen, BigenReel, BigenFeature, BigenProduct } from '@/sanity/queries'
-// Static import → Next generates a tiny blur placeholder at build, so the hero
-// shows an instant blur-up while the full image loads.
-import jadejaHero from '../../../public/jadeja.png'
 
 // Google Sans (self-hosted) — bold, modern sans for a confident, manly look
 const googleSans = localFont({
@@ -32,14 +29,12 @@ const EASE = [0.16, 1, 0.3, 1] as const
 
 /* ─────────── Defaults (used when a Sanity field is empty) ─────────── */
 const D = {
-  heroLogo: '/bigen-logo.svg',
   heroHeadline1: 'Specially',
   heroHeadline2: 'formulated',
   heroHeadline3: "for men's beard",
   heroEyebrow: "Japan's No.1 · Men's Beard",
   heroCtaLabel: 'Shop now',
   heroCtaHref: 'https://www.amazon.in/s?k=bigen',
-  heroImage: '/jadeja.png',
   videoHeadline: 'Confidence, in one stroke',
   videoUrl:
     'https://storage.googleapis.com/jlm_website_v2/BIGEN%20JADEJA%2010%20SEC%20English%20new%20PW%20%20HD%205.mp4',
@@ -48,17 +43,17 @@ const D = {
   ritualHeadlineItalic2: '10 minutes',
   ritualBody:
     'Smooth, controlled application that behaves the way you want it to — start to grey-free in the time it takes to read the morning headlines.',
-  ritualImage: '/2-trim.png',
   shineBannerTop: 'Darker, bolder beard',
   shineBannerBottom: 'In just 1 stroke',
   shineHeadline: 'Gives a natural shine\nto your beard',
   shineBody:
     'With the goodness of olive oil and taurine, every stroke conditions as it colours — for a softer, healthier-looking beard with a subtle, natural sheen.',
   shinePillLabel: 'No Ammonia formula',
-  shineImage: '/4-trim.png',
   testimonialsHeadline: 'Decades of Trust. Endorsed by icons.',
   rangeEyebrow: "The Men's Range",
   rangeHeadline: 'Explore our entire product range',
+  instagramUrl: 'https://www.instagram.com/bigenindia',
+  facebookUrl: 'https://www.facebook.com/share/14ciJNjNc4N/',
 }
 
 const DEFAULT_RITUAL_FEATURES: BigenFeature[] = [
@@ -78,33 +73,6 @@ const DEFAULT_REELS: BigenReel[] = [
   { url: 'https://www.instagram.com/reel/DBIfWYGSb-3/' },
   { url: 'https://www.instagram.com/reel/C2KbXlcy4-P/' },
   { url: 'https://www.instagram.com/reel/C7wj2GDPRjH/' },
-]
-
-const DEFAULT_PRODUCTS: BigenProduct[] = [
-  {
-    name: 'Beard Oil',
-    desc: 'Argan & rosehip for a shiny, smooth, conditioned beard.',
-    image: '/beard%20oil.jpg',
-    href: 'https://www.amazon.in/dp/B0BLSSWY2Y',
-  },
-  {
-    name: 'Beard Colour',
-    desc: 'No-ammonia cream for beard, moustache & sideburns.',
-    image: '/beard%20colour.jpg',
-    href: 'https://www.amazon.in/dp/B00EIMAA3S',
-  },
-  {
-    name: 'Speedy Colour',
-    desc: 'Greys gone in 10 minutes with olive oil & taurine.',
-    image: '/speedy%20colour.jpg',
-    href: 'https://www.amazon.in/dp/B00DRE3NZA',
-  },
-  {
-    name: 'Speedy Hair Colour Conditioner',
-    desc: 'Darkens grey hair in 5 minutes, with natural herbs.',
-    image: '/hair%20conditioner.jpg',
-    href: 'https://www.amazon.in/dp/B007E9E16O',
-  },
 ]
 
 /* Build the Instagram embed URL from a reel/post/tv link. */
@@ -225,7 +193,7 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
   const [showControls, setShowControls] = useState(false)
 
   const videoUrl = cms.videoUrl || D.videoUrl
-  const ritualImage = cms.ritualImage || D.ritualImage
+  const ritualImage = cms.ritualImage
 
   // Hero: use the CMS image when set (with its LQIP if available), otherwise the
   // statically-imported default which carries its own build-time blur placeholder.
@@ -236,7 +204,7 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
           ? { placeholder: 'blur' as const, blurDataURL: cms.heroImageLqip }
           : {}),
       }
-    : { src: jadejaHero, placeholder: 'blur' as const }
+    : null
   const features =
     cms.ritualFeatures && cms.ritualFeatures.length
       ? cms.ritualFeatures
@@ -290,14 +258,16 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
             <div className="relative z-10 max-w-xl">
               {/* Bigen logo */}
               <motion.div {...fadeUp} transition={{ duration: 0.6, ease: EASE }}>
-                <Image
-                  src={cms.heroLogo || D.heroLogo}
-                  alt="Bigen"
-                  width={423}
-                  height={206}
-                  priority
-                  className="h-28 md:h-36 w-auto"
-                />
+                {cms.heroLogo && (
+                  <Image
+                    src={cms.heroLogo}
+                    alt="Bigen"
+                    width={423}
+                    height={206}
+                    priority
+                    className="h-28 md:h-36 w-auto"
+                  />
+                )}
               </motion.div>
 
               {/* headline */}
@@ -323,6 +293,27 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
                   {cms.heroHeadline3 || D.heroHeadline3}
                 </span>
               </motion.h1>
+
+              {/* Shop now CTA — label + link are editable in Sanity. inline-flex so
+                  the pill hugs the text at any length and stays on one line. */}
+              <motion.a
+                {...fadeUp}
+                transition={{ duration: 0.7, ease: EASE, delay: 0.16 }}
+                href={cms.heroCtaHref || D.heroCtaHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-8 inline-flex w-fit max-w-full items-center gap-2 whitespace-nowrap rounded-full px-7 py-3.5 text-sm font-bold text-[#1d1408] shadow-[0_14px_30px_-12px_rgba(0,0,0,0.6)] transition-transform hover:-translate-y-0.5"
+                style={{
+                  backgroundImage:
+                    'linear-gradient(135deg, #f5e487 0%, #d8b04a 55%, #c79a3a 100%)',
+                  fontFamily: 'var(--font-google-sans)',
+                }}
+              >
+                {cms.heroCtaLabel || D.heroCtaLabel}
+                <span aria-hidden className="transition-transform">
+                  →
+                </span>
+              </motion.a>
             </div>
 
             {/* ── RIGHT: hero photo with big gold "Japan's No.1" behind ── */}
@@ -364,14 +355,21 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
               {/* Jadeja photo in front — fully opaque, anchored so his bottom
                   pixel sits flush with the section's lower edge */}
               <div className="absolute inset-0 z-10">
-                <Image
-                  {...heroImageProps}
-                  alt="Bigen men's beard colour"
-                  fill
-                  priority
-                  sizes="(max-width: 1024px) 0px, 55vw"
-                  className="object-contain object-bottom"
-                />
+                {heroImageProps && (
+                  <Image
+                    {...heroImageProps}
+                    alt="Bigen men's beard colour"
+                    fill
+                    priority
+                    // Serve straight from Sanity's CDN (already format/size/quality
+                    // optimized by urlFor) instead of re-processing through Next's
+                    // /_next/image hop — the hero is above the fold and this keeps
+                    // the blur-up brief on a cold cache.
+                    unoptimized
+                    sizes="(max-width: 1024px) 0px, 55vw"
+                    className="object-contain object-bottom"
+                  />
+                )}
               </div>
             </motion.div>
           </div>
@@ -590,16 +588,18 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
                     'radial-gradient(circle, rgba(230,192,104,0.18) 0%, rgba(199,154,58,0.06) 48%, transparent 70%)',
                 }}
               />
-              <Image
-                src={cms.shineImage || D.shineImage}
-                alt="Bigen men's beard colour pack"
-                width={588}
-                height={558}
-                className="relative z-10 h-auto w-full max-w-[580px] object-contain"
-                {...(cms.shineImageLqip
-                  ? { placeholder: 'blur' as const, blurDataURL: cms.shineImageLqip }
-                  : {})}
-              />
+              {cms.shineImage && (
+                <Image
+                  src={cms.shineImage}
+                  alt="Bigen men's beard colour pack"
+                  width={588}
+                  height={558}
+                  className="relative z-10 h-auto w-full max-w-[580px] object-contain"
+                  {...(cms.shineImageLqip
+                    ? { placeholder: 'blur' as const, blurDataURL: cms.shineImageLqip }
+                    : {})}
+                />
+              )}
             </div>
           </div>
         </motion.div>
@@ -610,7 +610,9 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
         headline={cms.testimonialsHeadline}
         reels={cms.reels && cms.reels.length ? cms.reels : DEFAULT_REELS}
         rangeHeadline={cms.rangeHeadline}
-        products={cms.products && cms.products.length ? cms.products : DEFAULT_PRODUCTS}
+        products={cms.products ?? []}
+        instagramUrl={cms.instagramUrl || D.instagramUrl}
+        facebookUrl={cms.facebookUrl || D.facebookUrl}
       />
 
       {/* cream backdrop so the footer's rounded top corners blend with the
@@ -629,6 +631,8 @@ function ReelsSection({
   reels,
   rangeHeadline,
   products,
+  instagramUrl,
+  facebookUrl,
 }: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   headline?: any[]
@@ -636,6 +640,8 @@ function ReelsSection({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   rangeHeadline?: any[]
   products: BigenProduct[]
+  instagramUrl: string
+  facebookUrl: string
 }) {
   const trackRef = useRef<HTMLDivElement>(null)
 
@@ -764,7 +770,12 @@ function ReelsSection({
         </div>
 
         {/* ── Product range, same panel ── */}
-        <ProductRange headline={rangeHeadline} products={products} />
+        <ProductRange
+          headline={rangeHeadline}
+          products={products}
+          instagramUrl={instagramUrl}
+          facebookUrl={facebookUrl}
+        />
       </div>
     </section>
   )
@@ -775,10 +786,14 @@ function ReelsSection({
 function ProductRange({
   headline,
   products,
+  instagramUrl,
+  facebookUrl,
 }: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   headline?: any[]
   products: BigenProduct[]
+  instagramUrl: string
+  facebookUrl: string
 }) {
   return (
     <div className="mt-24 md:mt-32">
@@ -864,30 +879,50 @@ function ProductRange({
         >
           Join the community
         </h3>
-        <a
-          href="https://www.instagram.com/bigenindia"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Follow Bigen on Instagram"
-          className="mt-7 inline-flex h-14 w-14 items-center justify-center rounded-full text-white shadow-[0_12px_30px_-10px_rgba(40,29,9,0.55)] transition-transform hover:scale-105"
-          style={{ background: 'linear-gradient(135deg, #c79a3a 0%, #1d1408 100%)' }}
-        >
-          <svg
-            width="26"
-            height="26"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
+        <div className="mt-7 flex items-center gap-4">
+          <a
+            href={instagramUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Follow Bigen on Instagram"
+            className="inline-flex h-14 w-14 items-center justify-center rounded-full text-white shadow-[0_12px_30px_-10px_rgba(40,29,9,0.55)] transition-transform hover:scale-105"
+            style={{ background: 'linear-gradient(135deg, #c79a3a 0%, #1d1408 100%)' }}
           >
-            <rect x="3" y="3" width="18" height="18" rx="5" />
-            <circle cx="12" cy="12" r="4" />
-            <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
-          </svg>
-        </a>
+            <svg
+              width="26"
+              height="26"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <rect x="3" y="3" width="18" height="18" rx="5" />
+              <circle cx="12" cy="12" r="4" />
+              <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+            </svg>
+          </a>
+          <a
+            href={facebookUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Follow Bigen on Facebook"
+            className="inline-flex h-14 w-14 items-center justify-center rounded-full text-white shadow-[0_12px_30px_-10px_rgba(40,29,9,0.55)] transition-transform hover:scale-105"
+            style={{ background: 'linear-gradient(135deg, #c79a3a 0%, #1d1408 100%)' }}
+          >
+            <svg
+              width="26"
+              height="26"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path d="M14 13.5h2.5l1-4H14V7c0-1.03 0-2 2-2h1.5V1.64c-.33-.04-1.55-.14-2.84-.14-2.69 0-4.66 1.64-4.66 4.66V9.5H7v4h3v8.5h4z" />
+            </svg>
+          </a>
+        </div>
       </div>
     </div>
   )
