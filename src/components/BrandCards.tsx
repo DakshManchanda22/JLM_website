@@ -19,40 +19,23 @@ export type Brand = {
   lqip?: string
 }
 
-const DEFAULT_BRANDS: Brand[] = [
-  {
-    name: 'Morisons Baby Dreams',
-    shortName: 'Baby Dreams',
-    tagline: 'Care your baby deserves.',
-    href: '/brands/morisons-baby-dreams',
-    image: '/morisons-baby-dreams-homepage.jpg',
-  },
-  {
-    name: 'Emoform',
-    shortName: 'Emoform',
-    tagline: 'Dental health, perfected.',
-    href: '/emoform',
-    image: '/emoform-homepage.jpg',
-  },
-  {
-    name: 'Bigen',
-    shortName: 'Bigen',
-    tagline: 'Colour with confidence.',
-    href: '/bigen',
-    image: '/bigen-homepage.jpg',
-  },
-]
-
 const EASE = [0.16, 1, 0.3, 1] as const
 
 function BrandCard({
   brand,
+  index,
   isActive,
+  viewportMode,
+  setRef,
   onEnter,
   onLeave,
 }: {
   brand: Brand
+  index: number
   isActive: boolean
+  /** Touch devices have no hover — the card is activated when scrolled to centre. */
+  viewportMode: boolean
+  setRef: (el: HTMLDivElement | null) => void
   onEnter: () => void
   onLeave: () => void
 }) {
@@ -119,6 +102,8 @@ function BrandCard({
 
   return (
     <motion.div
+      ref={setRef}
+      data-index={index}
       style={{ flex: '1 1 0', minWidth: 0 }}
       animate={{ flexGrow: isActive ? 2.5 : 1 }}
       transition={{ duration: 0.6, ease: EASE }}
@@ -126,9 +111,9 @@ function BrandCard({
       <Link
         ref={cardRef}
         href={brand.href}
-        onMouseEnter={handleEnter}
-        onMouseLeave={onLeave}
-        onMouseMove={handleMouseMove}
+        onMouseEnter={viewportMode ? undefined : handleEnter}
+        onMouseLeave={viewportMode ? undefined : onLeave}
+        onMouseMove={viewportMode ? undefined : handleMouseMove}
         className="relative block h-[60vh] md:h-[72vh] overflow-hidden rounded-2xl cursor-pointer group"
       >
         {/* Image */}
@@ -170,8 +155,8 @@ function BrandCard({
           )}
         </AnimatePresence>
 
-        {/* Cursor-following label — only while active */}
-        {isActive && (
+        {/* Cursor-following label — only while active on hover (desktop) */}
+        {isActive && !viewportMode && (
           <motion.div
             ref={labelRef}
             className="absolute top-0 left-0 pointer-events-none z-10"
@@ -216,8 +201,44 @@ function BrandCard({
 }
 
 export default function BrandCards({ brands }: { brands?: Brand[] }) {
-  const BRANDS = brands && brands.length > 0 ? brands : DEFAULT_BRANDS
+  const BRANDS = brands ?? []
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
+  const [viewportMode, setViewportMode] = useState(false)
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([])
+
+  /* Touch devices have no hover. Detect them and switch to viewport mode, where
+     the card centred on screen is the active ("lit up") one. */
+  useEffect(() => {
+    const mq = window.matchMedia('(hover: none)')
+    const apply = () => setViewportMode(mq.matches)
+    apply()
+    mq.addEventListener('change', apply)
+    return () => mq.removeEventListener('change', apply)
+  }, [])
+
+  /* In viewport mode, light up whichever card crosses the centre of the screen. */
+  useEffect(() => {
+    if (!viewportMode) {
+      setActiveIndex(null)
+      return
+    }
+    const els = cardRefs.current.filter(Boolean) as HTMLDivElement[]
+    if (!els.length) return
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const idx = Number((entry.target as HTMLElement).dataset.index)
+            if (!Number.isNaN(idx)) setActiveIndex(idx)
+          }
+        })
+      },
+      // Fire when a card's centre band crosses the viewport centre.
+      { rootMargin: '-45% 0px -45% 0px', threshold: 0 }
+    )
+    els.forEach((el) => observer.observe(el))
+    return () => observer.disconnect()
+  }, [viewportMode, BRANDS.length])
 
   return (
     <section className="bg-[#111111] py-20 md:py-28 px-6 md:px-10">
@@ -238,7 +259,12 @@ export default function BrandCards({ brands }: { brands?: Brand[] }) {
           <BrandCard
             key={brand.name}
             brand={brand}
+            index={i}
             isActive={activeIndex === i}
+            viewportMode={viewportMode}
+            setRef={(el) => {
+              cardRefs.current[i] = el
+            }}
             onEnter={() => setActiveIndex(i)}
             onLeave={() => setActiveIndex(null)}
           />

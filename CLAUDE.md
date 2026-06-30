@@ -151,6 +151,37 @@ The site must load fast — target Lighthouse score 95+.
 
 ---
 
+## Cross-Browser, Native Feel & Speed (Non-Negotiable)
+
+The site must feel as seamless and polished as apple.com on **every major browser and device** — Chrome, Safari, Firefox, Edge — on **desktop and mobile (iOS + Android)**. No browser is a second-class citizen.
+
+### Native scroll & browser chrome
+- **Let the document (window) scroll natively.** Do NOT trap the whole page inside a `position: fixed` / `height: 100vh` / `overflow: hidden` inner scroll container. That pattern breaks native UX: on mobile Safari/Chrome the address bar never collapses, scroll momentum feels wrong, and `Cmd/Ctrl+F`, anchor links and the scroll-restoration all misbehave. Native window scrolling is what makes Apple's site feel right.
+- GSAP `ScrollTrigger` and `IntersectionObserver` should default to the **window/viewport** as the scroller/root — not a custom element. Only pin/transform individual sections, never the whole page.
+- Set a light browser `theme-color` (via the `viewport` export) so the iOS/Android browser chrome blends with the page instead of showing a heavy dark band.
+- Use `100dvh`/`100svh` (dynamic viewport units), not `100vh`, for full-height sections so they don't jump when the mobile toolbar shows/hides.
+- Respect safe areas: use `env(safe-area-inset-*)` for fixed top/bottom UI on notched phones.
+
+### Responsiveness
+- Every layout must work from ~320px up to large desktop. Test at mobile, tablet, and desktop breakpoints.
+- Support both **touch and hover** inputs — never rely on hover alone for essential interactions (use `(hover: none)` / viewport-based fallbacks on touch).
+- All controls (pills, buttons, CTAs) must hug their text and stay readable when the content length changes — no clipped or overflowing text.
+
+### Speed (Core Web Vitals)
+- Targets: **LCP < 2.5s, CLS < 0.1, INP < 200ms**, Lighthouse mobile 95+.
+- Above-the-fold hero media: `priority`, correctly sized, and served pre-optimized (prefer Sanity's CDN directly for hero images to avoid a double-optimization hop).
+- Keep client JS lean: Server Components by default, `next/dynamic` for heavy/animation code, no blocking third-party scripts.
+- Reserve space for media (width/height or aspect-ratio) to avoid layout shift.
+
+### Caching (proper, layered)
+- **Pages:** ISR via `export const revalidate = <seconds>` so Sanity edits surface without redeploys while pages stay CDN-cached and fast. Use on-demand revalidation (webhook from Sanity) for instant updates where needed.
+- **Static assets** (`/_next/static`, fonts): immutable, hashed filenames cached for a year by Vercel automatically — never hand-cache-bust.
+- **Images:** Next/Image + Sanity CDN handle format negotiation, resizing and long-lived cache headers. Don't disable optimization except for deliberately pre-optimized hero images.
+- **Sanity data:** fetched server-side; rely on ISR + Sanity's API CDN. Never fetch Sanity client-side.
+- **Fonts:** `next/font` self-hosts and caches — no external CDN font links.
+
+---
+
 ## Redirects
 
 - Migration redirects (old URL → new URL) go in `next.config.js` under `redirects`

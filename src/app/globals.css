@@ -10,8 +10,27 @@
   padding: 0;
 }
 
+/* Navbar height — thinner on mobile, taller on desktop. Used by both the
+   navbar itself and the page top padding so they always line up. */
+:root {
+  --nav-h: 48px;
+}
+@media (min-width: 768px) {
+  :root {
+    --nav-h: 56px;
+  }
+}
+
+/* Native window scrolling (so mobile browser toolbars collapse like Apple).
+   Anchor jumps land below the fixed navbar via scroll-padding. */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--nav-h) + 8px);
+}
+
 /* Dark page bg so the rounded corner cutouts of <main> reveal the
-   #111111 colour — same as the navbar — creating the "card" silhouette. */
+   #111111 colour — same as the navbar — creating the "card" silhouette.
+   The fixed navbar sits over the body's top padding. */
 html,
 body {
   background-color: #111111;
@@ -19,12 +38,18 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+body {
+  padding-top: var(--nav-h);
+}
 
-#page-scroller {
+/* Hide the main scrollbar for the clean full-bleed look (content still scrolls). */
+html,
+body {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
-#page-scroller::-webkit-scrollbar {
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
   width: 0;
   height: 0;
   display: none;

@@ -219,7 +219,6 @@ const STEPS: Step[] = [
   {
     tag: 'Sensitivity & Gums',
     color: '#E2604A',
-    image: '/gum.png',
     title: 'Daily relief from sensitivity & gum problems, with a triple-salt formula',
     underline: 'triple-salt formula',
     sub: 'Containing sodium chloride, potassium nitrate & calcium carbonate.',
@@ -251,14 +250,12 @@ const STEPS: Step[] = [
   {
     tag: 'Enamel Protection',
     color: '#2FA36B',
-    image: '/brushing-teeth.webp',
     title: 'Specialized low-abrasive formula to protect enamel',
     rda: true,
   },
   {
     tag: 'Tooth & Gum Care',
     color: '#2F6FE0',
-    image: '/dentist.png',
     title: 'Doctor-developed toothpaste for tooth & gum care',
     features: true,
   },

@@ -1043,10 +1043,8 @@ function TogetherBlock() {
 export default function LifeAtJlmClient({ cms = {} }: { cms?: LifeCms }) {
   const [introDone, setIntroDone] = useState(false)
 
-  /* keep page-scroller behaviour from layout (smooth scroll for anchors) */
+  /* smooth scroll for in-page anchors, offset for the fixed navbar */
   useEffect(() => {
-    const root = document.getElementById('page-scroller')
-    if (!root) return
     const onClick = (e: MouseEvent) => {
       const t = e.target as HTMLElement
       const a = t.closest('a[href^="#"]') as HTMLAnchorElement | null
@@ -1056,29 +1054,27 @@ export default function LifeAtJlmClient({ cms = {} }: { cms?: LifeCms }) {
       const el = document.getElementById(id)
       if (!el) return
       e.preventDefault()
-      const top = el.getBoundingClientRect().top + root.scrollTop - 32
-      root.scrollTo({ top, behavior: 'smooth' })
+      const navH =
+        parseInt(
+          getComputedStyle(document.documentElement).getPropertyValue('--nav-h')
+        ) || 56
+      const top = el.getBoundingClientRect().top + window.scrollY - navH - 8
+      window.scrollTo({ top, behavior: 'smooth' })
     }
-    root.addEventListener('click', onClick)
-    return () => root.removeEventListener('click', onClick)
+    document.addEventListener('click', onClick)
+    return () => document.removeEventListener('click', onClick)
   }, [])
 
-  /* lock scroll while the intro curtain is playing.
-     IMPORTANT: only touch overflow-y. Clearing the `overflow` shorthand
-     wipes the page-scroller's overflow-x:hidden too, which makes
-     `border-radius` stop clipping children — that's what was killing
-     the navbar's rounded "cap" curve after the curtain lifted. */
+  /* lock the page while the intro curtain is playing */
   useEffect(() => {
-    const root = document.getElementById('page-scroller')
-    if (!root) return
     if (introDone) {
-      root.style.overflowY = 'auto'
+      document.body.style.overflow = ''
     } else {
-      root.style.overflowY = 'hidden'
-      root.scrollTop = 0
+      document.body.style.overflow = 'hidden'
+      window.scrollTo(0, 0)
     }
     return () => {
-      root.style.overflowY = 'auto'
+      document.body.style.overflow = ''
     }
   }, [introDone])
 

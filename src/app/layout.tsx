@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import Navbar from '@/components/Navbar'
 import './globals.css'
 
@@ -7,7 +7,11 @@ export const metadata: Metadata = {
   description: 'Building goodness for every Indian family since 1920.',
 }
 
-const NAV_HEIGHT = 56
+// Dark browser chrome (status bar / address bar tint) on iOS + Android, matching
+// the navbar so the browser UI blends into one seamless dark header.
+export const viewport: Viewport = {
+  themeColor: '#111111',
+}
 
 export default function RootLayout({
   children,
@@ -16,25 +20,21 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body style={{ overflow: 'hidden', height: '100vh' }}>
+      <body>
         <Navbar />
 
-        {/* Single fixed wrapper — the rounded "card" the entire page lives in.
-            All sections (hero, quote, etc.) scroll INSIDE this card, so the
-            top corners stay permanently anchored just below the navbar. */}
+        {/* The rounded white "card" the page lives in. It flows in the normal
+            document so the WINDOW scrolls natively (mobile toolbars collapse like
+            Apple). `overflow: clip` clips children to the rounded corners without
+            making this a scroll container — so position:sticky / GSAP pins inside
+            still resolve against the viewport. */}
         <main
-          id="page-scroller"
           style={{
-            position: 'fixed',
-            top: `${NAV_HEIGHT}px`,
-            left: 0,
-            right: 0,
-            bottom: 0,
+            minHeight: 'calc(100dvh - var(--nav-h))',
             backgroundColor: '#FFFFFF',
             borderTopLeftRadius: '24px',
             borderTopRightRadius: '24px',
-            overflowX: 'hidden',
-            overflowY: 'auto',
+            overflow: 'clip',
           }}
         >
           {children}

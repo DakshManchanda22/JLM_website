@@ -30,7 +30,7 @@ export default function EmoformClient({ cms }: { cms?: EmoformView }) {
   const hero1 = cms?.heroLine1 ?? 'Sensitivity ka'
   const hero2 = cms?.heroLine2 ?? 'अंत,   तुरंत'
   const flag = cms?.heroFlag ?? 'Swiss Formula'
-  const heroImg = cms?.heroImage ?? '/toothpaste_herov2.png'
+  const heroImg = cms?.heroImage
 
   return (
     <>
@@ -97,18 +97,20 @@ export default function EmoformClient({ cms }: { cms?: EmoformView }) {
             transition={{ duration: 1.1, ease: EASE, delay: 0.15 }}
             className="relative flex justify-center"
           >
-            <Image
-              src={heroImg}
-              alt="Emoform sensitivity toothpaste"
-              width={1500}
-              height={1739}
-              priority
-              sizes="(max-width: 1024px) 86vw, 40vw"
-              className="w-[86vw] max-w-[420px] h-auto -translate-x-[8%] object-contain drop-shadow-2xl lg:max-w-none lg:w-[40vw]"
-              {...(cms?.heroImageLqip
-                ? { placeholder: 'blur' as const, blurDataURL: cms.heroImageLqip }
-                : {})}
-            />
+            {heroImg && (
+              <Image
+                src={heroImg}
+                alt="Emoform sensitivity toothpaste"
+                width={1500}
+                height={1739}
+                priority
+                sizes="(max-width: 1024px) 86vw, 40vw"
+                className="w-[86vw] max-w-[420px] h-auto -translate-x-[8%] object-contain drop-shadow-2xl lg:max-w-none lg:w-[40vw]"
+                {...(cms?.heroImageLqip
+                  ? { placeholder: 'blur' as const, blurDataURL: cms.heroImageLqip }
+                  : {})}
+              />
+            )}
           </motion.div>
         </div>
       </section>

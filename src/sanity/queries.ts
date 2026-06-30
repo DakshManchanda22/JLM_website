@@ -105,6 +105,16 @@ export type StatData = {
   body: string
 }
 
+export type HomeFeatureData = {
+  eyebrow?: string
+  headline: string
+  body?: string
+  ctaLabel: string
+  href: string
+  image: any
+  imageRight?: boolean
+}
+
 export type HeroVideo = {
   videoUrl?: string
   poster?: any
@@ -122,7 +132,10 @@ export type Homepage = {
     attribution?: string
   }
   brands?: BrandCardData[]
+  statsHeading?: string
+  statsNote?: string
   stats?: StatData[]
+  features?: HomeFeatureData[]
 }
 
 export const homepageQuery = groq`*[_type == "homepage"][0]{
@@ -150,10 +163,21 @@ export const homepageQuery = groq`*[_type == "homepage"][0]{
     href,
     image{ ${imageWithLqip} },
   },
+  statsHeading,
+  statsNote,
   stats[]{
     number,
     label,
     body,
+  },
+  features[]{
+    eyebrow,
+    headline,
+    body,
+    ctaLabel,
+    href,
+    imageRight,
+    image{ ${imageWithLqip} },
   },
 }`
 
@@ -411,6 +435,9 @@ export type Bigen = {
   rangeEyebrow?: string
   rangeHeadline?: any[]
   products?: BigenProduct[]
+  // social
+  instagramUrl?: string
+  facebookUrl?: string
 }
 
 export const bigenQuery = groq`*[_type == "bigen"][0]{
@@ -429,6 +456,8 @@ export const bigenQuery = groq`*[_type == "bigen"][0]{
   reels[]{ url, name },
   rangeEyebrow, rangeHeadline,
   products[]{ name, desc, href, image{ ${imageWithLqip} } },
+  instagramUrl,
+  facebookUrl,
 }`
 
 export async function fetchBigen(): Promise<Bigen | null> {

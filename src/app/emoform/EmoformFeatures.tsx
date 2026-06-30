@@ -82,7 +82,7 @@ export default function EmoformFeatures({ cms }: { cms?: EmoformView }) {
   const reduce = useReducedMotion()
   const titleTop = cms?.featuresTitleTop ?? '5 in 1'
   const titleBottom = cms?.featuresTitleBottom ?? 'Unique Action'
-  const brushImg = cms?.featuresImage ?? '/brush.png'
+  const brushImg = cms?.featuresImage
 
   return (
     <section className={`${inter.className} relative overflow-hidden bg-white`}>
@@ -170,17 +170,19 @@ export default function EmoformFeatures({ cms }: { cms?: EmoformView }) {
         transition={{ duration: 0.9, ease: EASE }}
         className="absolute inset-y-0 right-0 z-0 flex items-stretch justify-end"
       >
-        <Image
-          src={brushImg}
-          alt="Emoform toothbrush with toothpaste"
-          width={592}
-          height={1080}
-          sizes="(max-width: 1024px) 50vw, 35vw"
-          className="h-full w-auto max-w-none object-contain object-bottom drop-shadow-[0_18px_40px_rgba(19,48,110,0.18)]"
-          {...(cms?.featuresImageLqip
-            ? { placeholder: 'blur' as const, blurDataURL: cms.featuresImageLqip }
-            : {})}
-        />
+        {brushImg && (
+          <Image
+            src={brushImg}
+            alt="Emoform toothbrush with toothpaste"
+            width={592}
+            height={1080}
+            sizes="(max-width: 1024px) 50vw, 35vw"
+            className="h-full w-auto max-w-none object-contain object-bottom drop-shadow-[0_18px_40px_rgba(19,48,110,0.18)]"
+            {...(cms?.featuresImageLqip
+              ? { placeholder: 'blur' as const, blurDataURL: cms.featuresImageLqip }
+              : {})}
+          />
+        )}
       </motion.div>
     </section>
   )
