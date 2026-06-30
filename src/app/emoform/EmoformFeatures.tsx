@@ -121,7 +121,7 @@ export default function EmoformFeatures({ cms }: { cms?: EmoformView }) {
               <motion.li
                 key={b.t2}
                 variants={reduce ? undefined : item}
-                className="flex items-center gap-4 md:gap-5"
+                className="flex w-fit items-center gap-4 rounded-full border border-[rgba(19,48,110,0.12)] bg-white/85 p-1.5 pr-6 shadow-[0_10px_30px_-8px_rgba(19,48,110,0.18)] backdrop-blur-md md:gap-5 md:pr-8"
               >
                 <span
                   className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border md:h-16 md:w-16"
