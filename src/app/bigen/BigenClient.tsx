@@ -253,7 +253,7 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
         />
 
         <div className="relative mx-auto max-w-[1400px] px-6 md:px-12 lg:px-16">
-          <div className="grid lg:grid-cols-2 items-center gap-10 min-h-[48vh] lg:min-h-[54vh] py-8 lg:py-10">
+          <div className="grid lg:grid-cols-2 items-center gap-10 min-h-[48vh] lg:min-h-[54vh] pt-8 pb-[7vh] lg:py-10">
             {/* ── LEFT: copy ── */}
             <div className="relative z-10 max-w-xl">
               {/* Bigen logo */}
@@ -321,7 +321,7 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.9, ease: EASE, delay: 0.1 }}
-              className="relative h-[44vh] sm:h-[52vh] lg:h-[72vh] block self-end -mb-8 lg:-mb-10"
+              className="relative h-[52vh] sm:h-[56vh] lg:h-[72vh] block self-end lg:-mb-10"
             >
               {/* Big gold JAPAN'S NO.1 wordmark behind the photo */}
               <div
@@ -332,7 +332,7 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
                 <span
                   className="font-extrabold uppercase leading-[0.95] tracking-tight bg-clip-text text-transparent"
                   style={{
-                    fontSize: 'clamp(2.4rem, 6.5vw, 5rem)',
+                    fontSize: 'clamp(2.4rem, 7.6vw, 5rem)',
                     backgroundImage:
                       'linear-gradient(180deg, #fff6cf 0%, #f7e489 22%, #e6c25a 46%, #cf9f37 64%, #a9781f 84%, #f0d885 100%)',
                   }}
@@ -342,7 +342,7 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
                 <span
                   className="font-extrabold uppercase leading-[0.8] tracking-[-0.02em] bg-clip-text text-transparent"
                   style={{
-                    fontSize: 'clamp(6rem, 17vw, 12.5rem)',
+                    fontSize: 'clamp(6rem, 20vw, 12.5rem)',
                     backgroundImage:
                       'linear-gradient(180deg, #fff6cf 0%, #f7e489 22%, #e6c25a 46%, #cf9f37 64%, #a9781f 84%, #f0d885 100%)',
                     filter: 'drop-shadow(0 6px 30px rgba(240,200,90,0.35))',

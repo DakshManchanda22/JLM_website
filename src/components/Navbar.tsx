@@ -261,7 +261,7 @@ export default function Navbar() {
               </button>
             </div>
 
-            <nav className="flex-1 flex flex-col items-center justify-center gap-6 px-8">
+            <nav className="flex-1 flex flex-col items-center justify-center gap-7 px-8">
               {ALL_MOBILE.map((label, i) => {
                 const subs = DROPDOWNS[label]
                 const isExpanded = mobileExpanded === label
@@ -281,7 +281,7 @@ export default function Navbar() {
                             p === label ? null : label
                           )
                         }
-                        className="text-white text-2xl font-light tracking-wide"
+                        className="text-white text-[clamp(2rem,8vw,2.75rem)] font-light tracking-wide leading-tight py-1"
                       >
                         {label}
                       </button>
@@ -289,7 +289,7 @@ export default function Navbar() {
                       <Link
                         href="/contact-us"
                         onClick={() => setMobileOpen(false)}
-                        className="inline-block rounded-full border border-white bg-transparent text-white px-5 py-2 text-base font-normal"
+                        className="inline-block rounded-full border border-white bg-transparent text-white px-6 py-2.5 text-lg font-normal"
                       >
                         {label}
                       </Link>
@@ -297,7 +297,7 @@ export default function Navbar() {
                       <Link
                         href={`/${slug(label)}`}
                         onClick={() => setMobileOpen(false)}
-                        className="text-white text-2xl font-light tracking-wide"
+                        className="text-white text-[clamp(2rem,8vw,2.75rem)] font-light tracking-wide leading-tight py-1"
                       >
                         {label}
                       </Link>
@@ -310,14 +310,14 @@ export default function Navbar() {
                           animate={{ opacity: 1, height: 'auto' }}
                           exit={{ opacity: 0, height: 0 }}
                           transition={{ duration: 0.3, ease: EASE }}
-                          className="overflow-hidden mt-4 flex flex-col items-center gap-3"
+                          className="overflow-hidden mt-4 flex flex-col items-center gap-4"
                         >
                           {subs.map((sub) => (
                             <Link
                               key={sub}
                               href={`/${slug(sub)}`}
                               onClick={() => setMobileOpen(false)}
-                              className="text-white/70 text-sm tracking-wide"
+                              className="text-white/70 text-lg tracking-wide"
                             >
                               {sub}
                             </Link>
