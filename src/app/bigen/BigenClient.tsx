@@ -321,7 +321,7 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.9, ease: EASE, delay: 0.1 }}
-              className="relative h-[58vh] lg:h-[72vh] hidden lg:block self-end -mb-8 lg:-mb-10"
+              className="relative h-[44vh] sm:h-[52vh] lg:h-[72vh] block self-end -mb-8 lg:-mb-10"
             >
               {/* Big gold JAPAN'S NO.1 wordmark behind the photo */}
               <div
@@ -366,7 +366,7 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
                     // /_next/image hop — the hero is above the fold and this keeps
                     // the blur-up brief on a cold cache.
                     unoptimized
-                    sizes="(max-width: 1024px) 0px, 55vw"
+                    sizes="(max-width: 1024px) 100vw, 55vw"
                     className="object-contain object-bottom"
                   />
                 )}
