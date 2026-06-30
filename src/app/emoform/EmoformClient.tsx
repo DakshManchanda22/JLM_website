@@ -36,7 +36,7 @@ export default function EmoformClient({ cms }: { cms?: EmoformView }) {
     <>
       <section
         className={`${inter.variable} relative w-full overflow-hidden`}
-        style={{ background: BG_GRADIENT, minHeight: 'calc(100vh - 56px)' }}
+        style={{ background: BG_GRADIENT, minHeight: 'calc(100svh - 56px)' }}
       >
         {/* Headline + product are BOTH width-driven (vw) so they fill the
             width and stay in proportion to each other on any resize. */}
