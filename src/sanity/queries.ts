@@ -560,3 +560,87 @@ export async function fetchEmoform(): Promise<EmoformView | null> {
     ctaButtonHref: raw.ctaButtonHref,
   }
 }
+
+/* ─────────────────── Morisons Baby Dreams ─────────────────── */
+
+export type BabyBanner = { image?: string; lqip?: string; alt?: string; href?: string }
+
+export type BabyTint = 'mint' | 'blush' | 'butter' | 'lilac' | 'sky'
+
+export type BabyCategory = {
+  title?: string
+  blurb?: string
+  image?: string
+  lqip?: string
+  tint?: BabyTint
+  href?: string
+}
+
+export type BabyDreams = {
+  bannerInterval?: number
+  banners?: BabyBanner[]
+  productsHeadline?: string
+  productsIntro?: string
+  categories?: BabyCategory[]
+  videoHeadline?: string
+  videoUrl?: string
+  videoPoster?: string
+  rangeHeadline?: string
+  rangeIntro?: string
+  blogsHeadline?: string
+  blogsIntro?: string
+  instagramUrl?: string
+  facebookUrl?: string
+  youtubeUrl?: string
+}
+
+export const babyDreamsQuery = groq`*[_type == "babyDreams"][0]{
+  bannerInterval,
+  banners[]{ image{ ${imageWithLqip} }, alt, href },
+  productsHeadline, productsIntro,
+  categories[]{ title, blurb, image{ ${imageWithLqip} }, tint, href },
+  videoHeadline, videoUrl,
+  videoPoster{ ${imageWithLqip} },
+  rangeHeadline, rangeIntro,
+  blogsHeadline, blogsIntro,
+  instagramUrl, facebookUrl, youtubeUrl,
+}`
+
+export async function fetchBabyDreams(): Promise<BabyDreams | null> {
+  if (!client) return null
+  const raw: any = await client.fetch(babyDreamsQuery)
+  if (!raw) return null
+
+  const poster = resolveImage(raw.videoPoster, 1600)
+
+  return {
+    bannerInterval: raw.bannerInterval,
+    banners: (raw.banners || []).map((b: any) => {
+      const r = resolveImage(b.image, 2400)
+      return { image: r?.url, lqip: r?.lqip, alt: b.alt, href: b.href }
+    }),
+    productsHeadline: raw.productsHeadline,
+    productsIntro: raw.productsIntro,
+    categories: (raw.categories || []).map((c: any) => {
+      const r = resolveImage(c.image, 1000)
+      return {
+        title: c.title,
+        blurb: c.blurb,
+        image: r?.url,
+        lqip: r?.lqip,
+        tint: c.tint,
+        href: c.href,
+      }
+    }),
+    videoHeadline: raw.videoHeadline,
+    videoUrl: raw.videoUrl,
+    videoPoster: poster?.url,
+    rangeHeadline: raw.rangeHeadline,
+    rangeIntro: raw.rangeIntro,
+    blogsHeadline: raw.blogsHeadline,
+    blogsIntro: raw.blogsIntro,
+    instagramUrl: raw.instagramUrl,
+    facebookUrl: raw.facebookUrl,
+    youtubeUrl: raw.youtubeUrl,
+  }
+}
