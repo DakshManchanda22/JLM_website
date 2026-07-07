@@ -1,6 +1,7 @@
 import type { SchemaTypeDefinition } from 'sanity'
 
 import author from './author'
+import babyDreams from './babyDreams'
 import bigen from './bigen'
 import blockContent from './blockContent'
 import emoform from './emoform'
@@ -20,6 +21,7 @@ export const schemaTypes: SchemaTypeDefinition[] = [
   leader,
   lifeAtJlm,
   ourStory,
+  babyDreams,
   bigen,
   emoform,
 ]

@@ -84,6 +84,15 @@ export default defineConfig({
                   .title('Our Brands')
                   .items([
                     S.listItem()
+                      .title('Morisons Baby Dreams')
+                      .id('babyDreams')
+                      .child(
+                        S.editor()
+                          .id('babyDreams')
+                          .schemaType('babyDreams')
+                          .documentId('babyDreams'),
+                      ),
+                    S.listItem()
                       .title('Bigen')
                       .id('bigen')
                       .child(
