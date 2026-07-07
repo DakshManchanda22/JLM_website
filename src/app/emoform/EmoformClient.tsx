@@ -49,6 +49,16 @@ export default function EmoformClient({ cms }: { cms?: EmoformView }) {
     ? hero2.replace(/\s+/g, ' ').trim()
     : hero2
 
+  /* Hold the slide-up until the full toothpaste image has decoded, so the
+     tube is always sharp as it rises — never the blurry LQIP placeholder.
+     A short fallback timer guarantees it still appears if onLoad is missed. */
+  const [heroLoaded, setHeroLoaded] = useState(false)
+  useEffect(() => {
+    if (!heroImg) return
+    const t = setTimeout(() => setHeroLoaded(true), 1500)
+    return () => clearTimeout(t)
+  }, [heroImg])
+
   return (
     <>
       <section
@@ -112,7 +122,7 @@ export default function EmoformClient({ cms }: { cms?: EmoformView }) {
         <div className="absolute inset-0 z-10 flex items-end justify-center">
           <motion.div
             initial={{ y: '100%' }}
-            animate={{ y: '0%' }}
+            animate={{ y: heroLoaded ? '0%' : '100%' }}
             transition={{ duration: 1.1, ease: EASE, delay: 0.15 }}
             className="relative flex justify-center"
           >
@@ -123,6 +133,7 @@ export default function EmoformClient({ cms }: { cms?: EmoformView }) {
                 width={1500}
                 height={1739}
                 priority
+                onLoad={() => setHeroLoaded(true)}
                 sizes="(max-width: 1024px) 86vw, 40vw"
                 className="w-[86vw] max-w-[420px] h-auto -translate-x-[8%] object-contain drop-shadow-2xl lg:max-w-none lg:w-[40vw]"
                 {...(cms?.heroImageLqip
