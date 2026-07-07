@@ -644,3 +644,99 @@ export async function fetchBabyDreams(): Promise<BabyDreams | null> {
     youtubeUrl: raw.youtubeUrl,
   }
 }
+
+/* ─────────────────────────── Philanthropy ─────────────────────────── */
+
+export type PhilanthropyStage = {
+  title?: string
+  lead?: string
+  body?: string
+  /** Candidate images — the client picks one at random per visit. */
+  images?: { url: string; lqip?: string }[]
+}
+
+export type PhilanthropyView = {
+  heroLine1?: string
+  heroLine2?: string
+  heroImage?: string
+  heroImageLqip?: string
+  differenceHeadingLine1?: string
+  differenceHeadingLine2?: string
+  differenceBody?: string
+  differenceCtaLabel?: string
+  differenceCtaHref?: string
+  differenceImage?: string
+  differenceImageLqip?: string
+  programsHeading?: string
+  programsIntro?: string
+  stages?: PhilanthropyStage[]
+  purposeEyebrow?: string
+  purposeHeading?: string
+  purposeBackgroundWord?: string
+  purposeImages?: { url: string; lqip?: string }[]
+  beliefEyebrow?: string
+  beliefText?: string
+}
+
+export const philanthropyQuery = groq`*[_type == "philanthropy"][0]{
+  heroLine1, heroLine2,
+  heroImage{ ${imageWithLqip} },
+  differenceHeadingLine1, differenceHeadingLine2, differenceBody,
+  differenceCtaLabel, differenceCtaHref,
+  differenceImage{ ${imageWithLqip} },
+  programsHeading, programsIntro,
+  stages[]{
+    title, lead, body,
+    images[]{ ${imageWithLqip} },
+  },
+  purposeEyebrow, purposeHeading, purposeBackgroundWord,
+  purposeImages[]{ ${imageWithLqip} },
+  beliefEyebrow, beliefText,
+}`
+
+export async function fetchPhilanthropy(): Promise<PhilanthropyView | null> {
+  if (!client) return null
+  const raw: any = await client.fetch(philanthropyQuery)
+  if (!raw) return null
+
+  const hero = resolveImage(raw.heroImage, 2000)
+  const diff = resolveImage(raw.differenceImage, 1400)
+
+  return {
+    heroLine1: raw.heroLine1,
+    heroLine2: raw.heroLine2,
+    heroImage: hero?.url,
+    heroImageLqip: hero?.lqip,
+    differenceHeadingLine1: raw.differenceHeadingLine1,
+    differenceHeadingLine2: raw.differenceHeadingLine2,
+    differenceBody: raw.differenceBody,
+    differenceCtaLabel: raw.differenceCtaLabel,
+    differenceCtaHref: raw.differenceCtaHref,
+    differenceImage: diff?.url,
+    differenceImageLqip: diff?.lqip,
+    programsHeading: raw.programsHeading,
+    programsIntro: raw.programsIntro,
+    stages: (raw.stages || []).map((s: any) => ({
+      title: s.title,
+      lead: s.lead,
+      body: s.body,
+      images: (s.images || [])
+        .map((im: any) => {
+          const r = resolveImage(im, 1200)
+          return r ? { url: r.url, lqip: r.lqip } : null
+        })
+        .filter(Boolean),
+    })),
+    purposeEyebrow: raw.purposeEyebrow,
+    purposeHeading: raw.purposeHeading,
+    purposeBackgroundWord: raw.purposeBackgroundWord,
+    purposeImages: (raw.purposeImages || [])
+      .map((im: any) => {
+        const r = resolveImage(im, 1400)
+        return r ? { url: r.url, lqip: r.lqip } : null
+      })
+      .filter(Boolean),
+    beliefEyebrow: raw.beliefEyebrow,
+    beliefText: raw.beliefText,
+  }
+}
