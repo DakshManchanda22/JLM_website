@@ -1,12 +1,12 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { motion, useReducedMotion } from 'framer-motion'
-import { Anton, Caveat_Brush, Cormorant_Garamond, DM_Sans } from 'next/font/google'
+import { Anton, Caveat_Brush, DM_Sans } from 'next/font/google'
 import Footer from '@/components/Footer'
-import type { PhilanthropyView } from '@/sanity/queries'
+import type { PhilanthropyStatCard, PhilanthropyView } from '@/sanity/queries'
 
 // Handwritten hero quote — the "Now i've got the support" brush style.
 const caveatBrush = Caveat_Brush({
@@ -20,13 +20,6 @@ const anton = Anton({
   subsets: ['latin'],
   weight: ['400'],
   variable: '--font-anton',
-})
-
-const cormorant = Cormorant_Garamond({
-  subsets: ['latin'],
-  weight: ['300', '400', '500'],
-  style: ['normal', 'italic'],
-  variable: '--font-cormorant',
 })
 
 const dmSans = DM_Sans({
@@ -71,6 +64,58 @@ const DEFAULT_BELIEF_TEXT =
   'We believe sustainable growth goes beyond business. By nurturing our ' +
   'environment and empowering our communities, we strive to create a positive ' +
   'impact that lasts.'
+
+const DEFAULT_ESG_INTRO =
+  'At JL Morison, we care for the planet. By adopting eco-friendly practices, we ' +
+  'are taking small steps towards a sustainable future. Our initiatives include ' +
+  'paper, water and electricity saving through responsible use, tree plantation ' +
+  'across our factories — with papaya, mango and other saplings — along with the ' +
+  'use of solar energy and rainwater harvesting to help nurture a greener tomorrow.'
+
+const DEFAULT_STATS: PhilanthropyStatCard[] = [
+  {
+    title: 'Plastic Savings',
+    value: '15 MT +',
+    body: 'Increased plastic savings through technical packaging innovations — UV laminate, shrink packaging and pallet reuse.',
+    tag: 'Environment',
+    icon: 'recycle',
+  },
+  {
+    title: 'Green Energy',
+    value: '1,27,000',
+    body: 'Units of clean, green energy generated directly at the Waluj solar plant.',
+    tag: 'Environment',
+    icon: 'solarPanel',
+  },
+  {
+    title: 'Gender Parity',
+    value: '10%',
+    body: 'Women now represent 10% of the JLM team — 40 women, up from just 16 in 2020.',
+    tag: 'Social',
+    icon: 'people',
+  },
+  {
+    title: 'Community Impact',
+    value: '80+',
+    body: 'Volunteering programs completed across all regions and factories — supporting elders, children, and blood donation.',
+    tag: 'Social',
+    icon: 'community',
+  },
+  {
+    title: 'Tree Plantations',
+    value: '1000+',
+    body: 'Trees planted across all our factories.',
+    tag: 'Environment',
+    icon: 'leaf',
+  },
+  {
+    title: 'Water Saving',
+    value: '1,17,000L',
+    body: 'Water saved across factories through rainwater harvesting & spray jets. Water-saving nozzles installed across all JLM offices, leading to a 50% reduction compared to before.',
+    tag: 'Environment',
+    icon: 'water',
+  },
+]
 
 // The four stages of Project Kaamyaab. Title sits on the card; the lead + body
 // read below it, Apple-style.
@@ -174,11 +219,15 @@ export default function PhilanthropyClient({ cms }: { cms?: PhilanthropyView }) 
 
   const beliefEyebrow = cms?.beliefEyebrow ?? 'Our commitment'
   const beliefText = cms?.beliefText ?? DEFAULT_BELIEF_TEXT
+  const statCards =
+    cms?.statCards && cms.statCards.length > 0 ? cms.statCards : DEFAULT_STATS
+  const esgIntro = cms?.esgIntro ?? DEFAULT_ESG_INTRO
+  const esgGallery = cms?.esgGallery ?? []
 
   const heroLines = [heroLine1, heroLine2]
 
   return (
-    <div className={`${caveatBrush.variable} ${cormorant.variable} ${dmSans.variable}`}>
+    <div className={`${caveatBrush.variable} ${dmSans.variable}`}>
       {/* ============================= HERO ============================= */}
       <section
         className="relative w-full overflow-hidden"
@@ -290,14 +339,14 @@ export default function PhilanthropyClient({ cms }: { cms?: PhilanthropyView }) 
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-15%' }}
               transition={{ duration: 0.9, ease: EASE }}
-              className={cormorant.className}
+              className={anton.className}
               style={{
                 margin: 0,
                 color: INK,
-                fontWeight: 400,
-                fontSize: 'clamp(44px, 6vw, 88px)',
-                lineHeight: 0.98,
-                letterSpacing: '-0.01em',
+                fontSize: 'clamp(40px, 5.4vw, 82px)',
+                lineHeight: 0.95,
+                letterSpacing: '0.01em',
+                textTransform: 'uppercase',
               }}
             >
               {diffLine1}
@@ -442,19 +491,78 @@ export default function PhilanthropyClient({ cms }: { cms?: PhilanthropyView }) 
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-15%' }}
           transition={{ duration: 0.9, ease: EASE, delay: 0.08 }}
-          className={cormorant.className}
+          className={dmSans.className}
           style={{
             margin: '0.7em auto 0',
             maxWidth: 'min(1100px, 100%)',
             color: INK,
-            fontWeight: 400,
-            fontSize: 'clamp(28px, 4.4vw, 58px)',
-            lineHeight: 1.14,
+            fontWeight: 300,
+            fontSize: 'clamp(24px, 3.4vw, 44px)',
+            lineHeight: 1.3,
             letterSpacing: '-0.01em',
           }}
         >
           {beliefText}
         </motion.p>
+
+        {/* impact stat tiles — hover / scroll to reveal the description */}
+        {statCards.length > 0 && (
+          <div className="mx-auto mt-16 grid max-w-[1100px] grid-cols-1 gap-6 text-left sm:grid-cols-2 md:mt-20">
+            {statCards.map((s, i) => (
+              <StatCard key={i} card={s} index={i} reduce={!!reduce} />
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* ========================= ESG PARAGRAPH + GALLERY ========================= */}
+      <section className="bg-white px-[7vw] pb-24 md:pb-32">
+        <motion.p
+          initial={reduce ? false : { opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-15%' }}
+          transition={{ duration: 0.9, ease: EASE }}
+          className={dmSans.className}
+          style={{
+            margin: '0 auto',
+            maxWidth: '62ch',
+            textAlign: 'center',
+            color: INK,
+            fontWeight: 300,
+            fontSize: 'clamp(17px, 1.5vw, 22px)',
+            lineHeight: 1.7,
+          }}
+        >
+          {esgIntro}
+        </motion.p>
+
+        {esgGallery.length > 0 && (
+          <div className="mx-auto mt-14 max-w-[1200px] columns-2 gap-2 sm:columns-3 lg:columns-4 md:mt-16">
+            {esgGallery.map((img, i) => (
+              <motion.div
+                key={img.url}
+                initial={reduce ? false : { opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-8%' }}
+                transition={{ duration: 0.6, ease: EASE, delay: (i % 4) * 0.05 }}
+                className="mb-2 overflow-hidden rounded-xl"
+                style={{ breakInside: 'avoid' }}
+              >
+                <Image
+                  src={img.url}
+                  alt=""
+                  width={img.w}
+                  height={img.h}
+                  sizes="(max-width: 640px) 48vw, (max-width: 1024px) 32vw, 24vw"
+                  className="block h-auto w-full"
+                  {...(img.lqip
+                    ? { placeholder: 'blur' as const, blurDataURL: img.lqip }
+                    : {})}
+                />
+              </motion.div>
+            ))}
+          </div>
+        )}
       </section>
 
       <Footer />
@@ -553,12 +661,18 @@ function ProgramCard({
 }
 
 // Photo collage: three photos start stacked and, once the section scrolls into
-// view (just past the heading), spring out once into a scattered arrangement
-// modelled on the reference. A large faded word sits behind them.
+// view (just past the heading), spring out once into a scattered arrangement.
+// A rotating circular stamp sits over the top. Mobile uses a tighter spread so
+// nothing runs off-screen or covers the heading.
 const COLLAGE_SPREAD = [
   { x: '-46%', y: '-30%', rotate: -5, z: 20 }, // top-left
   { x: '48%', y: '-6%', rotate: 3, z: 10 }, // right
   { x: '-4%', y: '32%', rotate: -4, z: 30 }, // front, bottom-centre
+]
+const COLLAGE_SPREAD_MOBILE = [
+  { x: '-24%', y: '-40%', rotate: -5, z: 20 },
+  { x: '24%', y: '-12%', rotate: 5, z: 10 },
+  { x: '-2%', y: '34%', rotate: -4, z: 30 },
 ]
 
 function PurposeCollage({
@@ -571,6 +685,17 @@ function PurposeCollage({
   reduce: boolean
 }) {
   const shots = images.slice(0, 3)
+  const [compact, setCompact] = useState(false)
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 640px)')
+    const on = () => setCompact(mq.matches)
+    on()
+    mq.addEventListener('change', on)
+    return () => mq.removeEventListener('change', on)
+  }, [])
+
+  const spread = compact ? COLLAGE_SPREAD_MOBILE : COLLAGE_SPREAD
 
   return (
     <section className="overflow-hidden bg-white px-[7vw] pb-8 pt-10 md:pb-12 md:pt-14">
@@ -594,18 +719,18 @@ function PurposeCollage({
 
       {/* collage — one-shot spread animation triggered when it enters view */}
       <motion.div
-        className="relative mx-auto mt-6 aspect-[3/2] w-full max-w-[1040px] md:mt-10"
+        className="relative mx-auto mt-8 aspect-square w-full max-w-[1040px] sm:aspect-[3/2] md:mt-10"
         initial={reduce ? 'spread' : 'stack'}
         whileInView="spread"
         viewport={{ once: true, amount: 0.25 }}
       >
         {/* photos */}
         {shots.map((img, i) => {
-          const end = COLLAGE_SPREAD[i] ?? COLLAGE_SPREAD[0]
+          const end = spread[i] ?? spread[0]
           return (
             <div
               key={img.url}
-              className="absolute left-1/2 top-1/2 w-[76%] max-w-[620px] sm:w-[58%]"
+              className="absolute left-1/2 top-1/2 w-[66%] max-w-[620px] sm:w-[56%]"
               style={{ transform: 'translate(-50%, -50%)', zIndex: end.z }}
             >
               <motion.div
@@ -620,7 +745,7 @@ function PurposeCollage({
                     src={img.url}
                     alt=""
                     fill
-                    sizes="(max-width: 640px) 76vw, 44vw"
+                    sizes="(max-width: 640px) 66vw, 44vw"
                     style={{ objectFit: 'cover' }}
                     {...(img.lqip
                       ? { placeholder: 'blur' as const, blurDataURL: img.lqip }
@@ -633,5 +758,222 @@ function PurposeCollage({
         })}
       </motion.div>
     </section>
+  )
+}
+
+// Line icons for the impact grid. Stroke follows the tile's text colour.
+function ImpactIcon({ name, size = 76 }: { name?: string; size?: number }) {
+  const common = {
+    width: size,
+    height: size,
+    viewBox: '0 0 48 48',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2.2,
+    strokeLinecap: 'round' as const,
+    strokeLinejoin: 'round' as const,
+  }
+  switch (name) {
+    case 'solar':
+      return (
+        <svg {...common} aria-hidden>
+          <circle cx="24" cy="24" r="8" />
+          <path d="M24 6v5M24 37v5M6 24h5M37 24h5M11 11l3.5 3.5M33.5 33.5 37 37M37 11l-3.5 3.5M14.5 33.5 11 37" />
+        </svg>
+      )
+    case 'water':
+      return (
+        <svg {...common} aria-hidden>
+          <path d="M7 17c3.5-4 6.5-4 10 0s6.5 4 10 0 6.5-4 10 0" />
+          <path d="M7 26c3.5-4 6.5-4 10 0s6.5 4 10 0 6.5-4 10 0" />
+          <path d="M7 35c3.5-4 6.5-4 10 0s6.5 4 10 0 6.5-4 10 0" />
+        </svg>
+      )
+    case 'people':
+      return (
+        <svg {...common} aria-hidden>
+          <circle cx="18" cy="18" r="5" />
+          <circle cx="32" cy="19" r="4" />
+          <path d="M9 36c0-6 4-9 9-9s9 3 9 9" />
+          <path d="M28 27c5 0 9 3 9 9" />
+        </svg>
+      )
+    case 'hands':
+      return (
+        <svg {...common} aria-hidden>
+          <path d="M24 37S11 29 11 20a6 6 0 0 1 11-3 6 6 0 0 1 11 3c0 9-13 17-13 17Z" />
+        </svg>
+      )
+    case 'skill':
+      return (
+        <svg {...common} aria-hidden>
+          <path d="M24 7l3.6 12.4L40 23l-12.4 3.6L24 39l-3.6-12.4L8 23l12.4-3.6z" />
+        </svg>
+      )
+    case 'recycle':
+      return (
+        <svg {...common} aria-hidden>
+          <path d="M14 19a11 11 0 0 1 18-3" />
+          <path d="M32 11v5h-5" />
+          <path d="M34 29a11 11 0 0 1-18 4" />
+          <path d="M16 37v-5h5" />
+        </svg>
+      )
+    case 'solarPanel':
+      return (
+        <svg {...common} aria-hidden>
+          <path d="M12 35l3-11h14l3 11z" />
+          <path d="M14.5 30h17M20 24v11M25.5 35l-1-11" />
+          <circle cx="34" cy="13" r="3" />
+          <path d="M34 7v2M34 17v1M28 13h2M39 13h1M30 9l1 1M38 9l-1 1" />
+        </svg>
+      )
+    case 'community':
+      return (
+        <svg {...common} aria-hidden>
+          <circle cx="24" cy="13" r="3.2" />
+          <circle cx="15" cy="18" r="2.6" />
+          <circle cx="33" cy="18" r="2.6" />
+          <path d="M11 38c1-6 4-9 6-10M37 38c-1-6-4-9-6-10M18 38c1-7 4-10 6-10s5 3 6 10" />
+        </svg>
+      )
+    case 'leaf':
+    default:
+      return (
+        <svg {...common} aria-hidden>
+          <path d="M12 36c0-14 10-24 24-24 0 14-10 24-24 24Z" />
+          <path d="M20 34C24 28 30 22 34 18" />
+        </svg>
+      )
+  }
+}
+
+// A stat card: title + big number always visible; the description is revealed on
+// hover (pointer devices) or when the card scrolls to centre (touch devices).
+function StatCard({
+  card,
+  index,
+  reduce,
+}: {
+  card: PhilanthropyStatCard
+  index: number
+  reduce: boolean
+}) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [revealed, setRevealed] = useState(false)
+  const [isTouch, setIsTouch] = useState(false)
+
+  useEffect(() => {
+    const touch =
+      typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches
+    setIsTouch(touch)
+    if (!touch) return
+    const el = ref.current
+    if (!el) return
+    // Reveal while the card sits in the middle band of the viewport.
+    const io = new IntersectionObserver(
+      ([entry]) => setRevealed(entry.isIntersecting),
+      { rootMargin: '-38% 0px -38% 0px' }
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
+
+  const open = reduce || revealed
+
+  // Checker pattern of ink / beige tiles across a 2-column grid.
+  const col = index % 2
+  const row = Math.floor(index / 2)
+  const dark = (col + row) % 2 === 0
+  const bg = dark ? '#141414' : BEIGE
+  const fg = dark ? '#FFFFFF' : INK
+  const soft = dark ? 'rgba(255,255,255,0.72)' : 'rgba(17,17,17,0.62)'
+  const chipBg = dark ? 'rgba(255,255,255,0.14)' : 'rgba(17,17,17,0.07)'
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={reduce ? false : { opacity: 0, y: 28 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-10%' }}
+      transition={{ duration: 0.7, ease: EASE, delay: (index % 2) * 0.08 }}
+      onMouseEnter={() => !isTouch && setRevealed(true)}
+      onMouseLeave={() => !isTouch && setRevealed(false)}
+      className="flex flex-col rounded-3xl p-7 sm:p-8"
+      style={{ backgroundColor: bg, color: fg, minHeight: 210 }}
+    >
+      {/* title + tag */}
+      <div className="flex items-start justify-between gap-3">
+        <h3
+          className={dmSans.className}
+          style={{
+            margin: 0,
+            color: fg,
+            fontWeight: 700,
+            fontSize: 'clamp(20px, 1.9vw, 28px)',
+            lineHeight: 1.1,
+          }}
+        >
+          {card.title}
+        </h3>
+        {card.tag && (
+          <span
+            className={dmSans.className}
+            style={{
+              flexShrink: 0,
+              borderRadius: 999,
+              padding: '4px 11px',
+              backgroundColor: chipBg,
+              color: fg,
+              fontSize: 11,
+              fontWeight: 600,
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+            }}
+          >
+            {card.tag}
+          </span>
+        )}
+      </div>
+
+      {/* value + icon */}
+      <div className="mt-2 flex items-center justify-between gap-4">
+        <span
+          className={dmSans.className}
+          style={{
+            color: fg,
+            fontWeight: 700,
+            fontSize: 'clamp(38px, 4.4vw, 58px)',
+            lineHeight: 1.05,
+            letterSpacing: '-0.02em',
+          }}
+        >
+          {card.value}
+        </span>
+        <span aria-hidden style={{ color: fg, flexShrink: 0, lineHeight: 0, opacity: 0.9 }}>
+          <ImpactIcon name={card.icon} size={54} />
+        </span>
+      </div>
+
+      {/* description — revealed on hover / scroll-over */}
+      <motion.div
+        initial={false}
+        animate={{ height: open ? 'auto' : 0, opacity: open ? 1 : 0 }}
+        transition={{ duration: 0.45, ease: EASE }}
+        style={{ overflow: 'hidden' }}
+      >
+        <p
+          className={dmSans.className}
+          style={{
+            margin: '0.9em 0 0',
+            color: soft,
+            fontSize: 'clamp(15px, 1.2vw, 17px)',
+            lineHeight: 1.6,
+          }}
+        >
+          {card.body}
+        </p>
+      </motion.div>
+    </motion.div>
   )
 }

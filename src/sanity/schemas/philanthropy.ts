@@ -18,6 +18,8 @@ export default defineType({
     { name: 'programs', title: 'Programmes' },
     { name: 'purpose', title: 'Purpose collage' },
     { name: 'belief', title: 'Belief statement' },
+    { name: 'stats', title: 'Stat cards' },
+    { name: 'esg', title: 'ESG gallery' },
   ],
   fields: [
     /* ───────────── Hero ───────────── */
@@ -196,6 +198,88 @@ export default defineType({
       description: 'The large centred belief statement.',
       type: 'text',
       rows: 4,
+    }),
+
+    /* ───────────── Stat cards (hover to reveal) ───────────── */
+    defineField({
+      name: 'statCards',
+      title: 'Stat cards',
+      group: 'stats',
+      description:
+        'Cards that show a title + big number, and reveal their description on ' +
+        'hover (desktop) or when scrolled over (mobile).',
+      type: 'array',
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'statCard',
+          fields: [
+            defineField({
+              name: 'title',
+              title: 'Title',
+              type: 'string',
+              validation: (Rule) => Rule.required(),
+            }),
+            defineField({
+              name: 'value',
+              title: 'Big number / value',
+              description: 'e.g. "15 MT +", "1,27,000", "10%", "80+".',
+              type: 'string',
+            }),
+            defineField({
+              name: 'body',
+              title: 'Description (revealed on hover)',
+              type: 'text',
+              rows: 3,
+            }),
+            defineField({
+              name: 'tag',
+              title: 'Tag label',
+              description: 'Small chip, e.g. "Environment" or "Social".',
+              type: 'string',
+            }),
+            defineField({
+              name: 'icon',
+              title: 'Icon',
+              type: 'string',
+              options: {
+                list: [
+                  { title: 'Recycle', value: 'recycle' },
+                  { title: 'Solar panel', value: 'solarPanel' },
+                  { title: 'People', value: 'people' },
+                  { title: 'Community / hands', value: 'community' },
+                  { title: 'Solar / sun', value: 'solar' },
+                  { title: 'Water / waves', value: 'water' },
+                  { title: 'Leaf / nature', value: 'leaf' },
+                ],
+                layout: 'dropdown',
+              },
+              initialValue: 'recycle',
+            }),
+          ],
+          preview: { select: { title: 'title', subtitle: 'value' } },
+        }),
+      ],
+    }),
+
+    /* ───────────── ESG closing (paragraph + gallery) ───────────── */
+    defineField({
+      name: 'esgIntro',
+      title: 'ESG paragraph',
+      group: 'esg',
+      description: 'The paragraph shown above the photo gallery.',
+      type: 'text',
+      rows: 5,
+    }),
+    defineField({
+      name: 'esgGallery',
+      title: 'ESG photo gallery',
+      group: 'esg',
+      description:
+        'A Pinterest-style masonry of ESG photos. Drag to reorder. Any number of images.',
+      type: 'array',
+      of: [defineArrayMember({ type: 'image', options: { hotspot: true } })],
+      options: { layout: 'grid' },
     }),
   ],
   preview: {
