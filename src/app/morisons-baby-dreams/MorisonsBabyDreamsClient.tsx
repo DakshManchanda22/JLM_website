@@ -613,7 +613,7 @@ function DoctorBlogs({
     if (reduce) return
     const tick = () => {
       if (!pausedRef.current && trackRef.current) {
-        posRef.current += 0.4
+        posRef.current += 0.8
         const half = trackRef.current.scrollWidth / 2
         if (posRef.current >= half) posRef.current = 0
         trackRef.current.style.transform = `translateX(-${posRef.current}px)`
@@ -657,23 +657,23 @@ function DoctorBlogs({
       >
         <div
           ref={trackRef}
-          className="flex gap-5 pb-2 pl-6 md:pl-12"
+          className="flex gap-4 pb-2 pl-6 md:gap-5 md:pl-12"
           style={{ width: reduce ? undefined : 'max-content' }}
         >
           {(reduce ? blogs : looped).map((post, i) => (
             <Link
               key={`${post.href}-${i}`}
               href={post.href}
-              className="group block w-[300px] flex-none md:w-[340px]"
+              className="group block w-[230px] flex-none md:w-[340px]"
             >
               <article
-                className="flex h-full flex-col rounded-[22px] bg-white p-4"
+                className="flex h-full flex-col rounded-[18px] bg-white p-3 md:rounded-[22px] md:p-4"
                 style={{
                   boxShadow:
                     '0 20px 44px -18px rgba(46,39,33,0.28), 0 6px 14px -8px rgba(46,39,33,0.14)',
                 }}
               >
-                <div className="relative aspect-[16/11] w-full flex-none overflow-hidden rounded-2xl bg-[#efe7db]">
+                <div className="relative aspect-[16/11] w-full flex-none overflow-hidden rounded-xl bg-[#efe7db] md:rounded-2xl">
                   {post.image && (
                     <Image
                       src={post.image}
@@ -688,16 +688,15 @@ function DoctorBlogs({
                   )}
                 </div>
 
-                <p className="mt-4 text-[12.5px]" style={{ color: MUTED }}>
+                <p className="mt-3 text-[11.5px] md:mt-4 md:text-[12.5px]" style={{ color: MUTED }}>
                   {fmtDate(post.publishedAt)} · {post.author}
                 </p>
                 <h3
-                  className="mt-2 line-clamp-2"
+                  className="mt-1.5 line-clamp-2 text-[1rem] md:mt-2 md:text-[1.2rem]"
                   style={{
                     fontFamily: 'var(--font-nunito)',
                     fontWeight: 800,
                     letterSpacing: '-0.01em',
-                    fontSize: '1.2rem',
                     lineHeight: 1.2,
                     color: INK,
                   }}
@@ -705,12 +704,12 @@ function DoctorBlogs({
                   {post.title}
                 </h3>
                 {post.excerpt && (
-                  <p className="mt-2 line-clamp-2 text-[13.5px] leading-relaxed" style={{ color: MUTED }}>
+                  <p className="mt-1.5 line-clamp-2 text-[12px] leading-relaxed md:mt-2 md:text-[13.5px]" style={{ color: MUTED }}>
                     {post.excerpt}
                   </p>
                 )}
                 <span
-                  className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold"
+                  className="mt-3 inline-flex items-center gap-1.5 text-[13px] font-semibold md:mt-4 md:text-sm"
                   style={{ color: CORAL_INK }}
                 >
                   Read more
