@@ -4,9 +4,13 @@ import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { motion, useReducedMotion } from 'framer-motion'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Nunito } from 'next/font/google'
 import Footer from '@/components/Footer'
 import type { BabyCategory, BabyDreams, BabyTint } from '@/sanity/queries'
+
+gsap.registerPlugin(ScrollTrigger)
 
 /* ── Type system: Nunito — a soft, rounded, friendly sans used across the whole
    page (bold weights for headings, regular for body), matching the warm,
@@ -525,6 +529,8 @@ function BabyVideo({
   const reduce = useReduce()
   const videoRef = useRef<HTMLVideoElement>(null)
   const [showControls, setShowControls] = useState(false)
+  const scrubRef = useRef<HTMLDivElement>(null)
+  const frameRef = useRef<HTMLDivElement>(null)
 
   /* Autoplay muted when scrolled into view; pause when it leaves. */
   useEffect(() => {
@@ -535,55 +541,103 @@ function BabyVideo({
         if (entry.isIntersecting) video.play().catch(() => {})
         else video.pause()
       },
-      { threshold: 0.4 },
+      { threshold: 0.3 },
     )
     observer.observe(video)
     return () => observer.disconnect()
   }, [videoUrl])
 
-  return (
-    <section style={{ backgroundColor: CREAM }} className="px-6 pt-16 pb-12 md:px-12 md:pt-24 md:pb-14">
-      <div className="mx-auto max-w-[1400px]">
-        <SectionHead headline={headline} center />
+  /* Scroll-scrubbed expand: the frame is laid out full-bleed but starts scaled
+     down as a rounded card, then grows to fill the viewport (scale 1, no radius)
+     as the tall wrapper scrolls past. The frame itself is `position: sticky`,
+     so it stays centred in view for the whole scrub — no ScrollTrigger pin
+     needed, which keeps window scrolling perfectly native. */
+  useEffect(() => {
+    if (reduce) return
+    const wrap = scrubRef.current
+    const frame = frameRef.current
+    if (!wrap || !frame) return
+    const scroller = document.getElementById('page-scroller')
 
-        <motion.div
-          initial={reduce ? false : { opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.8, ease: EASE }}
-          className="relative mx-auto mt-12 aspect-[16/9] w-full overflow-hidden rounded-[28px] bg-[#e8ddce]"
-          onMouseEnter={() => setShowControls(true)}
-          onMouseLeave={() => setShowControls(false)}
-        >
-          {videoUrl ? (
-            <video
-              ref={videoRef}
-              src={videoUrl}
-              poster={poster}
-              muted
-              loop
-              playsInline
-              preload="metadata"
-              controls={showControls}
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-          ) : (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center">
-              <span
-                className="flex h-16 w-16 items-center justify-center rounded-full"
-                style={{ backgroundColor: 'white', color: CORAL }}
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-              </span>
-              <span className="text-sm" style={{ color: MUTED }}>
-                Video coming soon
-              </span>
-            </div>
-          )}
-        </motion.div>
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        frame,
+        { scale: 0.62, borderRadius: 44 },
+        {
+          scale: 1,
+          borderRadius: 0,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: wrap,
+            scroller: scroller ?? undefined,
+            start: 'top top',
+            end: 'bottom bottom',
+            scrub: true,
+            invalidateOnRefresh: true,
+          },
+        },
+      )
+    }, wrap)
+    return () => ctx.revert()
+  }, [reduce])
+
+  const videoEl = videoUrl ? (
+    <video
+      ref={videoRef}
+      src={videoUrl}
+      poster={poster}
+      muted
+      loop
+      playsInline
+      preload="metadata"
+      controls={showControls}
+      className="absolute inset-0 h-full w-full object-cover"
+    />
+  ) : (
+    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center">
+      <span
+        className="flex h-16 w-16 items-center justify-center rounded-full"
+        style={{ backgroundColor: 'white', color: CORAL }}
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M8 5v14l11-7z" />
+        </svg>
+      </span>
+      <span className="text-sm" style={{ color: MUTED }}>
+        Video coming soon
+      </span>
+    </div>
+  )
+
+  return (
+    <section style={{ backgroundColor: CREAM }}>
+      <div className="px-6 pt-16 md:px-12 md:pt-24">
+        <SectionHead headline={headline} center />
       </div>
+
+      {reduce ? (
+        /* Reduced motion: a simple contained frame, no scroll animation. */
+        <div className="mx-auto mt-12 max-w-[1400px] px-6 pb-12 md:px-12 md:pb-14">
+          <div className="relative aspect-[16/9] w-full overflow-hidden rounded-[28px] bg-[#e8ddce]">
+            {videoEl}
+          </div>
+        </div>
+      ) : (
+        /* The wrapper reserves the scroll distance; the sticky frame expands
+           within it from card to full-bleed. */
+        <div ref={scrubRef} className="relative mt-10" style={{ height: '220vh' }}>
+          <div className="sticky top-0 flex h-[100svh] w-full items-center justify-center overflow-hidden">
+            <div
+              ref={frameRef}
+              className="relative h-[100svh] w-full overflow-hidden bg-[#e8ddce] will-change-transform"
+              onMouseEnter={() => setShowControls(true)}
+              onMouseLeave={() => setShowControls(false)}
+            >
+              {videoEl}
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   )
 }
