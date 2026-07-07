@@ -38,6 +38,15 @@ export default defineConfig({
                           .schemaType('homepage')
                           .documentId('homepage'),
                       ),
+                    S.listItem()
+                      .title('Philanthropy')
+                      .id('philanthropy')
+                      .child(
+                        S.editor()
+                          .id('philanthropy')
+                          .schemaType('philanthropy')
+                          .documentId('philanthropy'),
+                      ),
                   ]),
               ),
 
