@@ -676,6 +676,17 @@ export type PhilanthropyView = {
   purposeImages?: { url: string; lqip?: string }[]
   beliefEyebrow?: string
   beliefText?: string
+  statCards?: PhilanthropyStatCard[]
+  esgIntro?: string
+  esgGallery?: { url: string; lqip?: string; w: number; h: number }[]
+}
+
+export type PhilanthropyStatCard = {
+  title?: string
+  value?: string
+  body?: string
+  tag?: string
+  icon?: string
 }
 
 export const philanthropyQuery = groq`*[_type == "philanthropy"][0]{
@@ -692,6 +703,13 @@ export const philanthropyQuery = groq`*[_type == "philanthropy"][0]{
   purposeEyebrow, purposeHeading, purposeBackgroundWord,
   purposeImages[]{ ${imageWithLqip} },
   beliefEyebrow, beliefText,
+  statCards[]{ title, value, body, tag, icon },
+  esgIntro,
+  esgGallery[]{
+    ${imageWithLqip},
+    "dw": asset->metadata.dimensions.width,
+    "dh": asset->metadata.dimensions.height,
+  },
 }`
 
 export async function fetchPhilanthropy(): Promise<PhilanthropyView | null> {
@@ -738,5 +756,20 @@ export async function fetchPhilanthropy(): Promise<PhilanthropyView | null> {
       .filter(Boolean),
     beliefEyebrow: raw.beliefEyebrow,
     beliefText: raw.beliefText,
+    statCards: (raw.statCards || []).map((s: any) => ({
+      title: s.title,
+      value: s.value,
+      body: s.body,
+      tag: s.tag,
+      icon: s.icon,
+    })),
+    esgIntro: raw.esgIntro,
+    esgGallery: (raw.esgGallery || [])
+      .map((im: any) => {
+        const r = resolveImage(im, 1200)
+        if (!r) return null
+        return { url: r.url, lqip: r.lqip, w: im.dw || 1000, h: im.dh || 1000 }
+      })
+      .filter(Boolean),
   }
 }
