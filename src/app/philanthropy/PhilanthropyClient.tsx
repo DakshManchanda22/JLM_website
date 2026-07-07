@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { Anton, Caveat_Brush, Cormorant_Garamond, DM_Sans } from 'next/font/google'
 import Footer from '@/components/Footer'
 import type { PhilanthropyView } from '@/sanity/queries'
@@ -166,8 +166,7 @@ export default function PhilanthropyClient({ cms }: { cms?: PhilanthropyView }) 
           images: [{ url: s.image }] as CardImage[],
         }))
 
-  const purposeEyebrow = cms?.purposeEyebrow ?? 'What drives us'
-  const purposeHeading = cms?.purposeHeading ?? 'Purpose'
+  const purposeHeading = cms?.purposeHeading ?? 'Environmental responsibility'
   const purposeBgWord = cms?.purposeBackgroundWord ?? 'Goodness'
   const purposeImages =
     cms?.purposeImages && cms.purposeImages.length > 0
@@ -413,7 +412,6 @@ export default function PhilanthropyClient({ cms }: { cms?: PhilanthropyView }) 
 
       {/* ========================= PURPOSE COLLAGE ========================= */}
       <PurposeCollage
-        eyebrow={purposeEyebrow}
         heading={purposeHeading}
         bgWord={purposeBgWord}
         images={purposeImages}
@@ -449,11 +447,11 @@ export default function PhilanthropyClient({ cms }: { cms?: PhilanthropyView }) 
           className={cormorant.className}
           style={{
             margin: '0.7em auto 0',
-            maxWidth: '20ch',
+            maxWidth: 'min(1100px, 100%)',
             color: INK,
             fontWeight: 400,
-            fontSize: 'clamp(28px, 4.4vw, 60px)',
-            lineHeight: 1.12,
+            fontSize: 'clamp(28px, 4.4vw, 58px)',
+            lineHeight: 1.14,
             letterSpacing: '-0.01em',
           }}
         >
@@ -556,80 +554,40 @@ function ProgramCard({
   )
 }
 
-// Scroll-driven photo collage: three photos start stacked and fan outward into
-// a scattered arrangement as the section scrolls up into view. A large faded
-// word sits behind them.
+// Photo collage: three photos start stacked and, once the section scrolls into
+// view (just past the heading), spring out once into a scattered arrangement
+// modelled on the reference. A large faded word sits behind them.
+const COLLAGE_SPREAD = [
+  { x: '-46%', y: '-30%', rotate: -5, z: 20 }, // top-left
+  { x: '48%', y: '-6%', rotate: 3, z: 10 }, // right
+  { x: '-4%', y: '32%', rotate: -4, z: 30 }, // front, bottom-centre
+]
+
 function PurposeCollage({
-  eyebrow,
   heading,
   bgWord,
   images,
   reduce,
 }: {
-  eyebrow: string
   heading: string
   bgWord: string
   images: CardImage[]
   reduce: boolean
 }) {
-  const ref = useRef<HTMLDivElement>(null)
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start 85%', 'center 45%'],
-  })
-
-  // Per-photo fan-out. Order: [back-left, back-right, front-centre].
-  const x0 = useTransform(scrollYProgress, [0, 1], ['0%', '-62%'])
-  const y0 = useTransform(scrollYProgress, [0, 1], ['0%', '-4%'])
-  const r0 = useTransform(scrollYProgress, [0, 1], [0, -9])
-
-  const x1 = useTransform(scrollYProgress, [0, 1], ['0%', '58%'])
-  const y1 = useTransform(scrollYProgress, [0, 1], ['0%', '6%'])
-  const r1 = useTransform(scrollYProgress, [0, 1], [0, 8])
-
-  const x2 = useTransform(scrollYProgress, [0, 1], ['0%', '-2%'])
-  const y2 = useTransform(scrollYProgress, [0, 1], ['0%', '24%'])
-  const r2 = useTransform(scrollYProgress, [0, 1], [0, -3])
-
-  const T = [
-    { x: x0, y: y0, rotate: r0, z: 10 },
-    { x: x1, y: y1, rotate: r1, z: 20 },
-    { x: x2, y: y2, rotate: r2, z: 30 },
-  ]
-
-  // Reduced motion: render the fanned-out end state statically.
-  const staticEnd = [
-    { x: '-62%', y: '-4%', rotate: -9, z: 10 },
-    { x: '58%', y: '6%', rotate: 8, z: 20 },
-    { x: '-2%', y: '24%', rotate: -3, z: 30 },
-  ]
-
   const shots = images.slice(0, 3)
 
   return (
-    <section className="overflow-hidden bg-white px-[7vw] pb-28 pt-20 md:pb-36 md:pt-28">
+    <section className="overflow-hidden bg-white px-[7vw] pb-24 pt-10 md:pb-36 md:pt-14">
       {/* header */}
-      <div className="mx-auto max-w-[820px] text-center">
-        {eyebrow && (
-          <p
-            className={dmSans.className}
-            style={{
-              margin: 0,
-              color: '#555555',
-              fontSize: 'clamp(13px, 1vw, 16px)',
-              fontWeight: 400,
-            }}
-          >
-            {eyebrow}
-          </p>
-        )}
+      <div className="text-center">
         <h2
           className={anton.className}
           style={{
-            margin: '0.35em 0 0',
+            margin: '0 auto',
+            maxWidth: '15ch',
             color: INK,
-            fontSize: 'clamp(56px, 11vw, 168px)',
-            lineHeight: 0.95,
+            fontSize: 'clamp(34px, 6vw, 92px)',
+            lineHeight: 0.98,
             letterSpacing: '0.02em',
             textTransform: 'uppercase',
           }}
@@ -638,10 +596,12 @@ function PurposeCollage({
         </h2>
       </div>
 
-      {/* collage */}
-      <div
-        ref={ref}
-        className="relative mx-auto mt-12 aspect-[16/11] w-full max-w-[960px] md:mt-16"
+      {/* collage — one-shot spread animation triggered when it enters view */}
+      <motion.div
+        className="relative mx-auto mt-6 aspect-[3/2] w-full max-w-[1040px] md:mt-10"
+        initial={reduce ? 'spread' : 'stack'}
+        whileInView="spread"
+        viewport={{ once: true, amount: 0.25 }}
       >
         {/* faded background word */}
         <span
@@ -650,7 +610,7 @@ function PurposeCollage({
           style={{
             position: 'absolute',
             left: '50%',
-            top: '52%',
+            top: '50%',
             transform: 'translate(-50%, -50%)',
             zIndex: 5,
             color: BEIGE,
@@ -667,39 +627,38 @@ function PurposeCollage({
         </span>
 
         {/* photos */}
-        {shots.map((img, i) => (
-          <div
-            key={img.url}
-            className="absolute left-1/2 top-1/2 w-[56%] max-w-[420px] sm:w-[48%]"
-            style={{ transform: 'translate(-50%, -50%)', zIndex: T[i]?.z ?? 10 }}
-          >
-            <motion.div
-              style={
-                reduce
-                  ? {
-                      x: staticEnd[i]?.x,
-                      y: staticEnd[i]?.y,
-                      rotate: staticEnd[i]?.rotate,
-                    }
-                  : { x: T[i]?.x, y: T[i]?.y, rotate: T[i]?.rotate }
-              }
+        {shots.map((img, i) => {
+          const end = COLLAGE_SPREAD[i] ?? COLLAGE_SPREAD[0]
+          return (
+            <div
+              key={img.url}
+              className="absolute left-1/2 top-1/2 w-[76%] max-w-[620px] sm:w-[58%]"
+              style={{ transform: 'translate(-50%, -50%)', zIndex: end.z }}
             >
-              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl shadow-2xl ring-1 ring-black/5">
-                <Image
-                  src={img.url}
-                  alt=""
-                  fill
-                  sizes="(max-width: 640px) 60vw, 40vw"
-                  style={{ objectFit: 'cover' }}
-                  {...(img.lqip
-                    ? { placeholder: 'blur' as const, blurDataURL: img.lqip }
-                    : {})}
-                />
-              </div>
-            </motion.div>
-          </div>
-        ))}
-      </div>
+              <motion.div
+                variants={{
+                  stack: { x: '0%', y: '0%', rotate: 0, scale: 0.9 },
+                  spread: { x: end.x, y: end.y, rotate: end.rotate, scale: 1 },
+                }}
+                transition={{ duration: 0.9, ease: EASE, delay: i * 0.12 }}
+              >
+                <div className="relative aspect-[3/2] w-full overflow-hidden shadow-2xl">
+                  <Image
+                    src={img.url}
+                    alt=""
+                    fill
+                    sizes="(max-width: 640px) 76vw, 44vw"
+                    style={{ objectFit: 'cover' }}
+                    {...(img.lqip
+                      ? { placeholder: 'blur' as const, blurDataURL: img.lqip }
+                      : {})}
+                  />
+                </div>
+              </motion.div>
+            </div>
+          )
+        })}
+      </motion.div>
     </section>
   )
 }
