@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { Nunito } from 'next/font/google'
 import Footer from '@/components/Footer'
 import type { BabyCategory, BabyDreams, BabyTint } from '@/sanity/queries'
@@ -252,7 +252,6 @@ function BannerCarousel({
   }, [reduce, hover, count, interval])
 
   if (count === 0) return null
-  const active = list[index]
 
   return (
     <div
@@ -262,26 +261,34 @@ function BannerCarousel({
     >
       {/* Banners are designed at 1464×600, so the frame keeps that ratio and
           nothing in the creative gets cropped. */}
-      <div className="relative aspect-[1464/600] w-full">
-        <AnimatePresence initial={false} mode="sync">
-          <motion.div
-            key={index}
-            className="absolute inset-0"
-            initial={reduce ? { opacity: 1 } : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={reduce ? { opacity: 1 } : { opacity: 0 }}
-            transition={{ duration: 0.9, ease: EASE }}
-            drag={count > 1 ? 'x' : false}
-            dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={0.18}
-            onDragEnd={(_, info) => {
-              if (info.offset.x < -60) go(1)
-              else if (info.offset.x > 60) go(-1)
-            }}
-          >
-            <BannerImage banner={active} priority={index === 0} />
-          </motion.div>
-        </AnimatePresence>
+      <div className="relative aspect-[1464/600] w-full overflow-hidden">
+        {/* A single horizontal track holds every banner side by side and slides
+            left/right. Because all slides live in the DOM at once (and load
+            eagerly), the next image is already decoded before it arrives — no
+            blur-up on advance. */}
+        <motion.div
+          className="flex h-full"
+          style={{ width: `${count * 100}%` }}
+          drag={count > 1 ? 'x' : false}
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.14}
+          onDragEnd={(_, info) => {
+            if (info.offset.x < -60) go(1)
+            else if (info.offset.x > 60) go(-1)
+          }}
+          animate={{ x: `${(-index * 100) / count}%` }}
+          transition={reduce ? { duration: 0 } : { duration: 0.7, ease: EASE }}
+        >
+          {list.map((banner, i) => (
+            <div
+              key={i}
+              className="relative h-full flex-none"
+              style={{ width: `${100 / count}%` }}
+            >
+              <BannerImage banner={banner} priority={i === 0} eager={i !== 0} />
+            </div>
+          ))}
+        </motion.div>
 
         {/* soft edge scrim so controls stay legible over any photo */}
         <div
@@ -336,9 +343,11 @@ function BannerCarousel({
 function BannerImage({
   banner,
   priority,
+  eager,
 }: {
   banner: NonNullable<BabyDreams['banners']>[number]
   priority?: boolean
+  eager?: boolean
 }) {
   if (!banner.image) return null
   const img = (
@@ -347,6 +356,7 @@ function BannerImage({
       alt={banner.alt || 'Morisons Baby Dreams'}
       fill
       priority={priority}
+      {...(!priority && eager ? { loading: 'eager' as const } : {})}
       sizes="100vw"
       className="object-cover"
       {...(banner.lqip
