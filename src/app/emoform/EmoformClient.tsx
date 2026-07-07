@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { Inter, Noto_Sans_Devanagari } from 'next/font/google'
@@ -31,6 +32,22 @@ export default function EmoformClient({ cms }: { cms?: EmoformView }) {
   const hero2 = cms?.heroLine2 ?? 'अंत,   तुरंत'
   const flag = cms?.heroFlag ?? 'Swiss Formula'
   const heroImg = cms?.heroImage
+
+  /* The wide gap between the Hindi words (baked-in non-breaking spaces) frames
+     the tube in landscape/desktop, but looks unnatural in portrait where no
+     tube sits between them. Collapse any run of spaces/NBSPs to one space when
+     the viewport is taller than it is wide. */
+  const [isPortrait, setIsPortrait] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(orientation: portrait)')
+    const update = () => setIsPortrait(mq.matches)
+    update()
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [])
+  const hero2Display = isPortrait
+    ? hero2.replace(/\s+/g, ' ').trim()
+    : hero2
 
   return (
     <>
@@ -64,9 +81,11 @@ export default function EmoformClient({ cms }: { cms?: EmoformView }) {
           </div>
         </motion.div>
 
-        {/* ── Headline: above the product on mobile/tablet, centred behind it
-             on desktop ── */}
-        <div className="absolute inset-0 z-0 flex flex-col items-center justify-start px-4 pt-[18vh] text-center select-none lg:justify-center lg:pt-[15vh]">
+        {/* ── Headline: when the screen is taller than it is wide (portrait) the
+             tagline sits ABOVE the product and on top in the stack so the tube
+             can never cover it. When wider than tall (landscape / desktop) it
+             centres BEHIND the product for the layered hero look. ── */}
+        <div className="absolute inset-0 z-30 flex flex-col items-center justify-start px-4 pt-[13vh] text-center select-none landscape:z-0 landscape:justify-center landscape:pt-0">
           <motion.span
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
@@ -83,7 +102,7 @@ export default function EmoformClient({ cms }: { cms?: EmoformView }) {
             className={`${devanagari.className} block font-extrabold leading-[1.1] tracking-tight text-white`}
             style={{ fontSize: 'clamp(2.75rem, 11vw, 13rem)' }}
           >
-            {hero2}
+            {hero2Display}
           </motion.span>
         </div>
 
