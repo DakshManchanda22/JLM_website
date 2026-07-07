@@ -570,8 +570,13 @@ function BabyVideo({
           scrollTrigger: {
             trigger: wrap,
             scroller: scroller ?? undefined,
-            start: 'top top',
-            end: 'bottom bottom',
+            /* Drive the expand from the section's ENTRANCE: it starts growing as
+               the frame rises into view from the bottom and reaches full-bleed
+               right as it settles at the top (pin point) — so the effect reads
+               as part of the scroll, not a separate event once you arrive.
+               The remaining sticky range then holds it full-screen briefly. */
+            start: 'top 75%',
+            end: 'top top',
             scrub: true,
             invalidateOnRefresh: true,
           },
@@ -625,7 +630,7 @@ function BabyVideo({
       ) : (
         /* The wrapper reserves the scroll distance; the sticky frame expands
            within it from card to full-bleed. */
-        <div ref={scrubRef} className="relative mt-10" style={{ height: '220vh' }}>
+        <div ref={scrubRef} className="relative mt-10" style={{ height: '140vh' }}>
           <div className="sticky top-0 flex h-[100svh] w-full items-center justify-center overflow-hidden">
             <div
               ref={frameRef}
