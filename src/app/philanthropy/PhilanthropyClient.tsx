@@ -167,7 +167,6 @@ export default function PhilanthropyClient({ cms }: { cms?: PhilanthropyView }) 
         }))
 
   const purposeHeading = cms?.purposeHeading ?? 'Environmental responsibility'
-  const purposeBgWord = cms?.purposeBackgroundWord ?? 'Goodness'
   const purposeImages =
     cms?.purposeImages && cms.purposeImages.length > 0
       ? (cms.purposeImages as CardImage[])
@@ -413,13 +412,12 @@ export default function PhilanthropyClient({ cms }: { cms?: PhilanthropyView }) 
       {/* ========================= PURPOSE COLLAGE ========================= */}
       <PurposeCollage
         heading={purposeHeading}
-        bgWord={purposeBgWord}
         images={purposeImages}
         reduce={!!reduce}
       />
 
       {/* ========================= BELIEF ========================= */}
-      <section className="bg-white px-[7vw] py-24 text-center md:py-32">
+      <section className="bg-white px-[7vw] pb-24 pt-10 text-center md:pb-32 md:pt-12">
         {beliefEyebrow && (
           <motion.p
             initial={reduce ? false : { opacity: 0, y: 16 }}
@@ -565,19 +563,17 @@ const COLLAGE_SPREAD = [
 
 function PurposeCollage({
   heading,
-  bgWord,
   images,
   reduce,
 }: {
   heading: string
-  bgWord: string
   images: CardImage[]
   reduce: boolean
 }) {
   const shots = images.slice(0, 3)
 
   return (
-    <section className="overflow-hidden bg-white px-[7vw] pb-24 pt-10 md:pb-36 md:pt-14">
+    <section className="overflow-hidden bg-white px-[7vw] pb-8 pt-10 md:pb-12 md:pt-14">
       {/* header */}
       <div className="text-center">
         <h2
@@ -603,29 +599,6 @@ function PurposeCollage({
         whileInView="spread"
         viewport={{ once: true, amount: 0.25 }}
       >
-        {/* faded background word */}
-        <span
-          aria-hidden
-          className={anton.className}
-          style={{
-            position: 'absolute',
-            left: '50%',
-            top: '50%',
-            transform: 'translate(-50%, -50%)',
-            zIndex: 5,
-            color: BEIGE,
-            fontSize: 'clamp(64px, 18vw, 260px)',
-            lineHeight: 1,
-            letterSpacing: '0.01em',
-            textTransform: 'uppercase',
-            whiteSpace: 'nowrap',
-            userSelect: 'none',
-            pointerEvents: 'none',
-          }}
-        >
-          {bgWord}
-        </span>
-
         {/* photos */}
         {shots.map((img, i) => {
           const end = COLLAGE_SPREAD[i] ?? COLLAGE_SPREAD[0]
