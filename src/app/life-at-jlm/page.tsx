@@ -42,7 +42,10 @@ export default async function LifeAtJlmPage() {
               ? { src: url, caption: c.caption, aspect: c.aspect }
               : null
           })
-          .filter((x): x is NonNullable<typeof x> => x !== null),
+          .filter(
+            (x): x is { src: string; caption: string; aspect: number | undefined } =>
+              x !== null,
+          ),
         peopleLabel: data.peopleLabel,
         peopleHeadline: data.peopleHeadline,
         peopleTagline: data.peopleTagline,
