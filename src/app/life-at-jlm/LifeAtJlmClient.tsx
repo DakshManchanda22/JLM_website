@@ -76,6 +76,8 @@ const dmSans = DM_Sans({
 const FAINT = '#EEEEEE'
 const INK = '#111111'
 const MUTED = '#555555'
+/* Brand accent (CLAUDE.md) — used only as the animated highlight marker. */
+const BEIGE_ACCENT = '#E8E0D5'
 const EASE = [0.16, 1, 0.3, 1] as const
 
 /* ─────────────────────────── data ─────────────────────────── */
@@ -571,7 +573,27 @@ function TestimonialsBlock() {
             whiteSpace: 'nowrap',
           }}
         >
-          {HEADLINE}
+          <span className="relative inline-block">
+            {/* beige highlighter marker that sweeps in on scroll */}
+            <motion.span
+              aria-hidden
+              className="absolute left-[-0.12em] right-[-0.12em] rounded-[3px]"
+              style={{
+                bottom: '0.06em',
+                height: '0.34em',
+                backgroundColor: BEIGE_ACCENT,
+                transformOrigin: 'left center',
+                zIndex: 0,
+              }}
+              initial={{ scaleX: 0 }}
+              whileInView={{ scaleX: 1 }}
+              viewport={{ once: true, amount: 0.7 }}
+              transition={{ duration: 0.8, ease: EASE, delay: 0.25 }}
+            />
+            <span className="relative" style={{ zIndex: 1 }}>
+              {HEADLINE}
+            </span>
+          </span>
         </h2>
         <p
           className={`${dmSans.className} mt-6 max-w-[52ch]`}

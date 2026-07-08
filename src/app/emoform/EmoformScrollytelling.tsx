@@ -3,12 +3,8 @@
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { motion, useReducedMotion } from 'framer-motion'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Inter } from 'next/font/google'
 import type { EmoformView } from '@/sanity/queries'
-
-gsap.registerPlugin(ScrollTrigger)
 
 const inter = Inter({ subsets: ['latin'], weight: ['600', '700', '800', '900'] })
 const EASE = [0.16, 1, 0.3, 1] as const
@@ -284,7 +280,6 @@ export default function EmoformScrollytelling({ cms }: { cms?: EmoformView }) {
   })
 
   const sectionRef = useRef<HTMLElement>(null)
-  const leftRef = useRef<HTMLDivElement>(null)
   const stepRefs = useRef<(HTMLDivElement | null)[]>([])
 
   /* Active-step detection (BigenClient pattern): observe each right step
@@ -306,29 +301,6 @@ export default function EmoformScrollytelling({ cms }: { cms?: EmoformView }) {
     return () => observer.disconnect()
   }, [])
 
-  /* Pin the left card for the whole section (desktop). It only releases when the
-     section bottom reaches the viewport bottom, i.e. once the last step has
-     scrolled up, after which the whole page moves together. */
-  useEffect(() => {
-    if (reduce) return
-    const scroller = document.getElementById('page-scroller')
-    const mq = window.matchMedia('(min-width: 1024px)')
-    if (!mq.matches || !sectionRef.current || !leftRef.current) return
-
-    const ctx = gsap.context(() => {
-      ScrollTrigger.create({
-        trigger: sectionRef.current,
-        scroller: scroller ?? undefined,
-        start: 'top top',
-        end: 'bottom bottom',
-        pin: leftRef.current,
-        pinSpacing: false,
-        invalidateOnRefresh: true,
-      })
-    }, sectionRef)
-    return () => ctx.revert()
-  }, [reduce])
-
   const renderTitle = (s: Step) => {
     if (s.underline && s.title.includes(s.underline)) {
       const idx = s.title.indexOf(s.underline)
@@ -349,8 +321,9 @@ export default function EmoformScrollytelling({ cms }: { cms?: EmoformView }) {
     <section ref={sectionRef} className={`${inter.className} bg-white`}>
       <div className="mx-auto max-w-7xl px-6 md:px-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-16">
-          {/* ── LEFT: pinned frame, panel slides to the active step (desktop) ── */}
-          <div ref={leftRef} className="hidden h-screen items-center lg:flex">
+          {/* ── LEFT: sticky frame, panel slides to the active step (desktop).
+               Native `position: sticky` (no GSAP pin) keeps scrolling smooth. ── */}
+          <div className="hidden h-screen items-center self-start lg:flex lg:sticky lg:top-0">
             <div className="relative h-[70vh] w-full overflow-hidden rounded-2xl">
               <motion.div
                 className="absolute inset-0"
