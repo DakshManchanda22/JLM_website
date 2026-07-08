@@ -248,7 +248,7 @@ export type LifeAtJlm = {
   heroCaptionSmall?: string
   heroCaptionLarge?: string
   anchors?: { num: string; label: string; targetId: string; image: any }[]
-  captionStrip?: { image: any; caption: string }[]
+  captionStrip?: { image: any; caption: string; aspect?: number }[]
   peopleLabel?: string
   peopleHeadline?: string
   peopleTagline?: string
@@ -256,8 +256,7 @@ export type LifeAtJlm = {
   arentEyebrow?: string
   arentHeadline?: string
   arentBody?: string
-  arentList?: { word: string; caption: string; icon: string }[]
-  areList?: { word: string; caption: string; icon: string }[]
+  testimonials?: { quote: string; name: string; role: string }[]
   valuesLabel?: string
   valuesHeadline?: string
   valuesTagline?: string
@@ -287,11 +286,10 @@ export const lifeAtJlmQuery = groq`*[_type == "lifeAtJlm"][0]{
   heroCaptionSmall,
   heroCaptionLarge,
   anchors[]{ num, label, targetId, image },
-  captionStrip[]{ image, caption },
+  captionStrip[]{ image, caption, "aspect": image.asset->metadata.dimensions.aspectRatio },
   peopleLabel, peopleHeadline, peopleTagline, peopleBody,
   arentEyebrow, arentHeadline, arentBody,
-  arentList[]{ word, caption, icon },
-  areList[]{ word, caption, icon },
+  testimonials[]{ quote, name, role },
   valuesLabel, valuesHeadline, valuesTagline,
   values[]{ icon, title, body, image },
   workplaceLabel, workplaceHeadline, workplaceTagline, workplaceBody,

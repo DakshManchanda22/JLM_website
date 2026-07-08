@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
-import { motion, useInView, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, animate, useInView, useReducedMotion } from 'framer-motion'
 import { Cormorant_Garamond, DM_Sans } from 'next/font/google'
 import Footer from '@/components/Footer'
 
@@ -21,7 +21,7 @@ export type LifeCms = {
   heroCaptionSmall?: string
   heroCaptionLarge?: string
   anchors?: { num: string; label: string; targetId: string; image: string }[]
-  captionStrip?: { src: string; caption: string }[]
+  captionStrip?: { src: string; caption: string; aspect?: number }[]
   peopleLabel?: string
   peopleHeadline?: string
   peopleTagline?: string
@@ -29,8 +29,7 @@ export type LifeCms = {
   arentEyebrow?: string
   arentHeadline?: string
   arentBody?: string
-  arentList?: { word: string; caption: string; icon: string }[]
-  areList?: { word: string; caption: string; icon: string }[]
+  testimonials?: { quote: string; name: string; role: string }[]
   valuesLabel?: string
   valuesHeadline?: string
   valuesTagline?: string
@@ -54,6 +53,11 @@ export type LifeCms = {
 const LifeCtx = createContext<LifeCms>({})
 const useLife = () => useContext(LifeCtx)
 
+/* Most headings use the same system serif (Tailwind `font-serif`) as the
+   homepage "A century of everyday goodness" heading. A few elements keep the
+   original Cormorant Garamond (value titles, the intro statement). */
+const serifClass = 'font-serif'
+
 const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
   weight: ['300', '400', '500'],
@@ -67,24 +71,42 @@ const dmSans = DM_Sans({
   variable: '--font-dm-sans',
 })
 
-const BEIGE = '#E8E0D5'
+/* Neutral grayscale tint — replaces the off-brand beige for placeholders,
+   hairline borders and dividers. Cards use only pure black/white. */
+const FAINT = '#EEEEEE'
 const INK = '#111111'
 const MUTED = '#555555'
 const EASE = [0.16, 1, 0.3, 1] as const
 
 /* ─────────────────────────── data ─────────────────────────── */
 
-const DEFAULT_AINT_LIST = [
-  { word: 'corporate', caption: 'stiff, formal', icon: '🪑' },
-  { word: 'showy', caption: 'loud, flashy', icon: '🎺' },
-  { word: 'siloed', caption: 'closed, guarded', icon: '🧱' },
-]
-
-const DEFAULT_ARE_LIST = [
-  { word: 'Considered', caption: 'thoughtful, deliberate', icon: '🧭' },
-  { word: 'Curious', caption: 'always learning', icon: '🔎' },
-  { word: 'Generous', caption: 'time, credit, knowledge', icon: '🤝' },
-  { word: 'Patient', caption: 'good things take time', icon: '⏳' },
+/* Placeholder employee testimonials — marketing replaces these in Sanity
+   (Life at JL Morison → Employee testimonials). */
+const DEFAULT_TESTIMONIALS = [
+  {
+    quote:
+      'In fifteen years here, the thing that’s never changed is the feeling that the work matters — and that the people beside you care just as much as you do.',
+    name: 'Priya Nair',
+    role: 'R&D · Emoform',
+  },
+  {
+    quote:
+      'I joined straight out of college and was trusted with real responsibility within months. You’re never just a cog here; your ideas actually make it to the shelf.',
+    name: 'Arjun Mehta',
+    role: 'Brand Marketing · Baby Dreams',
+  },
+  {
+    quote:
+      'What I value most is the honesty. We talk openly about what’s working and what isn’t, and then we fix it together. That’s rare in a company this old.',
+    name: 'Fatima Sheikh',
+    role: 'Supply Chain',
+  },
+  {
+    quote:
+      'A hundred-year-old company that still feels like it’s just getting started. The pace is real, but so is the patience to get things right.',
+    name: 'Rohan Desai',
+    role: 'Sales · West Region',
+  },
 ]
 
 const DEFAULT_VALUES = [
@@ -134,21 +156,10 @@ const DEFAULT_VALUES = [
 
 /* ─────────────────────── reusable bits ─────────────────────── */
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <div
-      className={`${dmSans.className} uppercase tracking-[0.22em] text-[11px] font-medium`}
-      style={{ color: MUTED }}
-    >
-      {children}
-    </div>
-  )
-}
-
 function Sporting({ children }: { children: React.ReactNode }) {
   return (
     <p
-      className={`${cormorant.className} italic`}
+      className={`${serifClass} italic`}
       style={{
         fontWeight: 400,
         fontSize: 'clamp(20px, 2.2vw, 28px)',
@@ -190,21 +201,32 @@ const DEFAULT_INTRO_SRCS = [
 const DEFAULT_INTRO_FINAL_SRC =
   'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=1800&h=1200&fit=crop&auto=format'
 
-/* slower staggered reveal — each photo pops in with a ~900ms wait */
-const INTRO_DELAYS_MS = [200, 1100, 2000, 2900, 3800, 4700]
-const FINAL_FADE_IN_MS = 5800
-const CURTAIN_LIFT_MS = 7000
 const CURTAIN_DURATION_MS = 1500
+
+/* Choreography derived from however many collage photos are supplied, so the
+   intro adapts to the real count — never pausing on a missing frame and never
+   repeating an image to fill a fixed slot. Each photo pops in ~900ms apart. */
+function introTiming(count: number) {
+  const START = 200
+  const STEP = 900
+  const n = Math.max(1, count)
+  const delays = Array.from({ length: n }, (_, i) => START + i * STEP)
+  const finalFadeMs = START + n * STEP + 300
+  const liftMs = finalFadeMs + 1200
+  return { delays, finalFadeMs, liftMs }
+}
 
 function IntroCurtain({ onDone }: { onDone: () => void }) {
   const cms = useLife()
   const cmsSrcs = cms.introImages?.map((i) => i.url).filter(Boolean) as string[] | undefined
-  const SRCS =
-    cmsSrcs && cmsSrcs.length > 0
-      ? // pad/truncate to 6 to keep the layout array aligned
-        Array.from({ length: 6 }, (_, i) => cmsSrcs[i % cmsSrcs.length])
-      : DEFAULT_INTRO_SRCS
+  /* Render exactly the photos provided — no padding, so no image repeats. */
+  const SRCS = cmsSrcs && cmsSrcs.length > 0 ? cmsSrcs : DEFAULT_INTRO_SRCS
   const FINAL_SRC = cms.introFinalImage ?? DEFAULT_INTRO_FINAL_SRC
+  const {
+    delays: INTRO_DELAYS_MS,
+    finalFadeMs: FINAL_FADE_IN_MS,
+    liftMs: CURTAIN_LIFT_MS,
+  } = introTiming(SRCS.length)
 
   const [lifted, setLifted] = useState(false)
   const [visibleCount, setVisibleCount] = useState(0)
@@ -226,7 +248,7 @@ function IntroCurtain({ onDone }: { onDone: () => void }) {
       transition={{ duration: CURTAIN_DURATION_MS / 1000, ease: [0.77, 0, 0.175, 1] }}
       className="fixed overflow-hidden"
       style={{
-        top: 64,
+        top: 'var(--nav-h)',
         left: 0,
         right: 0,
         bottom: 0,
@@ -244,7 +266,9 @@ function IntroCurtain({ onDone }: { onDone: () => void }) {
         transition={{ duration: (CURTAIN_LIFT_MS - 200) / 1000, ease: 'linear', delay: 0.2 }}
         className="absolute inset-0"
       >
-        {INTRO_LAYOUT.map((img, i) => (
+        {SRCS.map((src, i) => {
+          const img = INTRO_LAYOUT[i % INTRO_LAYOUT.length]
+          return (
           <div
             key={i}
             className="absolute"
@@ -259,17 +283,16 @@ function IntroCurtain({ onDone }: { onDone: () => void }) {
             }}
           >
             <Image
-              src={SRCS[i]}
+              src={src}
               alt=""
               fill
               priority={i < 3}
               sizes="100vw"
               style={{ objectFit: 'cover' }}
             />
-            {/* subtle warm tint to bind the stack */}
-            <div className="absolute inset-0" style={{ backgroundColor: 'rgba(232,224,213,0.18)' }} />
           </div>
-        ))}
+          )
+        })}
       </motion.div>
 
       {/* final establishing cover, slides in scaling 0.8 → 1 and fading in,
@@ -306,8 +329,12 @@ function IntroCurtain({ onDone }: { onDone: () => void }) {
 function Hero() {
   const cms = useLife()
   /* Hero is mounted behind the curtain. Headline words animate
-     in once the curtain begins lifting — timed to the curtain. */
-  const HERO_REVEAL_DELAY = CURTAIN_LIFT_MS / 1000 + 0.5 // headline rises as curtain pulls away
+     in once the curtain begins lifting — timed to the same choreography. */
+  const introCount =
+    cms.introImages && cms.introImages.length > 0
+      ? cms.introImages.length
+      : DEFAULT_INTRO_SRCS.length
+  const HERO_REVEAL_DELAY = introTiming(introCount).liftMs / 1000 + 0.5 // headline rises as curtain pulls away
 
   const HERO_IMG =
     cms.heroImage ??
@@ -322,7 +349,7 @@ function Hero() {
       className="relative w-full"
       style={{
         minHeight: '92vh',
-        backgroundColor: BEIGE,
+        backgroundColor: FAINT,
         overflow: 'hidden',
       }}
     >
@@ -357,7 +384,7 @@ function Hero() {
             initial={{ y: '9vw' }}
             animate={{ y: 0 }}
             transition={{ duration: 1.6, ease: [0.696, 0.108, 0.199, 0.897], delay: HERO_REVEAL_DELAY }}
-            className={`${cormorant.className} italic text-center`}
+            className={`${serifClass} italic text-center`}
             style={{
               fontSize: 'clamp(64px, 12vw, 180px)',
               lineHeight: 1,
@@ -405,7 +432,7 @@ function Hero() {
           {CAP_SMALL}
         </span>
         <span
-          className={`${cormorant.className} italic mt-2 text-center max-w-[44ch]`}
+          className={`${serifClass} italic mt-2 text-center max-w-[44ch]`}
           style={{ fontSize: 'clamp(16px, 1.4vw, 20px)', color: '#FFFFFF', opacity: 0.85, fontWeight: 400 }}
         >
           {CAP_LARGE}
@@ -467,11 +494,19 @@ function CaptionStrip() {
     },
   ]
   const ITEMS = (cms.captionStrip && cms.captionStrip.length > 0 ? cms.captionStrip : DEFAULT_ITEMS).map(
-    (it, i) => ({ src: it.src, caption: it.caption, offset: i % 2 === 0 ? 0 : 64 }),
+    (it, i) => ({
+      src: it.src,
+      caption: it.caption,
+      // Match the frame to the photo's real proportions so nothing gets
+      // cropped — whatever aspect marketing uploads is what shows. Falls back
+      // to a portrait frame only when the ratio is unknown.
+      aspect: 'aspect' in it && it.aspect ? String(it.aspect) : '4 / 5',
+      offset: i % 2 === 0 ? 0 : 64,
+    }),
   )
   return (
     <section
-      className="relative w-full px-[6vw] py-[12vh] grid grid-cols-1 md:grid-cols-2 gap-x-[6vw] gap-y-16"
+      className="relative w-full px-[4vw] pt-[3vh] pb-[12vh] grid grid-cols-1 md:grid-cols-2 gap-x-[4vw] gap-y-16"
       style={{ backgroundColor: '#FFFFFF' }}
     >
       {ITEMS.map((it, i) => (
@@ -485,12 +520,12 @@ function CaptionStrip() {
         >
           <div
             className="relative overflow-hidden"
-            style={{ borderRadius: 16, aspectRatio: '4 / 5', backgroundColor: BEIGE }}
+            style={{ borderRadius: 16, aspectRatio: it.aspect, backgroundColor: FAINT }}
           >
             <Image src={it.src} alt={it.caption} fill sizes="(max-width: 768px) 90vw, 42vw" style={{ objectFit: 'cover' }} />
           </div>
           <p
-            className={`${cormorant.className} italic mt-4`}
+            className={`${serifClass} italic mt-4`}
             style={{ fontSize: 20, color: MUTED, fontWeight: 400 }}
           >
             {it.caption}
@@ -501,158 +536,39 @@ function CaptionStrip() {
   )
 }
 
-/* ─────────────────── /1 PEOPLE block ─────────────────── */
+/* ──────────── Employee testimonials (card row) ──────────── */
 
-function PeopleBlock() {
+/* Section sits on black. Cards alternate a solid white fill and a raised
+   charcoal surface (clearly lighter than the black ground, with a hairline
+   edge) so both read cleanly — monochrome, no hue introduced. */
+const CARD_STYLES = [
+  { bg: '#FFFFFF', fg: INK, sub: MUTED, border: 'none' },
+  { bg: '#2A2A2A', fg: '#FFFFFF', sub: 'rgba(255,255,255,0.62)', border: '1px solid rgba(255,255,255,0.08)' },
+] as const
+
+function TestimonialsBlock() {
   const cms = useLife()
-  const LABEL = cms.peopleLabel ?? '/1 People'
-  const HEADLINE = cms.peopleHeadline ?? 'A team that shows up — for each other, and for the families we serve.'
-  const TAGLINE = cms.peopleTagline ?? 'No titles, no posturing — just craft. 🌱'
-  const BODY =
-    cms.peopleBody ??
-    'Some of us have been here for decades. Some joined last year. What we share is harder to put on a CV — a quiet patience with the work, respect for the next person’s craft, and a real belief that good products are built by good teams.'
-  return (
-    <section
-      id="people"
-      className="relative w-full"
-      style={{ backgroundColor: '#FFFFFF', padding: '14vh 6vw' }}
-    >
-      <div className="max-w-[820px] mx-auto text-center">
-        <SectionLabel>{LABEL}</SectionLabel>
-        <motion.h2
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-80px' }}
-          transition={{ duration: 0.9, ease: EASE }}
-          className={`${cormorant.className} mt-6`}
-          style={{
-            fontSize: 'clamp(40px, 5.4vw, 80px)',
-            lineHeight: 1.04,
-            fontWeight: 300,
-            color: INK,
-          }}
-        >
-          {HEADLINE}
-        </motion.h2>
-        <div className="mt-6">
-          <Sporting>{TAGLINE}</Sporting>
-        </div>
-        <p
-          className={`${dmSans.className} mt-6 max-w-[58ch] mx-auto`}
-          style={{ color: MUTED, fontSize: 15, lineHeight: 1.7 }}
-        >
-          {BODY}
-        </p>
-      </div>
-    </section>
-  )
-}
-
-/* ──────────── ARE / AREN'T strikethrough block ──────────── */
-
-function StrikeRow({ word, caption, icon }: { word: string; caption: string; icon: string }) {
-  const ref = useRef<HTMLDivElement>(null)
-  const inView = useInView(ref, { once: true, margin: '-80px' })
-  return (
-    <div ref={ref} className="relative">
-      <SectionLabel>We aren’t</SectionLabel>
-      <div className="relative mt-2 inline-block">
-        <h3
-          className={`${cormorant.className} italic`}
-          style={{
-            fontSize: 'clamp(40px, 5.4vw, 84px)',
-            color: INK,
-            fontWeight: 400,
-            lineHeight: 1,
-          }}
-        >
-          {word}
-        </h3>
-        {/* strikethrough line */}
-        <motion.div
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: inView ? 1 : 0 }}
-          transition={{ duration: 0.9, ease: EASE, delay: 0.2 }}
-          className="absolute left-0 right-0"
-          style={{
-            top: '52%',
-            height: 2,
-            backgroundColor: INK,
-            transformOrigin: 'left center',
-          }}
-        />
-      </div>
-      <div
-        className={`${dmSans.className} mt-3`}
-        style={{ color: MUTED, fontSize: 13, letterSpacing: '0.02em' }}
-      >
-        <span className="mr-2">{icon}</span>
-        <span style={{ textDecoration: 'line-through' }}>{caption}</span>
-      </div>
-    </div>
-  )
-}
-
-function AreRow({ word, caption, icon }: { word: string; caption: string; icon: string }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-60px' }}
-      transition={{ duration: 0.7, ease: EASE }}
-    >
-      <SectionLabel>We are</SectionLabel>
-      <h3
-        className={`${dmSans.className} mt-2`}
-        style={{
-          fontSize: 'clamp(34px, 4.4vw, 64px)',
-          color: INK,
-          fontWeight: 400,
-          letterSpacing: '-0.01em',
-          lineHeight: 1.04,
-        }}
-      >
-        {word}
-      </h3>
-      <div
-        className={`${dmSans.className} mt-3`}
-        style={{ color: MUTED, fontSize: 13 }}
-      >
-        <span className="mr-2">{icon}</span>
-        {caption}
-      </div>
-    </motion.div>
-  )
-}
-
-function AreArentBlock() {
-  const cms = useLife()
-  const EYEBROW = cms.arentEyebrow ?? 'Not your average company'
-  const HEADLINE = cms.arentHeadline ?? 'What we are — and what we’re not.'
+  const HEADLINE = cms.arentHeadline ?? 'What our employees say'
   const BODY =
     cms.arentBody ??
-    'A hundred years has taught us as much about what to avoid as what to chase. We try to be honest about both.'
-  const AINT_LIST = cms.arentList && cms.arentList.length > 0 ? cms.arentList : DEFAULT_AINT_LIST
-  const ARE_LIST = cms.areList && cms.areList.length > 0 ? cms.areList : DEFAULT_ARE_LIST
+    'A hundred years of building goodness — in the words of the people who do it every day.'
+  const ITEMS =
+    cms.testimonials && cms.testimonials.length > 0 ? cms.testimonials : DEFAULT_TESTIMONIALS
+
   return (
     <section
       className="relative w-full"
-      style={{ backgroundColor: INK, color: '#FFFFFF', padding: '16vh 6vw' }}
+      style={{ backgroundColor: INK, color: '#FFFFFF', padding: '16vh 0 10vh' }}
     >
-      <div className="max-w-[820px]">
-        <p
-          className={`${dmSans.className} uppercase tracking-[0.22em]`}
-          style={{ fontSize: 11, color: '#FFFFFF', opacity: 0.65 }}
-        >
-          {EYEBROW}
-        </p>
+      <div className="px-[6vw] max-w-[820px]">
         <h2
-          className={`${cormorant.className} mt-5`}
+          className={serifClass}
           style={{
-            fontSize: 'clamp(42px, 5.6vw, 86px)',
+            fontSize: 'clamp(26px, 5.4vw, 72px)',
             lineHeight: 1.04,
             color: '#FFFFFF',
-            fontWeight: 300,
+            fontWeight: 500,
+            whiteSpace: 'nowrap',
           }}
         >
           {HEADLINE}
@@ -665,19 +581,53 @@ function AreArentBlock() {
         </p>
       </div>
 
+      {/* horizontal, snap-scrolling row of quote cards */}
       <div
-        className="mt-[10vh] grid gap-x-10 gap-y-14"
-        style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', color: '#FFFFFF' }}
+        className="hide-scrollbar mt-[8vh] flex items-stretch gap-5 overflow-x-auto overflow-y-hidden pb-4 snap-x snap-mandatory"
+        style={{ paddingLeft: '6vw', paddingRight: '6vw', scrollPaddingLeft: '6vw' }}
       >
-        {AINT_LIST.map((it) => (
-          <StrikeRow key={it.word} {...it} />
-        ))}
-      </div>
-
-      <div className="mt-[14vh] grid gap-x-10 gap-y-14" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
-        {ARE_LIST.map((it) => (
-          <AreRow key={it.word} {...it} />
-        ))}
+        {ITEMS.map((t, i) => {
+          const s = CARD_STYLES[i % CARD_STYLES.length]
+          return (
+            <motion.figure
+              key={i}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-60px' }}
+              transition={{ duration: 0.7, ease: EASE, delay: (i % 4) * 0.08 }}
+              className="snap-start shrink-0 flex flex-col justify-between"
+              style={{
+                width: 'min(80vw, 380px)',
+                minHeight: 460,
+                backgroundColor: s.bg,
+                color: s.fg,
+                border: s.border,
+                borderRadius: 20,
+                padding: '32px 30px',
+              }}
+            >
+              <blockquote
+                className={dmSans.className}
+                style={{ fontSize: 'clamp(17px, 1.5vw, 20px)', lineHeight: 1.45, fontWeight: 400 }}
+              >
+                “{t.quote}”
+              </blockquote>
+              <figcaption className="mt-8">
+                <div
+                  className={dmSans.className}
+                  style={{ fontSize: 24, fontWeight: 600, letterSpacing: '-0.01em' }}
+                >
+                  {t.name}
+                </div>
+                {t.role && (
+                  <div className={`${dmSans.className} mt-1`} style={{ fontSize: 14, color: s.sub }}>
+                    {t.role}
+                  </div>
+                )}
+              </figcaption>
+            </motion.figure>
+          )
+        })}
       </div>
     </section>
   )
@@ -687,7 +637,6 @@ function AreArentBlock() {
 
 function ValuesBlock() {
   const cms = useLife()
-  const LABEL = cms.valuesLabel ?? '/2 Values'
   const HEADLINE =
     cms.valuesHeadline ?? 'Seven values we quietly refuse to compromise on.'
   const TAGLINE = cms.valuesTagline ?? 'All of the above — with long-term thinking.'
@@ -700,14 +649,14 @@ function ValuesBlock() {
       style={{ backgroundColor: '#FFFFFF', padding: '14vh 6vw' }}
     >
       <div className="max-w-[820px]">
-        <SectionLabel>{LABEL}</SectionLabel>
         <h2
-          className={`${cormorant.className} mt-6`}
+          className={`${serifClass} mt-6`}
           style={{
-            fontSize: 'clamp(40px, 5.4vw, 80px)',
-            lineHeight: 1.04,
+            fontSize: 'clamp(32px, 4.2vw, 58px)',
+            lineHeight: 1.08,
             fontWeight: 300,
             color: INK,
+            textWrap: 'balance',
           }}
         >
           {HEADLINE}
@@ -727,7 +676,7 @@ function ValuesBlock() {
                 key={v.title}
                 onMouseEnter={() => setActive(i)}
                 className="group relative py-8 cursor-default"
-                style={{ borderTop: `1px solid ${isActive ? INK : BEIGE}`, transition: 'border-color 300ms' }}
+                style={{ borderTop: `1px solid ${isActive ? INK : FAINT}`, transition: 'border-color 300ms' }}
               >
                 <div className="flex items-baseline gap-6">
                   <span
@@ -745,7 +694,7 @@ function ValuesBlock() {
                   <div className="flex-1">
                     <div className="flex items-baseline">
                       <h3
-                        className={`${cormorant.className}`}
+                        className={cormorant.className}
                         style={{
                           fontSize: 'clamp(28px, 3.4vw, 48px)',
                           color: INK,
@@ -777,14 +726,14 @@ function ValuesBlock() {
               </div>
             )
           })}
-          <div style={{ borderTop: `1px solid ${BEIGE}` }} />
+          <div style={{ borderTop: `1px solid ${FAINT}` }} />
         </div>
 
         {/* image reveal */}
         <div className="md:col-span-5 md:sticky md:top-24 self-start">
           <div
             className="relative w-full overflow-hidden"
-            style={{ aspectRatio: '3 / 4', borderRadius: 18, backgroundColor: BEIGE }}
+            style={{ aspectRatio: '3 / 4', borderRadius: 18, backgroundColor: FAINT }}
           >
             <AnimatePresence mode="wait">
               <motion.div
@@ -805,7 +754,7 @@ function ValuesBlock() {
               </motion.div>
             </AnimatePresence>
             <div
-              className={`${cormorant.className} italic absolute bottom-5 left-5`}
+              className={`${serifClass} italic absolute bottom-5 left-5`}
               style={{ color: '#FFFFFF', fontSize: 22, textShadow: '0 2px 12px rgba(0,0,0,0.4)' }}
             >
               {VALUES[active].title}
@@ -817,11 +766,119 @@ function ValuesBlock() {
   )
 }
 
+/* ───────────────── Stat cards (below Values) ───────────────── */
+
+/* Stat cards modelled exactly on the reference travel card: photo on top,
+   coloured title, subtitle, an icon detail row, a dark pill CTA and a heart.
+   Images (and the reference placeholder copy) are swappable later. */
+const STAT_GREEN = '#58C15C'
+const STAT_PINK = '#E85CA0'
+const STAT_CARDS = [
+  {
+    img: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=1200&h=1000&fit=crop&auto=format',
+    number: 400,
+    suffix: '',
+    label: 'Work strength',
+    color: STAT_GREEN,
+  },
+  {
+    img: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&h=1000&fit=crop&auto=format',
+    number: 10,
+    suffix: '%',
+    label: 'Gender parity',
+    color: STAT_PINK,
+  },
+] as const
+
+/* Counts from 0 → `to` once the number scrolls into view. Honours
+   prefers-reduced-motion by jumping straight to the final value. */
+function CountUp({ to, duration = 1 }: { to: number; duration?: number }) {
+  const ref = useRef<HTMLSpanElement>(null)
+  const inView = useInView(ref, { once: true, margin: '-60px' })
+  const reduce = useReducedMotion()
+  const [val, setVal] = useState(0)
+  useEffect(() => {
+    if (!inView) return
+    if (reduce) {
+      setVal(to)
+      return
+    }
+    const controls = animate(0, to, {
+      duration,
+      ease: [0.25, 1, 0.5, 1],
+      onUpdate: (v) => setVal(Math.round(v)),
+    })
+    return () => controls.stop()
+  }, [inView, to, duration, reduce])
+  return <span ref={ref}>{val}</span>
+}
+
+function StatsBlock() {
+  return (
+    <section
+      className="relative w-full"
+      style={{ backgroundColor: '#FFFFFF', padding: '12vh 6vw' }}
+    >
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-[1000px] mx-auto">
+        {STAT_CARDS.map((c, i) => (
+          <motion.div
+            key={c.label}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-80px' }}
+            transition={{ duration: 0.7, ease: EASE, delay: i * 0.1 }}
+            className="mx-auto w-full max-w-[460px]"
+            style={{
+              backgroundColor: '#FFFFFF',
+              borderRadius: 30,
+              padding: 20,
+              boxShadow: '0 30px 60px -22px rgba(0,0,0,0.22)',
+            }}
+          >
+            <div
+              className="relative w-full overflow-hidden"
+              style={{ aspectRatio: '5 / 4', borderRadius: 22, backgroundColor: FAINT }}
+            >
+              <Image
+                src={c.img}
+                alt=""
+                fill
+                sizes="(max-width: 768px) 90vw, 460px"
+                style={{ objectFit: 'cover' }}
+              />
+            </div>
+            <div className="px-3 pt-6 pb-3">
+              <div
+                className={dmSans.className}
+                style={{
+                  fontSize: 'clamp(56px, 7vw, 88px)',
+                  lineHeight: 1,
+                  fontWeight: 700,
+                  letterSpacing: '-0.03em',
+                  color: c.color,
+                }}
+              >
+                <CountUp to={c.number} />
+                {c.suffix}
+              </div>
+              <div
+                className={`${dmSans.className} mt-2`}
+                style={{ fontSize: 'clamp(20px, 2.2vw, 26px)', fontWeight: 500, color: c.color }}
+              >
+                {c.label}
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 /* ───────────────── /3 WORKPLACE block ───────────────── */
 
 function WorkplaceBlock() {
   const cms = useLife()
-  const LABEL = cms.workplaceLabel ?? '/3 Workplace'
   const HEADLINE =
     cms.workplaceHeadline ?? 'A working day that makes room for actual thinking.'
   const TAGLINE = cms.workplaceTagline ?? 'Heads-down work. Heads-up culture. 🪟'
@@ -850,17 +907,17 @@ function WorkplaceBlock() {
     <section
       id="workplace"
       className="relative w-full"
-      style={{ backgroundColor: BEIGE, padding: '14vh 6vw' }}
+      style={{ backgroundColor: '#FFFFFF', padding: '14vh 6vw' }}
     >
       <div className="max-w-[820px]">
-        <SectionLabel>{LABEL}</SectionLabel>
         <h2
-          className={`${cormorant.className} mt-6`}
+          className={`${serifClass} mt-6`}
           style={{
-            fontSize: 'clamp(40px, 5.4vw, 80px)',
-            lineHeight: 1.04,
+            fontSize: 'clamp(32px, 4.2vw, 58px)',
+            lineHeight: 1.08,
             fontWeight: 300,
             color: INK,
+            textWrap: 'balance',
           }}
         >
           {HEADLINE}
@@ -909,134 +966,6 @@ function WorkplaceBlock() {
   )
 }
 
-/* ───────────────── /4 TOGETHER block ───────────────── */
-
-function TogetherBlock() {
-  const cms = useLife()
-  const LABEL = cms.togetherLabel ?? '/4 Together'
-  const HEADLINE = cms.togetherHeadline ?? 'Three brands. One company. Many hands.'
-  const TAGLINE = cms.togetherTagline ?? 'And a hundred-year-old habit of doing it together.'
-  const BODY =
-    cms.togetherBody ??
-    'The R&D chemist who refuses to ship a formula that isn’t quite right. The salesperson who knows the shopkeeper by name. The designer obsessing over the spacing of a single line on a Baby Dreams box. None of it works alone, and none of us pretends it does.'
-  const DEFAULT_BRANDS = [
-    { name: 'Morisons Baby Dreams', tag: 'Baby care, with care.' },
-    { name: 'Emoform', tag: 'A quieter kind of confidence.' },
-    { name: 'Bigen', tag: 'Heritage colour, simply done.' },
-  ]
-  const BRANDS =
-    cms.togetherBrands && cms.togetherBrands.length > 0
-      ? cms.togetherBrands
-      : DEFAULT_BRANDS
-  const CLOSING_MARK = cms.togetherClosingMark ?? 'end <life at jlm>'
-  const CLOSING_LINE =
-    cms.togetherClosingLine ?? 'Want to build the next hundred years with us?'
-  const CTA_LABEL = cms.togetherCtaLabel ?? 'Get in touch'
-  const CTA_HREF = cms.togetherCtaHref ?? '/contact-us'
-
-  return (
-    <section
-      id="together"
-      className="relative w-full"
-      style={{ backgroundColor: '#FFFFFF', padding: '14vh 6vw' }}
-    >
-      <div className="max-w-[820px]">
-        <SectionLabel>{LABEL}</SectionLabel>
-        <h2
-          className={`${cormorant.className} mt-6`}
-          style={{
-            fontSize: 'clamp(40px, 5.4vw, 80px)',
-            lineHeight: 1.04,
-            fontWeight: 300,
-            color: INK,
-          }}
-        >
-          {HEADLINE}
-        </h2>
-        <div className="mt-6">
-          <Sporting>{TAGLINE}</Sporting>
-        </div>
-        <p
-          className={`${dmSans.className} mt-6 max-w-[58ch]`}
-          style={{ color: MUTED, fontSize: 15, lineHeight: 1.7 }}
-        >
-          {BODY}
-        </p>
-      </div>
-
-      <div className="mt-[10vh] grid grid-cols-1 md:grid-cols-3 gap-6">
-        {BRANDS.map((b, i) => (
-          <motion.div
-            key={b.name}
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-60px' }}
-            transition={{ duration: 0.7, ease: EASE, delay: i * 0.08 }}
-            className="relative p-7"
-            style={{
-              border: `1px solid ${BEIGE}`,
-              borderRadius: 16,
-              backgroundColor: '#FFFFFF',
-            }}
-          >
-            <span
-              className={`${dmSans.className}`}
-              style={{ color: MUTED, fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase' }}
-            >
-              Brand
-            </span>
-            <h3
-              className={`${cormorant.className} mt-3`}
-              style={{ color: INK, fontSize: 28, fontWeight: 400, lineHeight: 1.15 }}
-            >
-              {b.name}
-            </h3>
-            <p
-              className={`${cormorant.className} italic mt-3`}
-              style={{ color: MUTED, fontSize: 18, fontWeight: 400 }}
-            >
-              {b.tag}
-            </p>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* closing line */}
-      <div className="mt-[16vh] flex flex-col items-center text-center">
-        <span
-          className={`${dmSans.className} uppercase tracking-[0.24em]`}
-          style={{ fontSize: 11, color: MUTED }}
-        >
-          {CLOSING_MARK}
-        </span>
-        <div
-          className="mt-6 w-[40vw] max-w-[400px]"
-          style={{ height: 1, backgroundColor: BEIGE }}
-        />
-        <p
-          className={`${cormorant.className} italic mt-8 max-w-[44ch]`}
-          style={{ fontSize: 'clamp(20px, 2.2vw, 28px)', color: INK, fontWeight: 400, lineHeight: 1.45 }}
-        >
-          {CLOSING_LINE}
-        </p>
-        <a
-          href={CTA_HREF}
-          className={`${dmSans.className} mt-8 inline-block`}
-          style={{
-            border: `1px solid ${INK}`,
-            color: INK,
-            fontSize: 13,
-            padding: '14px 28px',
-            borderRadius: 999,
-            letterSpacing: '0.05em',
-          }}
-        >
-          {CTA_LABEL}
-        </a>
-      </div>
-    </section>
-  )
-}
 
 /* ─────────────────────────── PAGE ─────────────────────────── */
 
@@ -1080,16 +1009,15 @@ export default function LifeAtJlmClient({ cms = {} }: { cms?: LifeCms }) {
 
   return (
     <LifeCtx.Provider value={cms}>
-      <div className={`${cormorant.variable} ${dmSans.variable}`}>
+      <div className={`${dmSans.variable}`}>
         {!introDone && <IntroCurtain onDone={() => setIntroDone(true)} />}
         <Hero />
         <IntroParagraph />
         <CaptionStrip />
-        <PeopleBlock />
-        <AreArentBlock />
+        <TestimonialsBlock />
         <ValuesBlock />
+        <StatsBlock />
         <WorkplaceBlock />
-        <TogetherBlock />
         <Footer />
       </div>
     </LifeCtx.Provider>
