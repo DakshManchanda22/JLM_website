@@ -406,7 +406,7 @@ export default function ContactPage() {
                       </div>
                       <span className="text-xs text-[#555555] leading-relaxed">
                         I agree to the{' '}
-                        <a href="/privacy-policy" className="underline text-[#111111]">
+                        <a href="https://storage.googleapis.com/jlm_website_v2/Privacy-Policy.pdf" target="_blank" rel="noopener noreferrer" className="underline text-[#111111]">
                           Privacy Policy
                         </a>
                         .

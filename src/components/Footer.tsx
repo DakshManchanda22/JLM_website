@@ -8,7 +8,7 @@ const COMPANY_LINKS = [
   { label: 'Blog', href: '/blog' },
   { label: 'Careers', href: '/careers' },
   { label: 'Contact Us', href: '/contact-us' },
-  { label: 'Privacy Policy', href: '/privacy-policy' },
+  { label: 'Privacy Policy', href: 'https://storage.googleapis.com/jlm_website_v2/Privacy-Policy.pdf', external: true },
 ]
 
 /* Simple inline SVGs — no extra dependency */
@@ -68,16 +68,25 @@ const SOCIAL = [
 const EASE = [0.16, 1, 0.3, 1] as const
 
 /* Reusable animated link with sliding underline */
-function FooterLink({ label, href }: { label: string; href: string }) {
+function FooterLink({ label, href, external }: { label: string; href: string; external?: boolean }) {
+  const className =
+    'group relative inline-block text-white/55 text-sm leading-relaxed hover:text-white transition-colors duration-200'
+  const underline = (
+    <span className="absolute bottom-[-1px] left-0 h-px w-0 bg-white/60 transition-[width] duration-300 ease-out group-hover:w-full" />
+  )
   return (
     <li>
-      <Link
-        href={href}
-        className="group relative inline-block text-white/55 text-sm leading-relaxed hover:text-white transition-colors duration-200"
-      >
-        {label}
-        <span className="absolute bottom-[-1px] left-0 h-px w-0 bg-white/60 transition-[width] duration-300 ease-out group-hover:w-full" />
-      </Link>
+      {external ? (
+        <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
+          {label}
+          {underline}
+        </a>
+      ) : (
+        <Link href={href} className={className}>
+          {label}
+          {underline}
+        </Link>
+      )}
     </li>
   )
 }
