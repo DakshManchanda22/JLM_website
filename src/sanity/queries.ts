@@ -265,7 +265,7 @@ export type LifeAtJlm = {
   workplaceHeadline?: string
   workplaceTagline?: string
   workplaceBody?: string
-  workplaceImages?: { image: any; caption: string }[]
+  workplaceImages?: { image: any; caption: string; aspect?: number }[]
   togetherLabel?: string
   togetherHeadline?: string
   togetherTagline?: string
@@ -293,7 +293,7 @@ export const lifeAtJlmQuery = groq`*[_type == "lifeAtJlm"][0]{
   valuesLabel, valuesHeadline, valuesTagline,
   values[]{ icon, title, body, image },
   workplaceLabel, workplaceHeadline, workplaceTagline, workplaceBody,
-  workplaceImages[]{ image, caption },
+  workplaceImages[]{ image, caption, "aspect": image.asset->metadata.dimensions.aspectRatio },
   togetherLabel, togetherHeadline, togetherTagline, togetherBody,
   togetherBrands[]{ name, tag },
   togetherClosingMark, togetherClosingLine, togetherCtaLabel, togetherCtaHref,

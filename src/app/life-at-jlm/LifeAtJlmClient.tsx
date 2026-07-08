@@ -38,7 +38,7 @@ export type LifeCms = {
   workplaceHeadline?: string
   workplaceTagline?: string
   workplaceBody?: string
-  workplaceImages?: { src: string; cap: string }[]
+  workplaceImages?: { src: string; cap: string; aspect?: number }[]
   togetherLabel?: string
   togetherHeadline?: string
   togetherTagline?: string
@@ -394,13 +394,21 @@ function Hero() {
               color: '#FFFFFF',
               letterSpacing: '-0.01em',
               margin: 0,
+              // vertical room so ascenders/descenders aren't clipped by the reveal mask
+              paddingTop: '0.24em',
+              paddingBottom: '0.24em',
             }}
           >
             {LINE1}
           </motion.h1>
         </div>
 
-        <div className="overflow-hidden">
+        {/* marginTop pulls this whole mask up to cancel the 0.48em of padding
+            (0.24em from each line) so the two lines keep their tight spacing */}
+        <div
+          className="overflow-hidden"
+          style={{ marginTop: 'calc(-0.4vw - 0.48 * clamp(64px, 12vw, 180px))' }}
+        >
           <motion.h1
             initial={{ y: '9vw' }}
             animate={{ y: 0 }}
@@ -412,7 +420,9 @@ function Hero() {
               fontWeight: 300,
               letterSpacing: '-0.02em',
               color: '#FFFFFF',
-              marginTop: '-0.4vw',
+              margin: 0,
+              paddingTop: '0.24em',
+              paddingBottom: '0.24em',
             }}
           >
             {LINE2}
@@ -550,6 +560,7 @@ const CARD_STYLES = [
 
 function TestimonialsBlock() {
   const cms = useLife()
+  const reduce = useReducedMotion()
   const HEADLINE = cms.arentHeadline ?? 'What our employees say'
   const BODY =
     cms.arentBody ??
@@ -573,24 +584,30 @@ function TestimonialsBlock() {
             whiteSpace: 'nowrap',
           }}
         >
+          {/* Philanthropy-style highlighter: a beige band that fully wraps the
+              glyphs with DARK ink text on top (high contrast, always legible).
+              The band sweeps in left→right (scaleX) as the section is reached,
+              revealing the ink text on beige as it goes. scaleX fires reliably
+              where an animated clip-path did not. */}
           <span className="relative inline-block">
-            {/* beige highlighter marker that sweeps in on scroll */}
             <motion.span
               aria-hidden
-              className="absolute left-[-0.12em] right-[-0.12em] rounded-[3px]"
+              className="absolute rounded-[0.1em]"
               style={{
-                bottom: '0.06em',
-                height: '0.34em',
                 backgroundColor: BEIGE_ACCENT,
+                top: '-0.04em',
+                bottom: '-0.14em',
+                left: '-0.12em',
+                right: '-0.12em',
                 transformOrigin: 'left center',
                 zIndex: 0,
               }}
-              initial={{ scaleX: 0 }}
+              initial={reduce ? false : { scaleX: 0 }}
               whileInView={{ scaleX: 1 }}
-              viewport={{ once: true, amount: 0.7 }}
-              transition={{ duration: 0.8, ease: EASE, delay: 0.25 }}
+              viewport={{ once: true, amount: 0.6 }}
+              transition={{ duration: 0.8, ease: EASE, delay: 0.15 }}
             />
-            <span className="relative" style={{ zIndex: 1 }}>
+            <span className="relative" style={{ color: INK, zIndex: 1 }}>
               {HEADLINE}
             </span>
           </span>
@@ -797,14 +814,14 @@ const STAT_GREEN = '#58C15C'
 const STAT_PINK = '#E85CA0'
 const STAT_CARDS = [
   {
-    img: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=1200&h=1000&fit=crop&auto=format',
+    img: 'https://cdn.sanity.io/images/vfv5lxgr/production/3fcd078e887bbc2e9b45f385fb0866b427175c42-1269x855.jpg?w=1200&h=960&fit=crop&auto=format',
     number: 400,
     suffix: '',
     label: 'Work strength',
     color: STAT_GREEN,
   },
   {
-    img: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&h=1000&fit=crop&auto=format',
+    img: 'https://cdn.sanity.io/images/vfv5lxgr/production/27fb52f31800ba6875c50e0916bcdeefd86dcc05-3024x4032.jpg?w=1200&h=960&fit=crop&auto=format',
     number: 10,
     suffix: '%',
     label: 'Gender parity',
@@ -841,7 +858,7 @@ function StatsBlock() {
       className="relative w-full"
       style={{ backgroundColor: '#FFFFFF', padding: '12vh 6vw' }}
     >
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-[1000px] mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-14 max-w-[1240px] mx-auto">
         {STAT_CARDS.map((c, i) => (
           <motion.div
             key={c.label}
@@ -849,12 +866,13 @@ function StatsBlock() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-80px' }}
             transition={{ duration: 0.7, ease: EASE, delay: i * 0.1 }}
-            className="mx-auto w-full max-w-[460px]"
+            className="mx-auto w-full max-w-[580px]"
             style={{
               backgroundColor: '#FFFFFF',
               borderRadius: 30,
-              padding: 20,
-              boxShadow: '0 30px 60px -22px rgba(0,0,0,0.22)',
+              padding: 24,
+              boxShadow:
+                '0 40px 80px -28px rgba(0,0,0,0.30), 0 8px 20px -10px rgba(0,0,0,0.14)',
             }}
           >
             <div
@@ -865,16 +883,16 @@ function StatsBlock() {
                 src={c.img}
                 alt=""
                 fill
-                sizes="(max-width: 768px) 90vw, 460px"
+                sizes="(max-width: 768px) 92vw, 560px"
                 style={{ objectFit: 'cover' }}
               />
             </div>
-            <div className="px-3 pt-6 pb-3">
+            <div className="px-3 pt-7 pb-3">
               <div
                 className={dmSans.className}
                 style={{
-                  fontSize: 'clamp(56px, 7vw, 88px)',
-                  lineHeight: 1,
+                  fontSize: 'clamp(72px, 8.4vw, 116px)',
+                  lineHeight: 0.95,
                   fontWeight: 700,
                   letterSpacing: '-0.03em',
                   color: c.color,
@@ -884,8 +902,8 @@ function StatsBlock() {
                 {c.suffix}
               </div>
               <div
-                className={`${dmSans.className} mt-2`}
-                style={{ fontSize: 'clamp(20px, 2.2vw, 26px)', fontWeight: 500, color: c.color }}
+                className={`${dmSans.className} mt-3`}
+                style={{ fontSize: 'clamp(22px, 2.4vw, 30px)', fontWeight: 500, color: c.color }}
               >
                 {c.label}
               </div>
@@ -903,86 +921,109 @@ function WorkplaceBlock() {
   const cms = useLife()
   const HEADLINE =
     cms.workplaceHeadline ?? 'A working day that makes room for actual thinking.'
-  const TAGLINE = cms.workplaceTagline ?? 'Heads-down work. Heads-up culture. 🪟'
+  const KICKER = cms.workplaceLabel ?? 'Life at JL Morison'
   const BODY =
     cms.workplaceBody ??
-    'We meet when meeting matters. The rest of the time, people are in flow — at the office in Mumbai, at home, on the factory floor, with retailers. Three brands, dozens of small teams, one shared rhythm of careful work.'
+    'A dynamic, engaging place where creativity thrives, collaboration is encouraged, and every milestone is celebrated together.'
 
-  const SPANS = [
-    { span: 'col-span-12 md:col-span-7', aspect: '3 / 2' },
-    { span: 'col-span-7 md:col-span-5', aspect: '3 / 4' },
-    { span: 'col-span-5 md:col-span-4', aspect: '4 / 5' },
-    { span: 'col-span-12 md:col-span-8', aspect: '4 / 3' },
-  ]
+  // Mixed orientations so the default state already reads as a Pinterest wall.
   const DEFAULT_PHOTOS = [
-    { src: 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=1200&h=800&fit=crop&auto=format', cap: 'The office, Mumbai' },
-    { src: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?w=900&h=1200&fit=crop&auto=format', cap: 'Mornings, before chai' },
-    { src: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=900&h=1100&fit=crop&auto=format', cap: 'Hands-on always' },
-    { src: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=1200&h=900&fit=crop&auto=format', cap: 'Teamwork that travels' },
+    { src: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&h=800&fit=crop&auto=format', cap: 'Teams at work', aspect: 1.5 },
+    { src: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=900&h=1200&fit=crop&auto=format', cap: 'Heads down, building', aspect: 0.75 },
+    { src: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=1200&h=800&fit=crop&auto=format', cap: 'In the room together', aspect: 1.5 },
+    { src: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=1000&h=1000&fit=crop&auto=format', cap: 'Milestones, marked', aspect: 1 },
+    { src: 'https://images.unsplash.com/photo-1543269865-cbf427effbad?w=1200&h=800&fit=crop&auto=format', cap: 'Celebrating together', aspect: 1.5 },
+    { src: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=900&h=1200&fit=crop&auto=format', cap: 'The everyday rhythm', aspect: 0.75 },
   ]
+  // Show every image marketing adds — the masonry just keeps growing.
   const photos =
     cms.workplaceImages && cms.workplaceImages.length > 0
-      ? cms.workplaceImages.slice(0, 4)
+      ? cms.workplaceImages
       : DEFAULT_PHOTOS
 
   return (
     <section
       id="workplace"
       className="relative w-full"
-      style={{ backgroundColor: '#FFFFFF', padding: '14vh 6vw' }}
+      style={{ backgroundColor: INK, padding: '16vh 6vw' }}
     >
-      <div className="max-w-[820px]">
-        <h2
-          className={`${serifClass} mt-6`}
+      {/* centered header */}
+      <div className="mx-auto max-w-[820px] text-center">
+        <motion.p
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-80px' }}
+          transition={{ duration: 0.6, ease: EASE }}
+          className={dmSans.className}
           style={{
-            fontSize: 'clamp(32px, 4.2vw, 58px)',
-            lineHeight: 1.08,
+            color: 'rgba(255,255,255,0.5)',
+            fontSize: 13,
+            fontWeight: 500,
+            letterSpacing: '0.22em',
+            textTransform: 'uppercase',
+          }}
+        >
+          {KICKER}
+        </motion.p>
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-80px' }}
+          transition={{ duration: 0.8, ease: EASE, delay: 0.05 }}
+          className={`${serifClass} mt-5`}
+          style={{
+            fontSize: 'clamp(34px, 4.6vw, 68px)',
+            lineHeight: 1.06,
             fontWeight: 300,
-            color: INK,
+            color: '#FFFFFF',
             textWrap: 'balance',
           }}
         >
           {HEADLINE}
-        </h2>
-        <div className="mt-6">
-          <Sporting>{TAGLINE}</Sporting>
-        </div>
-        <p
-          className={`${dmSans.className} mt-6 max-w-[58ch]`}
-          style={{ color: MUTED, fontSize: 15, lineHeight: 1.7 }}
+        </motion.h2>
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-80px' }}
+          transition={{ duration: 0.8, ease: EASE, delay: 0.12 }}
+          className={`${dmSans.className} mx-auto mt-6 max-w-[62ch]`}
+          style={{ color: 'rgba(255,255,255,0.66)', fontSize: 16, lineHeight: 1.7 }}
         >
           {BODY}
-        </p>
+        </motion.p>
       </div>
 
-      <div className="mt-[8vh] grid grid-cols-12 gap-4">
-        {photos.map((p, i) => {
-          const layout = SPANS[i % SPANS.length]
-          const c = { src: p.src, cap: p.cap, span: layout.span, aspect: layout.aspect }
-          return (
-          <motion.figure
-            key={i}
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-80px' }}
-            transition={{ duration: 0.9, ease: EASE, delay: i * 0.07 }}
-            className={c.span}
-          >
-            <div
+      {/* Pinterest-style masonry: CSS columns keep flowing as marketing adds
+          photos, each image keeps its own (vertical or horizontal) proportions,
+          and the gaps stay tight. */}
+      <div
+        className="mx-auto mt-[9vh] max-w-[1200px] columns-2 lg:columns-3"
+        style={{ columnGap: 10 }}
+      >
+        {photos.map((p, i) => (
+          <div key={i} style={{ breakInside: 'avoid', marginBottom: 10 }}>
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-60px' }}
+              transition={{ duration: 0.7, ease: EASE, delay: (i % 3) * 0.06 }}
               className="relative overflow-hidden"
-              style={{ aspectRatio: c.aspect, borderRadius: 14, backgroundColor: '#FFFFFF' }}
+              style={{
+                aspectRatio: p.aspect && p.aspect > 0 ? p.aspect : 1.5,
+                borderRadius: 14,
+                backgroundColor: '#1E1E1E',
+              }}
             >
-              <Image src={c.src} alt={c.cap} fill sizes="(max-width: 768px) 90vw, 50vw" style={{ objectFit: 'cover' }} />
-            </div>
-            <figcaption
-              className={`${dmSans.className} mt-2`}
-              style={{ color: MUTED, fontSize: 12, letterSpacing: '0.04em' }}
-            >
-              — {c.cap}
-            </figcaption>
-          </motion.figure>
-          )
-        })}
+              <Image
+                src={p.src}
+                alt={p.cap ?? ''}
+                fill
+                sizes="(max-width: 640px) 48vw, (max-width: 1024px) 46vw, 380px"
+                style={{ objectFit: 'cover' }}
+              />
+            </motion.div>
+          </div>
+        ))}
       </div>
     </section>
   )

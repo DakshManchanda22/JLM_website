@@ -70,10 +70,13 @@ export default async function LifeAtJlmPage() {
         workplaceBody: data.workplaceBody,
         workplaceImages: data.workplaceImages
           ?.map((w) => {
-            const url = resolveImageUrl(w.image, 1200)
-            return url && w.caption ? { src: url, cap: w.caption } : null
+            const url = resolveImageUrl(w.image, 1400)
+            return url ? { src: url, cap: w.caption ?? '', aspect: w.aspect } : null
           })
-          .filter((x): x is { src: string; cap: string } => x !== null),
+          .filter(
+            (x): x is { src: string; cap: string; aspect: number | undefined } =>
+              x !== null,
+          ),
         togetherLabel: data.togetherLabel,
         togetherHeadline: data.togetherHeadline,
         togetherTagline: data.togetherTagline,
