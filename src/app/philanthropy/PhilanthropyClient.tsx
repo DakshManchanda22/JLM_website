@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { motion, useReducedMotion } from 'framer-motion'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { Anton, Caveat_Brush, DM_Sans } from 'next/font/google'
 import Footer from '@/components/Footer'
 import type { PhilanthropyStatCard, PhilanthropyView } from '@/sanity/queries'
@@ -223,6 +223,24 @@ export default function PhilanthropyClient({ cms }: { cms?: PhilanthropyView }) 
     cms?.statCards && cms.statCards.length > 0 ? cms.statCards : DEFAULT_STATS
   const esgIntro = cms?.esgIntro ?? DEFAULT_ESG_INTRO
   const esgGallery = cms?.esgGallery ?? []
+
+  // ── Lightbox for the ESG (Pinterest-style) gallery ──
+  const [lightboxImg, setLightboxImg] = useState<(typeof esgGallery)[number] | null>(null)
+
+  // Lock body scroll + allow Escape to close while the lightbox is open.
+  useEffect(() => {
+    if (!lightboxImg) return
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLightboxImg(null)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => {
+      document.body.style.overflow = prevOverflow
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [lightboxImg])
 
   const heroLines = [heroLine1, heroLine2]
 
@@ -548,22 +566,80 @@ export default function PhilanthropyClient({ cms }: { cms?: PhilanthropyView }) 
                 className="mb-2 overflow-hidden rounded-xl"
                 style={{ breakInside: 'avoid' }}
               >
-                <Image
-                  src={img.url}
-                  alt=""
-                  width={img.w}
-                  height={img.h}
-                  sizes="(max-width: 640px) 48vw, (max-width: 1024px) 32vw, 24vw"
-                  className="block h-auto w-full"
-                  {...(img.lqip
-                    ? { placeholder: 'blur' as const, blurDataURL: img.lqip }
-                    : {})}
-                />
+                <button
+                  type="button"
+                  onClick={() => setLightboxImg(img)}
+                  aria-label="View image full screen"
+                  className="group block w-full cursor-zoom-in overflow-hidden rounded-xl"
+                >
+                  <Image
+                    src={img.url}
+                    alt=""
+                    width={img.w}
+                    height={img.h}
+                    sizes="(max-width: 640px) 48vw, (max-width: 1024px) 32vw, 24vw"
+                    className="block h-auto w-full transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+                    {...(img.lqip
+                      ? { placeholder: 'blur' as const, blurDataURL: img.lqip }
+                      : {})}
+                  />
+                </button>
               </motion.div>
             ))}
           </div>
         )}
       </section>
+
+      {/* ========================= GALLERY LIGHTBOX ========================= */}
+      <AnimatePresence>
+        {lightboxImg && (
+          <motion.div
+            key="lightbox"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25, ease: EASE }}
+            onClick={() => setLightboxImg(null)}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm sm:p-8"
+            role="dialog"
+            aria-modal="true"
+          >
+            {/* Close button */}
+            <button
+              type="button"
+              onClick={() => setLightboxImg(null)}
+              aria-label="Close full screen view"
+              className="absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white transition-colors duration-200 hover:bg-white/20 sm:right-6 sm:top-6"
+              style={{ top: 'max(1rem, env(safe-area-inset-top))' }}
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                <path d="M6 6l12 12M18 6L6 18" />
+              </svg>
+            </button>
+
+            <motion.div
+              initial={reduce ? false : { scale: 0.94, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={reduce ? undefined : { scale: 0.96, opacity: 0 }}
+              transition={{ duration: 0.3, ease: EASE }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative flex max-h-full max-w-full items-center justify-center"
+            >
+              <Image
+                src={lightboxImg.url}
+                alt=""
+                width={lightboxImg.w}
+                height={lightboxImg.h}
+                sizes="100vw"
+                className="block h-auto max-h-[90svh] w-auto max-w-full rounded-lg object-contain"
+                {...(lightboxImg.lqip
+                  ? { placeholder: 'blur' as const, blurDataURL: lightboxImg.lqip }
+                  : {})}
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <Footer />
     </div>
