@@ -38,9 +38,13 @@ export default async function LifeAtJlmPage() {
         captionStrip: data.captionStrip
           ?.map((c) => {
             const url = resolveImageUrl(c.image, 1100)
-            return url && c.caption ? { src: url, caption: c.caption } : null
+            return url && c.caption
+              ? { src: url, caption: c.caption, aspect: c.aspect }
+              : null
           })
-          .filter((x): x is { src: string; caption: string } => x !== null),
+          .filter(
+            (x): x is { src: string; caption: string; aspect?: number } => x !== null,
+          ),
         peopleLabel: data.peopleLabel,
         peopleHeadline: data.peopleHeadline,
         peopleTagline: data.peopleTagline,
@@ -48,8 +52,7 @@ export default async function LifeAtJlmPage() {
         arentEyebrow: data.arentEyebrow,
         arentHeadline: data.arentHeadline,
         arentBody: data.arentBody,
-        arentList: data.arentList,
-        areList: data.areList,
+        testimonials: data.testimonials?.filter((t) => t.quote && t.name),
         valuesLabel: data.valuesLabel,
         valuesHeadline: data.valuesHeadline,
         valuesTagline: data.valuesTagline,
