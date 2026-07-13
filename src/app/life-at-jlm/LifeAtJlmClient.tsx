@@ -568,6 +568,16 @@ function TestimonialsBlock() {
   const ITEMS =
     cms.testimonials && cms.testimonials.length > 0 ? cms.testimonials : DEFAULT_TESTIMONIALS
 
+  const scrollerRef = useRef<HTMLDivElement>(null)
+  const nudge = (dir: 1 | -1) => {
+    const el = scrollerRef.current
+    if (!el) return
+    // One card-width (incl. gap) per click; falls back to ~80% of the viewport.
+    const card = el.querySelector('figure')
+    const step = card ? (card as HTMLElement).offsetWidth + 20 : el.clientWidth * 0.8
+    el.scrollBy({ left: dir * step, behavior: 'smooth' })
+  }
+
   return (
     <section
       className="relative w-full"
@@ -622,6 +632,7 @@ function TestimonialsBlock() {
 
       {/* horizontal, snap-scrolling row of quote cards */}
       <div
+        ref={scrollerRef}
         className="hide-scrollbar mt-[8vh] flex items-stretch gap-5 overflow-x-auto overflow-y-hidden pb-4 snap-x snap-mandatory"
         style={{ paddingLeft: '6vw', paddingRight: '6vw', scrollPaddingLeft: '6vw' }}
       >
@@ -667,6 +678,30 @@ function TestimonialsBlock() {
             </motion.figure>
           )
         })}
+      </div>
+
+      {/* Scroll affordance — hints there are more cards to the right. */}
+      <div className="mt-8 flex justify-end gap-3" style={{ paddingRight: '6vw' }}>
+        <button
+          type="button"
+          onClick={() => nudge(-1)}
+          aria-label="Previous testimonials"
+          className="flex h-11 w-11 items-center justify-center rounded-full border border-white/25 text-white/85 transition-colors hover:border-white/60 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          onClick={() => nudge(1)}
+          aria-label="More testimonials"
+          className="flex h-11 w-11 items-center justify-center rounded-full border border-white/25 text-white/85 transition-colors hover:border-white/60 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        </button>
       </div>
     </section>
   )
@@ -1081,7 +1116,9 @@ export default function LifeAtJlmClient({ cms = {} }: { cms?: LifeCms }) {
         <ValuesBlock />
         <StatsBlock />
         <WorkplaceBlock />
-        <Footer />
+        {/* Section above is black (#111111); a rounded footer top would reveal
+            white notches, so sit flush for a seamless black expanse. */}
+        <Footer roundedTop={false} />
       </div>
     </LifeCtx.Provider>
   )

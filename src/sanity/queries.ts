@@ -675,8 +675,16 @@ export type PhilanthropyView = {
   beliefEyebrow?: string
   beliefText?: string
   statCards?: PhilanthropyStatCard[]
+  esgWord?: string
   esgIntro?: string
   esgGallery?: { url: string; lqip?: string; w: number; h: number }[]
+  socialWord?: string
+  socialGallery?: { url: string; lqip?: string; w: number; h: number }[]
+  policiesHeading?: string
+  policiesIntro?: string
+  policiesImage?: string
+  policiesImageLqip?: string
+  policyDocuments?: { title?: string; url?: string }[]
 }
 
 export type PhilanthropyStatCard = {
@@ -702,12 +710,21 @@ export const philanthropyQuery = groq`*[_type == "philanthropy"][0]{
   purposeImages[]{ ${imageWithLqip} },
   beliefEyebrow, beliefText,
   statCards[]{ title, value, body, tag, icon },
-  esgIntro,
+  esgWord, esgIntro,
   esgGallery[]{
     ${imageWithLqip},
     "dw": asset->metadata.dimensions.width,
     "dh": asset->metadata.dimensions.height,
   },
+  socialWord,
+  socialGallery[]{
+    ${imageWithLqip},
+    "dw": asset->metadata.dimensions.width,
+    "dh": asset->metadata.dimensions.height,
+  },
+  policiesHeading, policiesIntro,
+  policiesImage{ ${imageWithLqip} },
+  policyDocuments[]{ title, url },
 }`
 
 export async function fetchPhilanthropy(): Promise<PhilanthropyView | null> {
@@ -761,6 +778,7 @@ export async function fetchPhilanthropy(): Promise<PhilanthropyView | null> {
       tag: s.tag,
       icon: s.icon,
     })),
+    esgWord: raw.esgWord,
     esgIntro: raw.esgIntro,
     esgGallery: (raw.esgGallery || [])
       .map((im: any) => {
@@ -769,5 +787,20 @@ export async function fetchPhilanthropy(): Promise<PhilanthropyView | null> {
         return { url: r.url, lqip: r.lqip, w: im.dw || 1000, h: im.dh || 1000 }
       })
       .filter(Boolean),
+    socialWord: raw.socialWord,
+    socialGallery: (raw.socialGallery || [])
+      .map((im: any) => {
+        const r = resolveImage(im, 1400)
+        if (!r) return null
+        return { url: r.url, lqip: r.lqip, w: im.dw || 1000, h: im.dh || 1000 }
+      })
+      .filter(Boolean),
+    policiesHeading: raw.policiesHeading,
+    policiesIntro: raw.policiesIntro,
+    policiesImage: resolveImage(raw.policiesImage, 1400)?.url,
+    policiesImageLqip: resolveImage(raw.policiesImage, 1400)?.lqip,
+    policyDocuments: (raw.policyDocuments || [])
+      .map((d: any) => ({ title: d.title, url: d.url }))
+      .filter((d: any) => d.title && d.url),
   }
 }

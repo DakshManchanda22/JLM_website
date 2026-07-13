@@ -19,7 +19,9 @@ export default defineType({
     { name: 'purpose', title: 'Purpose collage' },
     { name: 'belief', title: 'Belief statement' },
     { name: 'stats', title: 'Stat cards' },
-    { name: 'esg', title: 'ESG gallery' },
+    { name: 'esg', title: 'Environment' },
+    { name: 'social', title: 'Social gallery' },
+    { name: 'policies', title: 'Policies & documents' },
   ],
   fields: [
     /* ───────────── Hero ───────────── */
@@ -262,24 +264,89 @@ export default defineType({
       ],
     }),
 
-    /* ───────────── ESG closing (paragraph + gallery) ───────────── */
+    /* ───────────── Environment (word + paragraph + photo wall) ───────────── */
+    defineField({
+      name: 'esgWord',
+      title: 'Environment — heading word',
+      group: 'esg',
+      description: 'The big pinned word, e.g. "Environment".',
+      type: 'string',
+    }),
     defineField({
       name: 'esgIntro',
-      title: 'ESG paragraph',
+      title: 'Environment — paragraph',
       group: 'esg',
-      description: 'The paragraph shown above the photo gallery.',
+      description: 'The paragraph that rises up as the word slot-machines away.',
       type: 'text',
       rows: 5,
     }),
     defineField({
       name: 'esgGallery',
-      title: 'ESG photo gallery',
+      title: 'Environment — photo wall',
       group: 'esg',
-      description:
-        'A Pinterest-style masonry of ESG photos. Drag to reorder. Any number of images.',
+      description: 'The framed photo grid behind the word. Drag to reorder.',
       type: 'array',
       of: [defineArrayMember({ type: 'image', options: { hotspot: true } })],
       options: { layout: 'grid' },
+    }),
+
+    /* ───────────── Social (heading + masonry) ───────────── */
+    defineField({
+      name: 'socialWord',
+      title: 'Social — heading word',
+      group: 'social',
+      description: 'The highlighted heading, e.g. "Social".',
+      type: 'string',
+    }),
+    defineField({
+      name: 'socialGallery',
+      title: 'Social — photo masonry',
+      group: 'social',
+      description:
+        'A Pinterest-style masonry of community photos. Drag to reorder. Any number of images.',
+      type: 'array',
+      of: [defineArrayMember({ type: 'image', options: { hotspot: true } })],
+      options: { layout: 'grid' },
+    }),
+
+    /* ───────────── Policies (dark split + document table) ───────────── */
+    defineField({
+      name: 'policiesHeading',
+      title: 'Policies — heading',
+      group: 'policies',
+      type: 'string',
+    }),
+    defineField({
+      name: 'policiesIntro',
+      title: 'Policies — intro paragraph',
+      group: 'policies',
+      type: 'text',
+      rows: 3,
+    }),
+    defineField({
+      name: 'policiesImage',
+      title: 'Policies — photo (left side)',
+      group: 'policies',
+      description: 'Portrait works best in the split layout.',
+      type: 'image',
+      options: { hotspot: true },
+    }),
+    defineField({
+      name: 'policyDocuments',
+      title: 'Policies — document links',
+      group: 'policies',
+      description: 'Each row links to a PDF that opens in a new tab.',
+      type: 'array',
+      of: [
+        defineArrayMember({
+          type: 'object',
+          fields: [
+            defineField({ name: 'title', title: 'Document name', type: 'string' }),
+            defineField({ name: 'url', title: 'PDF URL', type: 'url' }),
+          ],
+          preview: { select: { title: 'title', subtitle: 'url' } },
+        }),
+      ],
     }),
   ],
   preview: {

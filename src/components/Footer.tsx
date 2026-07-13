@@ -91,7 +91,7 @@ function FooterLink({ label, href, external }: { label: string; href: string; ex
   )
 }
 
-export default function Footer() {
+export default function Footer({ roundedTop = true }: { roundedTop?: boolean }) {
   return (
     <motion.footer
       initial={{ opacity: 0, y: 52 }}
@@ -99,7 +99,11 @@ export default function Footer() {
       viewport={{ once: true, margin: '-80px' }}
       transition={{ duration: 0.75, ease: EASE }}
       className="bg-[#111111]"
-      style={{ borderTopLeftRadius: '40px', borderTopRightRadius: '40px' }}
+      style={
+        roundedTop
+          ? { borderTopLeftRadius: '40px', borderTopRightRadius: '40px' }
+          : undefined
+      }
     >
       {/* ── 3-column content ── */}
       <div className="px-10 md:px-16 lg:px-20 pt-16 md:pt-20 pb-14">
