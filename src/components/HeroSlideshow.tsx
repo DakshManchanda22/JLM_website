@@ -226,7 +226,8 @@ function HeroVideoPlayer({ video }: { video: HeroVideo }) {
       <button
         onClick={toggleMute}
         aria-label={muted ? 'Unmute video' : 'Mute video'}
-        className="absolute bottom-7 right-5 md:right-8 z-20 flex items-center gap-2 rounded-full border border-white/30 bg-black/30 backdrop-blur px-4 py-2 text-white/90 text-xs tracking-[0.2em] uppercase hover:bg-black/50 hover:text-white transition-colors"
+        title={muted ? 'Sound off' : 'Sound on'}
+        className="absolute top-7 left-5 md:left-8 z-20 flex h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-black/30 backdrop-blur text-white/90 hover:bg-black/50 hover:text-white transition-colors"
       >
         {muted ? (
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
@@ -241,7 +242,6 @@ function HeroVideoPlayer({ video }: { video: HeroVideo }) {
             <path d="M18.5 5.5a9 9 0 0 1 0 13" />
           </svg>
         )}
-        <span>{muted ? 'Sound off' : 'Sound on'}</span>
       </button>
 
       {/* Headline overlay — bottom-left, huge (only if text is set) */}

@@ -95,10 +95,16 @@ const DROPDOWNS: Record<string, string[]> = {
 }
 
 const LEFT = ['Our Brands', 'Our People']
-const RIGHT_PLAIN = ['Philanthropy', 'Careers']
+const RIGHT_PLAIN = ['ESG & Philanthropy', 'Careers']
 const ALL_MOBILE = [...LEFT, ...RIGHT_PLAIN, 'Contact Us']
 
 const slug = (s: string) => s.toLowerCase().replace(/\s+/g, '-')
+
+// Labels whose display text doesn't map cleanly to their route.
+const HREF_OVERRIDES: Record<string, string> = {
+  'ESG & Philanthropy': '/philanthropy',
+}
+const linkHref = (label: string) => HREF_OVERRIDES[label] ?? `/${slug(label)}`
 const EASE = [0.16, 1, 0.3, 1] as const
 
 const plainLink =
@@ -211,7 +217,7 @@ export default function Navbar() {
               {RIGHT_PLAIN.map((label) => (
                 <Link
                   key={label}
-                  href={`/${slug(label)}`}
+                  href={linkHref(label)}
                   onMouseEnter={() => setActiveDropdown(null)}
                   className={plainLink}
                 >
@@ -295,7 +301,7 @@ export default function Navbar() {
                       </Link>
                     ) : (
                       <Link
-                        href={`/${slug(label)}`}
+                        href={linkHref(label)}
                         onClick={() => setMobileOpen(false)}
                         className="text-white text-[clamp(2rem,8vw,2.75rem)] font-light tracking-wide leading-tight py-1"
                       >

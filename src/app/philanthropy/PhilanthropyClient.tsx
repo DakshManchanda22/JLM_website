@@ -3,7 +3,14 @@
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import {
+  AnimatePresence,
+  motion,
+  useInView,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+} from 'framer-motion'
 import { Anton, Caveat_Brush, DM_Sans } from 'next/font/google'
 import Footer from '@/components/Footer'
 import type { PhilanthropyStatCard, PhilanthropyView } from '@/sanity/queries'
@@ -89,12 +96,52 @@ const DEFAULT_BELIEF_TEXT =
   'environment and empowering our communities, we strive to create a positive ' +
   'impact that lasts.'
 
-const DEFAULT_ESG_INTRO =
-  'At JL Morison, we care for the planet. By adopting eco-friendly practices, we ' +
-  'are taking small steps towards a sustainable future. Our initiatives include ' +
-  'paper, water and electricity saving through responsible use, tree plantation ' +
-  'across our factories — with papaya, mango and other saplings — along with the ' +
-  'use of solar energy and rainwater harvesting to help nurture a greener tomorrow.'
+// All fallbacks below point at the Sanity CDN (same assets the CMS serves), so
+// nothing depends on local files. Sanity's fields override these when populated.
+type GalleryImg = { url: string; lqip?: string; w: number; h: number }
+const sanityShot = (ref: string, w: number, h: number, ext = 'jpg'): GalleryImg => ({
+  url: `https://cdn.sanity.io/images/vfv5lxgr/production/${ref}-${w}x${h}.${ext}?w=1400&q=80&auto=format&fit=max`,
+  w,
+  h,
+})
+
+// JLM's own environment/sustainability photos (Sanity CDN).
+const DEFAULT_ENV_GALLERY: GalleryImg[] = [
+  sanityShot('393023ab59e80b214ddfc180bd071b76dbd93404', 4096, 2304),
+  sanityShot('7af19cd907cea172bf8e4a0f8ee3e5a2ba91defd', 4096, 2304),
+  sanityShot('463e56c7b205bf30413c16fd1e9717f942d17eb5', 4096, 2304),
+  sanityShot('c130eabb02d65d2704eb1a859c4aac88eefc9b80', 4096, 2304),
+  sanityShot('8cf826f61ca5dcfd76841537d39d4d2d20cf001d', 4096, 2304),
+  sanityShot('bd3afc73c3111f048bd657f2349a6d065375f857', 2304, 4096),
+]
+
+// Community / social photos (Project Kaamyaab, volunteering, factory life) —
+// served straight from the Sanity CDN.
+const DEFAULT_SOCIAL_GALLERY: GalleryImg[] = [
+  sanityShot('3f3743a6613cb80ae6612f3b71e72cecbf546396', 5712, 4284),
+  sanityShot('439792954a2929053fd27c26338b05186d874cb0', 4284, 5712),
+  sanityShot('573b2f0523beb4bafc2ce4f60ca2ebcc46626c8f', 5712, 4284),
+  sanityShot('8c8a62782afeeeccf1f7bfb164dc8f28eb93b9f3', 1600, 1200),
+  sanityShot('9208702dcade8bf56e61b5935020eee49c32e0a5', 1592, 1194),
+  sanityShot('03b35a13cee97c403a79e76321e8dc51cdd35435', 900, 1600),
+  sanityShot('dce2a2c51f04ccda73e8b3584f453f0bc6814032', 960, 1280),
+  sanityShot('a65baa4f883397dd94d5f17e9a1f4da475788eb8', 1500, 1000),
+  sanityShot('6d955a7a4a54a45b3a502d50d800521c3d277bda', 1600, 1066),
+]
+
+// Corporate policy / disclosure documents (PDFs on GCS, open in a new tab).
+type PolicyDoc = { name: string; href: string }
+const GOV = 'https://storage.googleapis.com/jlm_website_v2/Governance'
+const DEFAULT_POLICIES: PolicyDoc[] = [
+  { name: 'Code of Conduct for Employees', href: `${GOV}/CODE-OF-CONDUCT-v1-revised.pdf` },
+  { name: 'Environment, Health & Safety', href: `${GOV}/EHS-POLICY_03.11.2021-1.pdf` },
+  { name: 'Social Media Guidelines', href: `${GOV}/Social-Media-for-Employees-Final.pdf` },
+  { name: 'IMS Act Adherence', href: `${GOV}/Adherance-to-IMS-Act-WHO-Aug-19-2022.pdf` },
+  { name: 'Benefits of Breast Feeding', href: `${GOV}/0003_MBD-Breastfeeding-Leaflet_12X9-inch.pdf` },
+]
+// Governance photo (Sanity CDN). CMS `policiesImage` overrides this.
+const POLICIES_IMAGE =
+  'https://cdn.sanity.io/images/vfv5lxgr/production/6b01d6aecc6a6e266ffb72c21321f912fa55c37a-1502x1098.png?w=1400&q=80&auto=format&fit=max'
 
 const DEFAULT_STATS: PhilanthropyStatCard[] = [
   {
@@ -246,8 +293,31 @@ export default function PhilanthropyClient({ cms }: { cms?: PhilanthropyView }) 
   const beliefText = cms?.beliefText ?? DEFAULT_BELIEF_TEXT
   const statCards =
     cms?.statCards && cms.statCards.length > 0 ? cms.statCards : DEFAULT_STATS
-  const esgIntro = cms?.esgIntro ?? DEFAULT_ESG_INTRO
-  const esgGallery = cms?.esgGallery ?? []
+  // Everything below comes from Sanity (text + images off the Sanity CDN), with
+  // code defaults as a fallback until the fields are populated.
+  const esgWord = cms?.esgWord ?? 'Environment'
+  const esgBody = cms?.esgIntro ?? DEFAULT_ENV_BODY
+  const esgGallery =
+    cms?.esgGallery && cms.esgGallery.length > 0
+      ? cms.esgGallery
+      : DEFAULT_ENV_GALLERY
+  const socialWord = cms?.socialWord ?? 'Social'
+  const socialGallery =
+    cms?.socialGallery && cms.socialGallery.length > 0
+      ? cms.socialGallery
+      : DEFAULT_SOCIAL_GALLERY
+  const policiesHeading = cms?.policiesHeading ?? 'Governance'
+  const policiesIntro =
+    cms?.policiesIntro ??
+    'The standards and commitments that guide how we work, published for everyone to read.'
+  const policiesImage = cms?.policiesImage ?? POLICIES_IMAGE
+  const policiesImageLqip = cms?.policiesImageLqip
+  const policyDocuments: PolicyDoc[] =
+    cms?.policyDocuments && cms.policyDocuments.length > 0
+      ? cms.policyDocuments
+          .filter((d) => d.title && d.url)
+          .map((d) => ({ name: d.title as string, href: d.url as string }))
+      : DEFAULT_POLICIES
 
   // ── Lightbox for the ESG (Pinterest-style) gallery ──
   const [lightboxImg, setLightboxImg] = useState<(typeof esgGallery)[number] | null>(null)
@@ -559,62 +629,32 @@ export default function PhilanthropyClient({ cms }: { cms?: PhilanthropyView }) 
         )}
       </section>
 
-      {/* ========================= ESG PARAGRAPH + GALLERY ========================= */}
-      <section className="bg-white px-[7vw] pb-24 md:pb-32">
-        <motion.p
-          initial={reduce ? false : { opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-15%' }}
-          transition={{ duration: 0.9, ease: EASE }}
-          className={dmSans.className}
-          style={{
-            margin: '0 auto',
-            maxWidth: '62ch',
-            textAlign: 'center',
-            color: INK,
-            fontWeight: 300,
-            fontSize: 'clamp(17px, 1.5vw, 22px)',
-            lineHeight: 1.7,
-          }}
-        >
-          {esgIntro}
-        </motion.p>
+      {/* ================ ENVIRONMENT — SCROLL-REVEAL SCATTER ================ */}
+      <EnvironmentReveal
+        word={esgWord}
+        body={esgBody}
+        images={esgGallery}
+        onOpen={setLightboxImg}
+        reduce={!!reduce}
+      />
 
-        {esgGallery.length > 0 && (
-          <div className="mx-auto mt-14 max-w-[1200px] columns-2 gap-2 sm:columns-3 lg:columns-4 md:mt-16">
-            {esgGallery.map((img, i) => (
-              <motion.div
-                key={img.url}
-                initial={reduce ? false : { opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-8%' }}
-                transition={{ duration: 0.6, ease: EASE, delay: (i % 4) * 0.05 }}
-                className="mb-2 overflow-hidden rounded-xl"
-                style={{ breakInside: 'avoid' }}
-              >
-                <button
-                  type="button"
-                  onClick={() => setLightboxImg(img)}
-                  aria-label="View image full screen"
-                  className="group block w-full cursor-zoom-in overflow-hidden rounded-xl"
-                >
-                  <Image
-                    src={img.url}
-                    alt=""
-                    width={img.w}
-                    height={img.h}
-                    sizes="(max-width: 640px) 48vw, (max-width: 1024px) 32vw, 24vw"
-                    className="block h-auto w-full transition-transform duration-500 ease-out group-hover:scale-[1.04]"
-                    {...(img.lqip
-                      ? { placeholder: 'blur' as const, blurDataURL: img.lqip }
-                      : {})}
-                  />
-                </button>
-              </motion.div>
-            ))}
-          </div>
-        )}
-      </section>
+      {/* ========================= SOCIAL — MASONRY ========================= */}
+      <SocialSection
+        heading={socialWord}
+        images={socialGallery}
+        onOpen={setLightboxImg}
+        reduce={!!reduce}
+      />
+
+      {/* ==================== POLICIES — DARK SPLIT TABLE ==================== */}
+      <PoliciesSection
+        heading={policiesHeading}
+        intro={policiesIntro}
+        image={policiesImage}
+        imageLqip={policiesImageLqip}
+        docs={policyDocuments}
+        reduce={!!reduce}
+      />
 
       {/* ========================= GALLERY LIGHTBOX ========================= */}
       <AnimatePresence>
@@ -667,7 +707,11 @@ export default function PhilanthropyClient({ cms }: { cms?: PhilanthropyView }) 
         )}
       </AnimatePresence>
 
-      <Footer />
+      {/* Dark backing so the Policies section flows seamlessly into the footer —
+          hides the white page bg behind the footer's rounded corners + entry lift. */}
+      <div className="bg-[#0c0c0c]">
+        <Footer />
+      </div>
     </div>
   )
 }
@@ -860,6 +904,417 @@ function PurposeCollage({
           )
         })}
       </motion.div>
+    </section>
+  )
+}
+
+// ─────────────────── Environment gallery wall + reveal ───────────────────
+// "ENVIRONMENT" sits pinned in the centre over a 3-column wall of JLM's own
+// photos on a white background (images stay full-colour). The tiles auto-animate
+// in (staggered) the moment the wall enters view — not tied to scroll. Then, as
+// the pinned section scrolls, the word rolls up and vanishes like a slot machine
+// while the paragraph rises into its place and stays put. The page keeps
+// scrolling natively.
+
+const DEFAULT_ENV_BODY =
+  'At JL Morison, we care for the planet. By adopting eco-friendly practices, ' +
+  'we are taking small steps towards a sustainable future. Our initiatives ' +
+  'include paper, water and electricity saving through responsible use, tree ' +
+  'plantation across our factories — with papaya, mango and other saplings — ' +
+  'along with the use of solar energy and rainwater harvesting to help nurture ' +
+  'a greener tomorrow.'
+
+// Brighter, more vivid brand green for the pinned word.
+const ENV_GREEN = '#2FBF3F'
+// Warm marigold highlighter for the Social heading (sibling to ENV_GREEN).
+const SOCIAL_YELLOW = '#F4C838'
+
+function EnvironmentReveal({
+  word,
+  body,
+  images,
+  onOpen,
+  reduce,
+}: {
+  word: string
+  body: string
+  images: GalleryImg[]
+  onOpen: (img: GalleryImg) => void
+  reduce: boolean
+}) {
+  const sectionRef = useRef<HTMLElement>(null)
+  const gridRef = useRef<HTMLDivElement>(null)
+  // Fire the tile animation once the wall enters the viewport (time-based, not scroll).
+  const inView = useInView(gridRef, { once: true, margin: '0px 0px -20% 0px' })
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start start', 'end end'],
+  })
+
+  // Heading: green highlight + white text sweep in left→right (like the hero's
+  // "Changing Lives / Building Futures"). One-shot TIME-BASED animation (not
+  // scrubbed) that fires the moment the section enters view — so the heading is
+  // fully revealed well before the user scrolls to the centre of the section.
+  const swept = inView
+
+  // Word rolls up out of view (slot machine); paragraph rises into its place
+  // and then holds (useTransform clamps at the endpoints, so it never leaves).
+  const wordY = useTransform(scrollYProgress, [0.52, 0.68], ['0%', '-120%'])
+  const wordOpacity = useTransform(scrollYProgress, [0.58, 0.68], [1, 0])
+  // Paragraph starts rising when the word is ~70% up, fades to full opacity and
+  // HOLDS there for the rest of the scroll (extra end stop prevents any drop).
+  const paraY = useTransform(scrollYProgress, [0.62, 0.82], ['70%', '0%'])
+  const paraOpacity = useTransform(scrollYProgress, [0.62, 0.8, 1], [0, 1, 1])
+
+  return (
+    <section ref={sectionRef} className="relative bg-white" style={{ height: '220vh' }}>
+      <div className="sticky top-0 h-[100svh] overflow-hidden bg-white">
+        {/* 3-column wall of JLM's own photos, full colour on white gutters */}
+        <div
+          ref={gridRef}
+          className="absolute inset-0 grid grid-cols-2 gap-2 p-2 sm:grid-cols-3 sm:gap-3 sm:p-3"
+          style={{ gridAutoRows: '1fr' }}
+        >
+          {images.map((img, i) => (
+            <EnvTile
+              key={img.url}
+              i={i}
+              active={inView}
+              img={img}
+              onOpen={onOpen}
+              reduce={reduce}
+            />
+          ))}
+        </div>
+
+        {reduce ? (
+          /* Reduced motion: word + copy shown statically, stacked. */
+          <div className="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center gap-6 px-6 text-center">
+            <h2
+              className={`${anton.className} relative inline-block`}
+              style={{
+                margin: 0,
+                fontSize: 'clamp(34px, 9vw, 96px)',
+                lineHeight: 0.95,
+                letterSpacing: '0.01em',
+                textTransform: 'uppercase',
+              }}
+            >
+              <span
+                aria-hidden
+                className="absolute rounded-[0.12em]"
+                style={{
+                  backgroundColor: ENV_GREEN,
+                  top: '-0.08em',
+                  bottom: '-0.04em',
+                  left: '-0.08em',
+                  right: '-0.08em',
+                }}
+              />
+              <span className="relative" style={{ color: '#ffffff' }}>
+                {word}
+              </span>
+            </h2>
+            <p className="max-w-2xl rounded-2xl bg-white px-6 py-6 text-[15px] leading-relaxed text-[#111111] shadow-xl ring-1 ring-black/5 sm:text-base md:text-lg">
+              {body}
+            </p>
+          </div>
+        ) : (
+          <>
+            {/* ── WORD: green highlight + white text sweep in, then slot-machine roll-up ── */}
+            <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center px-6">
+              {/* fontSize here makes the p-[0.34em] clip padding scale with the
+                  heading, so the rounded band corners aren't sliced off square. */}
+              <div
+                className="overflow-hidden p-[0.34em] leading-none"
+                style={{ fontSize: 'clamp(38px, 11vw, 124px)' }}
+              >
+                <motion.h2
+                  className={anton.className}
+                  style={{
+                    margin: 0,
+                    fontSize: 'clamp(38px, 11vw, 124px)',
+                    lineHeight: 0.95,
+                    letterSpacing: '0.01em',
+                    textTransform: 'uppercase',
+                    display: 'inline-block',
+                    position: 'relative',
+                    y: wordY,
+                    opacity: wordOpacity,
+                  }}
+                >
+                  <span className="relative inline-block leading-none">
+                    <motion.span
+                      aria-hidden
+                      className="absolute rounded-[0.12em]"
+                      style={{
+                        backgroundColor: ENV_GREEN,
+                        top: '-0.08em',
+                        bottom: '-0.04em',
+                        left: '-0.08em',
+                        right: '-0.08em',
+                        transformOrigin: 'left',
+                      }}
+                      initial={{ scaleX: 0 }}
+                      animate={swept ? { scaleX: 1 } : { scaleX: 0 }}
+                      transition={{ duration: 0.8, ease: EASE, delay: 0.35 }}
+                    />
+                    <span className="relative" style={{ color: '#ffffff' }}>
+                      {word}
+                    </span>
+                  </span>
+                </motion.h2>
+              </div>
+            </div>
+
+            {/* ── PARAGRAPH: rises into place, fades to full opacity and holds ── */}
+            <motion.div
+              className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center px-6"
+              style={{ opacity: paraOpacity }}
+            >
+              <motion.p
+                style={{ y: paraY }}
+                className="max-w-2xl rounded-2xl bg-white px-6 py-6 text-center text-[15px] leading-relaxed text-[#111111] shadow-xl ring-1 ring-black/5 sm:text-base md:px-9 md:py-8 md:text-lg"
+              >
+                {body}
+              </motion.p>
+            </motion.div>
+          </>
+        )}
+      </div>
+    </section>
+  )
+}
+
+function EnvTile({
+  i,
+  active,
+  img,
+  onOpen,
+  reduce,
+}: {
+  i: number
+  active: boolean
+  img: GalleryImg
+  onOpen: (img: GalleryImg) => void
+  reduce: boolean
+}) {
+  return (
+    <motion.button
+      type="button"
+      onClick={() => onOpen(img)}
+      aria-label="View image full screen"
+      className="group relative block cursor-zoom-in overflow-hidden rounded-lg bg-[#E8E0D5] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2FBF3F]"
+      initial={reduce ? false : { opacity: 0, scale: 0.82 }}
+      animate={active || reduce ? { opacity: 1, scale: 1 } : undefined}
+      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: i * 0.09 }}
+    >
+      <Image
+        src={img.url}
+        alt=""
+        fill
+        sizes="(max-width: 640px) 50vw, 33vw"
+        className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.05]"
+        {...(img.lqip
+          ? { placeholder: 'blur' as const, blurDataURL: img.lqip }
+          : {})}
+      />
+    </motion.button>
+  )
+}
+
+// ───────────────────────── Social — Pinterest masonry ─────────────────────────
+// "Social" under a yellow highlighter that draws in behind the word, then a
+// masonry wall of JLM's community photos (served from the Sanity CDN). Tiles
+// open the shared lightbox. Sibling treatment to the green Environment heading.
+function SocialSection({
+  heading,
+  images,
+  onOpen,
+  reduce,
+}: {
+  heading: string
+  images: GalleryImg[]
+  onOpen: (img: GalleryImg) => void
+  reduce: boolean
+}) {
+  const headRef = useRef<HTMLDivElement>(null)
+  const inView = useInView(headRef, { once: true, margin: '0px 0px -20% 0px' })
+
+  return (
+    <section className="bg-white px-[7vw] py-20 md:py-28">
+      <div ref={headRef} className="mb-11 md:mb-16">
+        <h2
+          className={anton.className}
+          style={{
+            margin: 0,
+            fontSize: 'clamp(40px, 11vw, 128px)',
+            lineHeight: 0.92,
+            letterSpacing: '0.01em',
+            textTransform: 'uppercase',
+          }}
+        >
+          <span className="relative inline-block leading-none">
+            <motion.span
+              aria-hidden
+              className="absolute rounded-[0.12em]"
+              style={{
+                backgroundColor: SOCIAL_YELLOW,
+                top: '-0.08em',
+                bottom: '-0.04em',
+                left: '-0.08em',
+                right: '-0.08em',
+                transformOrigin: 'left',
+              }}
+              initial={reduce ? false : { scaleX: 0 }}
+              animate={inView || reduce ? { scaleX: 1 } : undefined}
+              transition={{ duration: 0.7, ease: EASE, delay: 0.1 }}
+            />
+            <span className="relative" style={{ color: INK }}>
+              {heading}
+            </span>
+          </span>
+        </h2>
+      </div>
+
+      {/* CSS multi-column masonry: always visible, and it grows in normal flow
+          so adding images pushes the Policies section straight down. */}
+      <div className="columns-2 gap-4 md:columns-3 md:gap-5 lg:columns-4">
+        {images.map((img) => (
+          <button
+            key={img.url}
+            type="button"
+            onClick={() => onOpen(img)}
+            aria-label="View image full screen"
+            className="group mb-4 block w-full cursor-zoom-in overflow-hidden rounded-xl bg-[#E8E0D5] md:mb-5"
+            style={{ breakInside: 'avoid' }}
+          >
+            <Image
+              src={img.url}
+              alt=""
+              width={img.w}
+              height={img.h}
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              className="h-auto w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+            />
+          </button>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+// ─────────────── Policies — dark split: photo left, document table right ───────────────
+// The one deliberately dark section on the page. Each row links to a policy
+// document; swap the placeholder hrefs + photo for the real assets.
+function PoliciesSection({
+  heading,
+  intro,
+  image,
+  imageLqip,
+  docs,
+  reduce,
+}: {
+  heading: string
+  intro: string
+  image: string
+  imageLqip?: string
+  docs: PolicyDoc[]
+  reduce: boolean
+}) {
+  return (
+    <section className="bg-[#0c0c0c] px-[7vw] py-20 text-white md:py-28">
+      <div className="mx-auto grid max-w-[1200px] grid-cols-1 items-center gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:gap-14">
+        <motion.div
+          initial={reduce ? false : { opacity: 0, y: 28 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-15%' }}
+          transition={{ duration: 0.9, ease: EASE }}
+          className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl bg-white/[0.04]"
+        >
+          <Image
+            src={image}
+            alt="JL Morison governance and workplace policies"
+            fill
+            sizes="(max-width: 1024px) 100vw, 45vw"
+            className="object-contain"
+            {...(imageLqip ? { placeholder: 'blur' as const, blurDataURL: imageLqip } : {})}
+          />
+        </motion.div>
+
+        <div>
+          <h2
+            className={anton.className}
+            style={{
+              margin: 0,
+              fontSize: 'clamp(40px, 6vw, 84px)',
+              lineHeight: 0.95,
+              letterSpacing: '0.01em',
+              textTransform: 'uppercase',
+              color: '#ffffff',
+            }}
+          >
+            {heading}
+          </h2>
+          <p
+            className={dmSans.className}
+            style={{
+              marginTop: '1.1rem',
+              maxWidth: '46ch',
+              color: 'rgba(255,255,255,0.64)',
+              fontWeight: 300,
+              fontSize: 'clamp(15px, 1.3vw, 18px)',
+              lineHeight: 1.6,
+            }}
+          >
+            {intro}
+          </p>
+
+          <ul className="mt-8 border-t border-white/12 md:mt-10">
+            {docs.map((doc) => (
+              <li key={doc.name} className="border-b border-white/12">
+                <a
+                  href={doc.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group grid grid-cols-[1fr_auto] items-center gap-4 py-4 transition-colors duration-200 hover:bg-white/[0.03] md:py-5"
+                >
+                  <span
+                    className={dmSans.className}
+                    style={{
+                      fontWeight: 500,
+                      fontSize: 'clamp(16px, 1.6vw, 21px)',
+                      color: '#ffffff',
+                    }}
+                  >
+                    {doc.name}
+                  </span>
+                  <span
+                    className={`${dmSans.className} inline-flex items-center gap-1.5 whitespace-nowrap underline-offset-4 group-hover:underline`}
+                    style={{ fontWeight: 400, fontSize: 'clamp(13px, 1.1vw, 15px)', color: BEIGE }}
+                  >
+                    View
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                    >
+                      <path d="M7 17 17 7M9 7h8v8" />
+                    </svg>
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
     </section>
   )
 }

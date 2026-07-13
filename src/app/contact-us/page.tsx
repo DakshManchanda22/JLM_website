@@ -36,30 +36,22 @@ const PORTRAITS = [
   'https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=400&h=500&fit=crop&auto=format',
 ]
 
-const contactDetails = [
+const offices = [
   {
-    label: 'Email',
-    description: 'Reach us by email and we will respond shortly.',
-    value: 'info@jlmorison.com',
-    href: 'mailto:info@jlmorison.com',
+    title: 'Registered Office: Kolkata',
+    address:
+      'Adventz Infinity @ 5, Plot No. 5,\nBlock - BN, North Wing, No. 1106,\n11th Floor, Sector - V, Salt Lake,\nKolkata - 700 091.',
+    phone: '(033) 22480114',
+    phoneHref: 'tel:+913322480114',
+    email: 'info@jlmorison.com',
   },
   {
-    label: 'Phone',
-    description: 'Call us on weekdays from 9 AM to 6 PM.',
-    value: '+91 22 2204 2406',
-    href: 'tel:+912222042406',
-  },
-  {
-    label: 'Media',
-    description: 'For press and media enquiries.',
-    value: 'media@jlmorison.com',
-    href: 'mailto:media@jlmorison.com',
-  },
-  {
-    label: 'Office',
-    description: 'Visit us at our headquarters.',
-    value: 'Morison House,\nMumbai 400 001,\nIndia',
-    href: null,
+    title: 'Head Office: Mumbai',
+    address:
+      'Peninsula Business Park, Tower "A",\n8th Floor, Senapati Bapat Marg,\nLower Parel, Mumbai - 400 013.',
+    phone: '(022) 61410300',
+    phoneHref: 'tel:+912261410300',
+    email: 'customercare@jlmorison.com',
   },
 ]
 
@@ -241,42 +233,40 @@ export default function ContactPage() {
               We&apos;d love to hear from you. Fill out the form and we&apos;ll get back to you shortly.
             </p>
 
-            <div className="grid grid-cols-2 gap-x-8 gap-y-10">
-              {contactDetails.map((item, i) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-10">
+              {offices.map((office, i) => (
                 <motion.div
-                  key={item.label}
+                  key={office.title}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, ease: EASE, delay: 0.1 + i * 0.08 }}
                 >
                   <p
-                    className="text-base font-semibold text-[#111111] mb-1"
+                    className="text-base font-semibold text-[#111111] mb-2"
                     style={{ fontFamily: 'var(--font-dm-sans)' }}
                   >
-                    {item.label}
+                    {office.title}
                   </p>
                   <p
-                    className="text-xs text-[#555555] leading-relaxed mb-2"
+                    className="text-sm text-[#555555] leading-relaxed whitespace-pre-line mb-4"
                     style={{ fontFamily: 'var(--font-dm-sans)' }}
                   >
-                    {item.description}
+                    {office.address}
                   </p>
-                  {item.href ? (
-                    <a
-                      href={item.href}
-                      className="text-sm font-medium text-[#111111] hover:text-[#555555] transition-colors"
-                      style={{ fontFamily: 'var(--font-dm-sans)' }}
-                    >
-                      {item.value}
-                    </a>
-                  ) : (
-                    <p
-                      className="text-sm font-medium text-[#111111] whitespace-pre-line"
-                      style={{ fontFamily: 'var(--font-dm-sans)' }}
-                    >
-                      {item.value}
-                    </p>
-                  )}
+                  <a
+                    href={office.phoneHref}
+                    className="block text-sm font-medium text-[#111111] hover:text-[#555555] transition-colors mb-1"
+                    style={{ fontFamily: 'var(--font-dm-sans)' }}
+                  >
+                    {office.phone}
+                  </a>
+                  <a
+                    href={`mailto:${office.email}`}
+                    className="block text-sm font-medium text-[#111111] hover:text-[#555555] transition-colors"
+                    style={{ fontFamily: 'var(--font-dm-sans)' }}
+                  >
+                    {office.email}
+                  </a>
                 </motion.div>
               ))}
             </div>
