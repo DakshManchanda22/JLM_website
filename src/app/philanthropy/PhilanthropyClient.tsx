@@ -32,6 +32,30 @@ const BEIGE = '#E8E0D5'
 const INK = '#111111'
 const EASE = [0.16, 1, 0.3, 1] as const
 
+// Scales a heading's font-size so it always fits on one line regardless of text length.
+function useFitText(maxPx = 200) {
+  const ref = useRef<HTMLHeadingElement>(null)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+
+    const fit = () => {
+      el.style.fontSize = `${maxPx}px`
+      const containerWidth = el.parentElement?.clientWidth ?? el.offsetWidth
+      const ratio = containerWidth / el.scrollWidth
+      if (ratio < 1) el.style.fontSize = `${Math.floor(maxPx * ratio)}px`
+    }
+
+    fit()
+    const ro = new ResizeObserver(fit)
+    ro.observe(el.parentElement ?? el)
+    return () => ro.disconnect()
+  }, [maxPx])
+
+  return ref
+}
+
 type CardImage = { url: string; lqip?: string }
 
 // ─────────────── Code defaults (used until Sanity is filled in) ───────────────
@@ -182,6 +206,7 @@ export default function PhilanthropyClient({ cms }: { cms?: PhilanthropyView }) 
 
   const programsHeading = cms?.programsHeading ?? 'Programs'
   const programsIntro = cms?.programsIntro ?? DEFAULT_PROGRAMS_INTRO
+  const programsHeadingRef = useFitText(200)
 
   // Build the four cards. Prefer Sanity stages; fall back to code defaults.
   // A stage's images fall back to its default photo (matched by title) when
@@ -211,7 +236,7 @@ export default function PhilanthropyClient({ cms }: { cms?: PhilanthropyView }) 
           images: [{ url: s.image }] as CardImage[],
         }))
 
-  const purposeHeading = cms?.purposeHeading ?? 'Environmental responsibility'
+  const purposeHeading = cms?.purposeHeading ?? 'ESG'
   const purposeImages =
     cms?.purposeImages && cms.purposeImages.length > 0
       ? (cms.purposeImages as CardImage[])
@@ -433,6 +458,7 @@ export default function PhilanthropyClient({ cms }: { cms?: PhilanthropyView }) 
         {/* centred header block */}
         <div className="mx-auto max-w-[820px] text-center">
           <motion.h2
+            ref={programsHeadingRef}
             initial={reduce ? false : { opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-15%' }}
@@ -441,10 +467,10 @@ export default function PhilanthropyClient({ cms }: { cms?: PhilanthropyView }) 
             style={{
               margin: 0,
               color: '#FFFFFF',
-              fontSize: 'clamp(64px, 13vw, 200px)',
               lineHeight: 0.95,
               letterSpacing: '0.01em',
               textTransform: 'uppercase',
+              whiteSpace: 'nowrap',
             }}
           >
             {programsHeading}
@@ -762,6 +788,7 @@ function PurposeCollage({
 }) {
   const shots = images.slice(0, 3)
   const [compact, setCompact] = useState(false)
+  const headingRef = useFitText(220)
 
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 640px)')
@@ -778,15 +805,15 @@ function PurposeCollage({
       {/* header */}
       <div className="text-center">
         <h2
+          ref={headingRef}
           className={anton.className}
           style={{
             margin: '0 auto',
-            maxWidth: '15ch',
             color: INK,
-            fontSize: 'clamp(34px, 6vw, 92px)',
             lineHeight: 0.98,
             letterSpacing: '0.02em',
             textTransform: 'uppercase',
+            whiteSpace: 'nowrap',
           }}
         >
           {heading}
