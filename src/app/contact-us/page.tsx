@@ -1,19 +1,20 @@
 'use client'
 
 import { useState } from 'react'
-import { Cormorant_Garamond, DM_Sans } from 'next/font/google'
+import { Roboto } from 'next/font/google'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Footer from '@/components/Footer'
 
-const cormorant = Cormorant_Garamond({
+const cormorant = Roboto({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600'],
+  weight: ['300', '400', '500', '700'],
   variable: '--font-cormorant',
 })
 
-const dmSans = DM_Sans({
+const dmSans = Roboto({
   subsets: ['latin'],
+  weight: ['300', '400', '500', '700'],
   variable: '--font-dm-sans',
 })
 

@@ -2,26 +2,26 @@
 
 import Image from 'next/image'
 import { useState } from 'react'
-import { Anton, Cormorant_Garamond, DM_Sans } from 'next/font/google'
+import { Roboto } from 'next/font/google'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import Footer from '@/components/Footer'
 
-const cormorant = Cormorant_Garamond({
+const cormorant = Roboto({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600'],
+  weight: ['300', '400', '500', '700'],
   style: ['normal', 'italic'],
   variable: '--font-cormorant',
 })
 
-const dmSans = DM_Sans({
+const dmSans = Roboto({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600'],
+  weight: ['300', '400', '500', '700'],
   variable: '--font-dm-sans',
 })
 
-const anton = Anton({
+const anton = Roboto({
   subsets: ['latin'],
-  weight: '400',
+  weight: '900',
   variable: '--font-anton',
 })
 

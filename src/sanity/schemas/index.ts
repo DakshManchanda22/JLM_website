@@ -11,6 +11,7 @@ import lifeAtJlm from './lifeAtJlm'
 import ourStory from './ourStory'
 import philanthropy from './philanthropy'
 import post from './post'
+import siteSettings from './siteSettings'
 import tag from './tag'
 
 export const schemaTypes: SchemaTypeDefinition[] = [
@@ -26,4 +27,5 @@ export const schemaTypes: SchemaTypeDefinition[] = [
   bigen,
   emoform,
   philanthropy,
+  siteSettings,
 ]

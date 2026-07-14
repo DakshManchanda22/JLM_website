@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence, animate, useInView, useReducedMotion } from 'framer-motion'
-import { Cormorant_Garamond, DM_Sans } from 'next/font/google'
+import { Roboto } from 'next/font/google'
 import Footer from '@/components/Footer'
 
 /* ─────────────── CMS overrides via Context ───────────────
@@ -58,16 +58,16 @@ const useLife = () => useContext(LifeCtx)
    original Cormorant Garamond (value titles, the intro statement). */
 const serifClass = 'font-serif'
 
-const cormorant = Cormorant_Garamond({
+const cormorant = Roboto({
   subsets: ['latin'],
   weight: ['300', '400', '500'],
   style: ['normal', 'italic'],
   variable: '--font-cormorant',
 })
 
-const dmSans = DM_Sans({
+const dmSans = Roboto({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600'],
+  weight: ['300', '400', '500', '700'],
   variable: '--font-dm-sans',
 })
 
@@ -481,7 +481,7 @@ function IntroParagraph() {
         a rare kind of foundation to grow from. Collaboration, honest communication, and a
         genuinely positive culture aren&rsquo;t aspirations here; they&rsquo;re simply how we work.
         Everything we do is grounded in{' '}
-        <span className="italic" style={{ fontWeight: 400 }}>
+        <span style={{ fontWeight: 300 }}>
           values we hold ourselves to
         </span>
         , every single day.
@@ -728,7 +728,7 @@ function ValuesBlock() {
           style={{
             fontSize: 'clamp(32px, 4.2vw, 58px)',
             lineHeight: 1.08,
-            fontWeight: 300,
+            fontWeight: 700,
             color: INK,
             textWrap: 'balance',
           }}
@@ -1009,7 +1009,7 @@ function WorkplaceBlock() {
           style={{
             fontSize: 'clamp(34px, 4.6vw, 68px)',
             lineHeight: 1.06,
-            fontWeight: 300,
+            fontWeight: 400,
             color: '#FFFFFF',
             textWrap: 'balance',
           }}

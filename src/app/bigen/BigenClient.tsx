@@ -3,25 +3,22 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { DM_Sans } from 'next/font/google'
-import localFont from 'next/font/local'
+import { Roboto } from 'next/font/google'
 import { PortableText, type PortableTextComponents } from '@portabletext/react'
 import Footer from '@/components/Footer'
 import type { Bigen, BigenReel, BigenFeature, BigenProduct } from '@/sanity/queries'
 
-// Google Sans (self-hosted) — bold, modern sans for a confident, manly look
-const googleSans = localFont({
-  src: [
-    { path: '../fonts/GoogleSans-500.woff2', weight: '500', style: 'normal' },
-    { path: '../fonts/GoogleSans-700.woff2', weight: '700', style: 'normal' },
-  ],
+// Was self-hosted "Google Sans" — now Roboto (bold) to match the site typeface.
+const googleSans = Roboto({
+  subsets: ['latin'],
+  weight: ['500', '700'],
   variable: '--font-google-sans',
   display: 'swap',
 })
 
-const dmSans = DM_Sans({
+const dmSans = Roboto({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700', '800'],
+  weight: ['300', '400', '500', '700', '900'],
   variable: '--font-dm-sans',
 })
 

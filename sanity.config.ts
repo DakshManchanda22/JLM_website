@@ -142,6 +142,19 @@ export default defineConfig({
                       .child(S.documentTypeList('tag').title('Tags')),
                   ]),
               ),
+
+            S.divider(),
+
+            /* ─────── Footer & global site settings (singleton) ─────── */
+            S.listItem()
+              .title('Footer & site settings')
+              .id('siteSettings')
+              .child(
+                S.editor()
+                  .id('siteSettings')
+                  .schemaType('siteSettings')
+                  .documentId('siteSettings'),
+              ),
           ]),
     }),
     visionTool({ defaultApiVersion: apiVersion }),

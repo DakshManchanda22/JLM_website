@@ -3,11 +3,11 @@
 import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { Cormorant_Garamond } from 'next/font/google'
+import { Roboto } from 'next/font/google'
 
 gsap.registerPlugin(ScrollTrigger)
 
-const cormorant = Cormorant_Garamond({
+const cormorant = Roboto({
   subsets: ['latin'],
   weight: ['400', '500'],
   style: ['italic', 'normal'],

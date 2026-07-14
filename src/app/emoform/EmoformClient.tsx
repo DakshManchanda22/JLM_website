@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { Inter, Noto_Sans_Devanagari } from 'next/font/google'
+import { Roboto, Noto_Sans_Devanagari } from 'next/font/google'
 import EmoformFeatures from './EmoformFeatures'
 import EmoformScrollytelling from './EmoformScrollytelling'
 import EmoformGumCare from './EmoformGumCare'
@@ -12,9 +12,9 @@ import type { EmoformView } from '@/sanity/queries'
 
 /* "Sensitivity ka" → Inter (Latin); "अंत, तुरंत" → Noto Sans Devanagari,
    which pairs cleanly with Inter and actually renders Devanagari glyphs. */
-const inter = Inter({
+const inter = Roboto({
   subsets: ['latin'],
-  weight: ['700', '800', '900'],
+  weight: ['700', '900'],
   variable: '--font-inter',
 })
 const devanagari = Noto_Sans_Devanagari({
