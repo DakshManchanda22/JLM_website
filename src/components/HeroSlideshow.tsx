@@ -210,6 +210,7 @@ function HeroVideoPlayer({ video }: { video: HeroVideo }) {
       <video
         ref={videoRef}
         className="absolute inset-0 h-full w-full object-cover"
+        style={{ objectPosition: 'center top' }}
         src={video.videoUrl}
         poster={video.poster}
         autoPlay

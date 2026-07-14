@@ -242,10 +242,7 @@ export default function BrandCards({ brands }: { brands?: Brand[] }) {
 
   return (
     <section className="bg-[#111111] py-20 md:py-28 px-6 md:px-10">
-      <div className="mb-12 md:mb-16 flex items-end justify-between gap-6 flex-wrap">
-        <p className="text-white/50 text-xs tracking-[0.3em] uppercase">
-          Our Brands
-        </p>
+      <div className="mb-12 md:mb-16 flex justify-center text-center">
         <h2
           className="text-white font-serif font-light tracking-tight leading-[1.05]"
           style={{ fontSize: 'clamp(2rem, 4.5vw, 4.25rem)' }}

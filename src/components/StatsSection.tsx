@@ -46,7 +46,7 @@ function parseNumber(raw: string) {
   return { prefix: m[1], value: parseFloat(m[2]), suffix: m[3], decimals }
 }
 
-const DEFAULT_HEADING = 'A century of everyday goodness'
+const DEFAULT_HEADING = 'Building Goodness Everyday for over a Century'
 const DEFAULT_NOTE = 'Since 1920'
 
 export default function StatsSection({

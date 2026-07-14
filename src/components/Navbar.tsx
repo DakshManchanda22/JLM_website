@@ -91,7 +91,7 @@ function Logo({ className }: { className?: string }) {
 
 const DROPDOWNS: Record<string, string[]> = {
   'Our People': ['Our Story', 'Leadership Team', 'Life at JLM'],
-  'Our Brands': ['Morisons Baby Dreams', 'Emoform', 'Bigen'],
+  'Our Brands': ['Morisons', 'Morisons Baby Dreams', 'Emoform', 'Bigen'],
 }
 
 const LEFT = ['Our Brands', 'Our People']
@@ -143,7 +143,7 @@ export default function Navbar() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-[#111111]">
         <div ref={navRef} onMouseLeave={() => setActiveDropdown(null)}>
           {/* TOP BAR */}
-          <div className="relative flex items-center justify-between h-[var(--nav-h)] px-5 md:px-8">
+          <div className="relative flex items-center h-[var(--nav-h)] px-5 md:px-8">
             {/* Hamburger — mobile */}
             <button
               onClick={() => setMobileOpen(true)}
@@ -155,8 +155,17 @@ export default function Navbar() {
               <span className="block w-5 h-px bg-white" />
             </button>
 
-            {/* LEFT — desktop, plain text triggers with dropdowns */}
-            <div className="hidden md:flex items-center gap-7">
+            {/* LOGO — centred on mobile, left-aligned on desktop */}
+            <Link
+              href="/"
+              aria-label="JL Morison home"
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 md:static md:left-auto md:top-auto md:translate-x-0 md:translate-y-0"
+            >
+              <Logo className="h-7 md:h-8 w-auto text-white" />
+            </Link>
+
+            {/* RIGHT — desktop: all tabs, right-aligned */}
+            <div className="hidden md:flex items-center gap-7 ml-auto">
               {LEFT.map((label) => {
                 const subs = DROPDOWNS[label]
                 const isActive = activeDropdown === label
@@ -201,19 +210,6 @@ export default function Navbar() {
                   </div>
                 )
               })}
-            </div>
-
-            {/* CENTRE — absolutely centred logo */}
-            <Link
-              href="/"
-              aria-label="JL Morison home"
-              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-            >
-              <Logo className="h-7 md:h-8 w-auto text-white" />
-            </Link>
-
-            {/* RIGHT — desktop */}
-            <div className="hidden md:flex items-center gap-7">
               {RIGHT_PLAIN.map((label) => (
                 <Link
                   key={label}
@@ -234,7 +230,7 @@ export default function Navbar() {
             </div>
 
             {/* Mobile right-side spacer to keep logo centred */}
-            <div className="md:hidden w-7" />
+            <div className="md:hidden w-7 ml-auto" />
           </div>
         </div>
       </nav>
