@@ -49,6 +49,46 @@ function parseNumber(raw: string) {
 const DEFAULT_HEADING = 'Building Goodness Everyday for over a Century'
 const DEFAULT_NOTE = 'Since 1920'
 
+/* Scales the heading's font-size down until it wraps onto exactly `lines` rows,
+   so the copy always fills the same number of lines no matter how long it is.
+   The heading has a font-independent (rem) width, so the wrap point is stable. */
+function useFitLines(lines = 2, maxPx = 72, minPx = 16) {
+  const ref = useRef<HTMLHeadingElement>(null)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+
+    const fit = () => {
+      let lo = minPx
+      let hi = maxPx
+      let best = minPx
+      while (lo <= hi) {
+        const mid = (lo + hi) >> 1
+        el.style.fontSize = `${mid}px`
+        const lh = parseFloat(getComputedStyle(el).lineHeight) || mid
+        const rows = Math.round(el.scrollHeight / lh)
+        if (rows <= lines) {
+          best = mid
+          lo = mid + 1
+        } else {
+          hi = mid - 1
+        }
+      }
+      el.style.fontSize = `${best}px`
+    }
+
+    fit()
+    // Re-fit when the container width changes (observe the parent, not the
+    // heading itself, so setting its font-size doesn't loop the observer).
+    const ro = new ResizeObserver(fit)
+    if (el.parentElement) ro.observe(el.parentElement)
+    return () => ro.disconnect()
+  }, [lines, maxPx, minPx])
+
+  return ref
+}
+
 export default function StatsSection({
   stats,
   heading,
@@ -62,6 +102,7 @@ export default function StatsSection({
   const HEADING = heading && heading.length > 0 ? heading : DEFAULT_HEADING
   const NOTE = note && note.length > 0 ? note : DEFAULT_NOTE
   const sectionRef = useRef<HTMLElement>(null)
+  const headingRef = useFitLines(2)
 
   /* Fade-up reveal of the heading + cards, and count-up of the numbers */
   useEffect(() => {
@@ -131,8 +172,9 @@ export default function StatsSection({
         {/* Header row — big editorial heading left, small note right */}
         <div className="mb-12 md:mb-16 flex items-end justify-between gap-6 flex-wrap">
           <h2
+            ref={headingRef}
             data-stat-reveal
-            className="font-serif font-light tracking-tight leading-[0.95] text-[#111111] max-w-[16ch]"
+            className="font-serif font-light tracking-tight leading-[0.95] text-[#111111] max-w-[20rem] md:max-w-[34rem] [text-wrap:balance]"
             style={{ fontSize: 'clamp(2.25rem, 5vw, 4.5rem)' }}
           >
             {HEADING}

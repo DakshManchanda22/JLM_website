@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 
 const COMPANY_LINKS = [
-  { label: 'About', href: '/about' },
+  { label: 'About', href: '/our-story' },
   { label: 'Careers', href: '/careers' },
   { label: 'Contact Us', href: '/contact-us' },
   { label: 'Privacy Policy', href: 'https://storage.googleapis.com/jlm_website_v2/Privacy-Policy.pdf', external: true },

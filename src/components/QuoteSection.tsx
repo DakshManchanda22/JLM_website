@@ -13,8 +13,6 @@ const DEFAULT_LINES: string[] = [
   'one product, one promise at a time.',
 ]
 
-const DEFAULT_ATTRIBUTION = 'J.L. Morison · Since 1920'
-
 export default function QuoteSection({
   lines,
   attribution,
@@ -23,7 +21,9 @@ export default function QuoteSection({
   attribution?: string
 }) {
   const LINES = lines && lines.length > 0 ? lines : DEFAULT_LINES
-  const ATTRIBUTION = attribution && attribution.length > 0 ? attribution : DEFAULT_ATTRIBUTION
+  // No default — if marketing clears the attribution in Sanity, it disappears
+  // (and its spacing goes with it) instead of falling back to hardcoded text.
+  const ATTRIBUTION = attribution?.trim()
 
   const sectionRef = useRef<HTMLElement>(null)
 
@@ -38,7 +38,7 @@ export default function QuoteSection({
 
       gsap.fromTo(
         words,
-        { opacity: 0.12 },
+        { opacity: 0.28 },
         {
           opacity: 1,
           ease: 'none',
@@ -47,8 +47,10 @@ export default function QuoteSection({
           scrollTrigger: {
             trigger: root,
             scroller: scroller ?? undefined,
-            start: 'top 65%',
-            end: 'bottom 80%',
+            // Complete the reveal by the time the quote is comfortably in view
+            // so a long quote never rests with a faded tail.
+            start: 'top 80%',
+            end: 'top 35%',
             scrub: 1,
           },
         }
@@ -65,8 +67,8 @@ export default function QuoteSection({
     >
       <blockquote className="max-w-5xl mx-auto">
         <p
-          className="font-serif text-[#111111] leading-[1.25] tracking-tight"
-          style={{ fontSize: 'clamp(1.75rem, 4.2vw, 4rem)' }}
+          className="font-serif text-[#111111] leading-[1.3] tracking-tight [text-wrap:balance]"
+          style={{ fontSize: 'clamp(1.5rem, 3.2vw, 3rem)' }}
         >
           {LINES.map((line, li) => (
             <span
@@ -78,7 +80,7 @@ export default function QuoteSection({
                   key={`${li}-${wi}`}
                   data-word
                   className="inline-block mr-[0.25em]"
-                  style={{ opacity: 0.12 }}
+                  style={{ opacity: 0.28 }}
                 >
                   {word}
                 </span>
@@ -87,11 +89,13 @@ export default function QuoteSection({
           ))}
         </p>
 
-        <footer className="mt-10 md:mt-14">
-          <span className="block text-[#555555] text-xs tracking-[0.3em] uppercase">
-            {ATTRIBUTION}
-          </span>
-        </footer>
+        {ATTRIBUTION && (
+          <footer className="mt-10 md:mt-14">
+            <span className="block text-[#555555] text-xs tracking-[0.3em] uppercase">
+              {ATTRIBUTION}
+            </span>
+          </footer>
+        )}
       </blockquote>
     </section>
   )
