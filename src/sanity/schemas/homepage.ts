@@ -16,6 +16,7 @@ export default defineType({
     { name: 'heroVideo', title: 'Hero · Video' },
     { name: 'hero', title: 'Hero · Photo carousel' },
     { name: 'quote', title: 'Quote' },
+    { name: 'values', title: 'Values image' },
     { name: 'brands', title: 'Brand cards' },
     { name: 'stats', title: 'Stats' },
     { name: 'features', title: 'Feature sections' },
@@ -170,6 +171,29 @@ export default defineType({
           description: 'e.g. "— J.L. MORISON"',
         }),
       ],
+    }),
+
+    /* ─────────────── Values image ─────────────── */
+    defineField({
+      name: 'showValuesImage',
+      title: 'Show the values image',
+      description:
+        'ON → the values image is shown just below the quote on the homepage. ' +
+        'OFF → the whole section is hidden and no empty space is left behind.',
+      type: 'boolean',
+      group: 'values',
+      initialValue: true,
+      options: { layout: 'switch' },
+    }),
+    defineField({
+      name: 'valuesImage',
+      title: 'Values image',
+      description:
+        'A single full-width image shown below the quote (e.g. the JLM values graphic). ' +
+        'Use the switch above to show or hide it.',
+      type: 'image',
+      group: 'values',
+      options: { hotspot: true },
     }),
 
     /* ─────────────── Brand cards ─────────────── */

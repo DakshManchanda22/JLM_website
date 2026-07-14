@@ -3,6 +3,7 @@ import QuoteSection from '@/components/QuoteSection'
 import BrandCards, { type Brand } from '@/components/BrandCards'
 import StatsSection, { type Stat } from '@/components/StatsSection'
 import HomeFeatures, { type HomeFeature } from '@/components/HomeFeatures'
+import ValuesImage from '@/components/ValuesImage'
 import Footer from '@/components/Footer'
 import { fetchHomepage } from '@/sanity/queries'
 import { resolveImage, resolveImageUrl } from '@/sanity/resolveImage'
@@ -49,6 +50,15 @@ export default async function Home() {
       : []
   })
 
+  /* Values graphic below the quote — only when toggled on and an image is set.
+     Default ON when the flag is unset so it shows until marketing hides it. */
+  const showValues = homepage?.showValuesImage ?? true
+  const valuesResolved = showValues ? resolveImage(homepage?.valuesImage, 1600) : undefined
+  const valuesAspect =
+    typeof homepage?.valuesImage?.aspect === 'number'
+      ? homepage.valuesImage.aspect
+      : undefined
+
   const stats: Stat[] | undefined = homepage?.stats?.map((s) => ({
     number: s.number,
     label: s.label,
@@ -84,6 +94,13 @@ export default async function Home() {
         lines={homepage?.quote?.lines}
         attribution={homepage?.quote?.attribution}
       />
+      {valuesResolved && (
+        <ValuesImage
+          image={valuesResolved.url}
+          lqip={valuesResolved.lqip}
+          aspect={valuesAspect}
+        />
+      )}
       <BrandCards brands={brands} />
       <StatsSection
         stats={stats}

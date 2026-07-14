@@ -131,6 +131,8 @@ export type Homepage = {
     lines?: string[]
     attribution?: string
   }
+  showValuesImage?: boolean
+  valuesImage?: any
   brands?: BrandCardData[]
   statsHeading?: string
   statsNote?: string
@@ -155,6 +157,11 @@ export const homepageQuery = groq`*[_type == "homepage"][0]{
   quote{
     lines,
     attribution,
+  },
+  showValuesImage,
+  valuesImage{
+    ${imageWithLqip},
+    "aspect": asset->metadata.dimensions.aspectRatio,
   },
   brands[]{
     name,
