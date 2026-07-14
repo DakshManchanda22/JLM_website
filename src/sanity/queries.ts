@@ -83,6 +83,37 @@ export async function fetchPostSlugs(): Promise<string[]> {
   return client.fetch(postSlugsQuery)
 }
 
+/* ─────────────────────── Site settings (footer) ─────────────────────── */
+
+export type FooterLinkData = { label: string; href: string; external?: boolean }
+
+export type SiteSettings = {
+  footerCompanyLinks?: FooterLinkData[]
+  footerAddress?: string[]
+  footerSocial?: {
+    linkedin?: string
+    instagram?: string
+    facebook?: string
+    youtube?: string
+    twitter?: string
+  }
+  footerFollowText?: string
+  footerCopyright?: string
+}
+
+export const siteSettingsQuery = groq`*[_type == "siteSettings"][0]{
+  footerCompanyLinks[]{ label, href, external },
+  footerAddress,
+  footerSocial{ linkedin, instagram, facebook, youtube, twitter },
+  footerFollowText,
+  footerCopyright,
+}`
+
+export async function fetchSiteSettings(): Promise<SiteSettings | null> {
+  if (!client) return null
+  return client.fetch(siteSettingsQuery)
+}
+
 /* ─────────────────────── Homepage singleton ─────────────────────── */
 
 export type HeroSlide = {

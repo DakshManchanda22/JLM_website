@@ -28,6 +28,26 @@ html {
   scroll-padding-top: calc(var(--nav-h) + 8px);
 }
 
+/* Lenis smooth scroll — applied only while Lenis is active (it adds these
+   classes to <html>). Lenis drives scrolling itself, so native smooth is
+   turned off; when Lenis is off (reduced-motion / Studio) the rules above hold. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
 /* Dark page bg so the rounded corner cutouts of <main> reveal the
    #111111 colour — same as the navbar — creating the "card" silhouette.
    The fixed navbar sits over the body's top padding. */

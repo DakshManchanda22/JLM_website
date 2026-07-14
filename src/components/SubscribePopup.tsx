@@ -3,13 +3,13 @@
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Cormorant_Garamond, DM_Sans } from 'next/font/google'
+import { Roboto } from 'next/font/google'
 
-const cormorant = Cormorant_Garamond({
+const cormorant = Roboto({
   subsets: ['latin'],
-  weight: ['400', '500', '600'],
+  weight: ['400', '500', '700'],
 })
-const dmSans = DM_Sans({ subsets: ['latin'] })
+const dmSans = Roboto({ subsets: ['latin'], weight: ['400', '500', '700'] })
 
 const EASE = [0.16, 1, 0.3, 1] as const
 

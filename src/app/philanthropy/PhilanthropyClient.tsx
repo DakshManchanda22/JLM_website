@@ -9,29 +9,31 @@ import {
   useInView,
   useReducedMotion,
   useScroll,
+  useSpring,
   useTransform,
 } from 'framer-motion'
-import { Anton, Caveat_Brush, DM_Sans } from 'next/font/google'
+import { Roboto } from 'next/font/google'
 import Footer from '@/components/Footer'
 import type { PhilanthropyStatCard, PhilanthropyView } from '@/sanity/queries'
 
-// Handwritten hero quote — the "Now i've got the support" brush style.
-const caveatBrush = Caveat_Brush({
+// Was a handwritten brush face — now light Roboto so the hero reads airy, not heavy.
+const caveatBrush = Roboto({
   subsets: ['latin'],
-  weight: ['400'],
+  weight: ['300'],
+  style: ['normal', 'italic'],
   variable: '--font-caveat-brush',
 })
 
-// Tall condensed display face for the "PROGRAMS" heading.
-const anton = Anton({
+// Display heading face (was Anton) — Roboto black for a bold, tall-cap feel.
+const anton = Roboto({
   subsets: ['latin'],
-  weight: ['400'],
+  weight: ['900'],
   variable: '--font-anton',
 })
 
-const dmSans = DM_Sans({
+const dmSans = Roboto({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
+  weight: ['300', '400', '500', '700'],
   variable: '--font-dm-sans',
 })
 
@@ -952,6 +954,14 @@ function EnvironmentReveal({
     offset: ['start start', 'end end'],
   })
 
+  // Ease the raw scroll progress so the word roll-up and paragraph rise glide
+  // instead of tracking the wheel step-for-step (looked jittery before).
+  const progress = useSpring(scrollYProgress, {
+    stiffness: 160,
+    damping: 32,
+    mass: 0.35,
+  })
+
   // Heading: green highlight + white text sweep in left→right (like the hero's
   // "Changing Lives / Building Futures"). One-shot TIME-BASED animation (not
   // scrubbed) that fires the moment the section enters view — so the heading is
@@ -960,12 +970,12 @@ function EnvironmentReveal({
 
   // Word rolls up out of view (slot machine); paragraph rises into its place
   // and then holds (useTransform clamps at the endpoints, so it never leaves).
-  const wordY = useTransform(scrollYProgress, [0.52, 0.68], ['0%', '-120%'])
-  const wordOpacity = useTransform(scrollYProgress, [0.58, 0.68], [1, 0])
+  const wordY = useTransform(progress, [0.52, 0.68], ['0%', '-120%'])
+  const wordOpacity = useTransform(progress, [0.58, 0.68], [1, 0])
   // Paragraph starts rising when the word is ~70% up, fades to full opacity and
   // HOLDS there for the rest of the scroll (extra end stop prevents any drop).
-  const paraY = useTransform(scrollYProgress, [0.62, 0.82], ['70%', '0%'])
-  const paraOpacity = useTransform(scrollYProgress, [0.62, 0.8, 1], [0, 1, 1])
+  const paraY = useTransform(progress, [0.62, 0.82], ['70%', '0%'])
+  const paraOpacity = useTransform(progress, [0.62, 0.8, 1], [0, 1, 1])
 
   return (
     <section ref={sectionRef} className="relative bg-white" style={{ height: '220vh' }}>
@@ -1223,6 +1233,9 @@ function PoliciesSection({
   docs: PolicyDoc[]
   reduce: boolean
 }) {
+  // Roboto 900 is far wider than the old condensed display face, so scale the
+  // heading down to fit its column instead of overflowing the margin.
+  const headingRef = useFitText(84)
   return (
     <section className="bg-[#0c0c0c] px-[7vw] py-20 text-white md:py-28">
       <div className="mx-auto grid max-w-[1200px] grid-cols-1 items-center gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:gap-14">
@@ -1245,6 +1258,7 @@ function PoliciesSection({
 
         <div>
           <h2
+            ref={headingRef}
             className={anton.className}
             style={{
               margin: 0,

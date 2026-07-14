@@ -3,10 +3,10 @@
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { motion, useReducedMotion } from 'framer-motion'
-import { Inter } from 'next/font/google'
+import { Roboto } from 'next/font/google'
 import type { EmoformView } from '@/sanity/queries'
 
-const inter = Inter({ subsets: ['latin'], weight: ['600', '700', '800', '900'] })
+const inter = Roboto({ subsets: ['latin'], weight: ['700', '900'] })
 const EASE = [0.16, 1, 0.3, 1] as const
 const NAVY = '#13306e'
 

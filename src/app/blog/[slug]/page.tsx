@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { Cormorant_Garamond, DM_Sans } from 'next/font/google'
+import { Roboto } from 'next/font/google'
 
 import AuthorCard from '@/components/blog/AuthorCard'
 import PortableBody from '@/components/blog/PortableBody'
@@ -12,11 +12,11 @@ import { demoPostBySlug, demoPostSlugs } from '@/sanity/demoContent'
 import { isSanityConfigured } from '@/sanity/env'
 import { resolveImage, resolveImageUrl } from '@/sanity/resolveImage'
 
-const cormorant = Cormorant_Garamond({
+const cormorant = Roboto({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
+  weight: ['400', '500', '700'],
 })
-const dmSans = DM_Sans({ subsets: ['latin'] })
+const dmSans = Roboto({ subsets: ['latin'], weight: ['400', '500', '700'] })
 
 export const revalidate = 60
 

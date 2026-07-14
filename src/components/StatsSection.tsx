@@ -174,7 +174,7 @@ export default function StatsSection({
           <h2
             ref={headingRef}
             data-stat-reveal
-            className="font-serif font-light tracking-tight leading-[0.95] text-[#111111] max-w-[20rem] md:max-w-[34rem] [text-wrap:balance]"
+            className="font-serif font-semibold tracking-tight leading-[0.95] text-[#111111] max-w-[20rem] md:max-w-[34rem] [text-wrap:balance]"
             style={{ fontSize: 'clamp(2.25rem, 5vw, 4.5rem)' }}
           >
             {HEADING}
@@ -198,7 +198,7 @@ export default function StatsSection({
               className="rounded-[28px] bg-[#F6F3EE] p-8 md:p-10 flex flex-col"
             >
               <span
-                className="font-serif font-light leading-none text-[#111111]"
+                className="font-serif font-semibold leading-none text-[#111111]"
                 style={{ fontSize: 'clamp(3.25rem, 6vw, 5.5rem)' }}
                 {...(parsed
                   ? {
