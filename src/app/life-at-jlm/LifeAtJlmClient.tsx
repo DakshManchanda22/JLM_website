@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence, animate, useInView, useReducedMotion } from 'framer-motion'
-import { Roboto } from 'next/font/google'
+import { Cormorant_Garamond, DM_Sans } from 'next/font/google'
 import Footer from '@/components/Footer'
 
 /* ─────────────── CMS overrides via Context ───────────────
@@ -58,16 +58,16 @@ const useLife = () => useContext(LifeCtx)
    original Cormorant Garamond (value titles, the intro statement). */
 const serifClass = 'font-serif'
 
-const cormorant = Roboto({
+const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
   weight: ['300', '400', '500'],
   style: ['normal', 'italic'],
   variable: '--font-cormorant',
 })
 
-const dmSans = Roboto({
+const dmSans = DM_Sans({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '700'],
+  weight: ['300', '400', '500', '600'],
   variable: '--font-dm-sans',
 })
 
@@ -336,7 +336,15 @@ function Hero() {
     cms.introImages && cms.introImages.length > 0
       ? cms.introImages.length
       : DEFAULT_INTRO_SRCS.length
-  const HERO_REVEAL_DELAY = introTiming(introCount).liftMs / 1000 + 0.5 // headline rises as curtain pulls away
+  /* On portrait viewports (taller than wide) the collage curtain is skipped, so
+     the headline reveals shortly after load instead of waiting for the (absent)
+     curtain to lift. Only the delay changes, so it's hydration-safe. */
+  const [skipIntro] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(orientation: portrait)').matches,
+  )
+  const HERO_REVEAL_DELAY = skipIntro
+    ? 0.35
+    : introTiming(introCount).liftMs / 1000 + 0.5 // headline rises as curtain pulls away
 
   const HERO_IMG =
     cms.heroImage ??
@@ -481,7 +489,7 @@ function IntroParagraph() {
         a rare kind of foundation to grow from. Collaboration, honest communication, and a
         genuinely positive culture aren&rsquo;t aspirations here; they&rsquo;re simply how we work.
         Everything we do is grounded in{' '}
-        <span style={{ fontWeight: 300 }}>
+        <span className="italic" style={{ fontWeight: 400 }}>
           values we hold ourselves to
         </span>
         , every single day.
@@ -728,7 +736,7 @@ function ValuesBlock() {
           style={{
             fontSize: 'clamp(32px, 4.2vw, 58px)',
             lineHeight: 1.08,
-            fontWeight: 700,
+            fontWeight: 300,
             color: INK,
             textWrap: 'balance',
           }}
@@ -1009,7 +1017,7 @@ function WorkplaceBlock() {
           style={{
             fontSize: 'clamp(34px, 4.6vw, 68px)',
             lineHeight: 1.06,
-            fontWeight: 400,
+            fontWeight: 300,
             color: '#FFFFFF',
             textWrap: 'balance',
           }}
@@ -1069,6 +1077,12 @@ function WorkplaceBlock() {
 
 export default function LifeAtJlmClient({ cms = {} }: { cms?: LifeCms }) {
   const [introDone, setIntroDone] = useState(false)
+
+  /* On portrait viewports (taller than wide — phones held upright) skip the
+     collage intro curtain entirely; only the hero text animation plays. */
+  useEffect(() => {
+    if (window.matchMedia('(orientation: portrait)').matches) setIntroDone(true)
+  }, [])
 
   /* smooth scroll for in-page anchors, offset for the fixed navbar */
   useEffect(() => {

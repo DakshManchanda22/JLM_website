@@ -3,7 +3,6 @@ import Navbar from '@/components/Navbar'
 import SmoothScroll from '@/components/SmoothScroll'
 import { SiteSettingsProvider } from '@/components/SiteSettingsProvider'
 import { fetchSiteSettings } from '@/sanity/queries'
-import { roboto } from './fonts'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -28,8 +27,8 @@ export default async function RootLayout({
   const settings = await fetchSiteSettings()
 
   return (
-    <html lang="en" className={roboto.variable}>
-      <body className={roboto.className}>
+    <html lang="en">
+      <body>
         <SmoothScroll />
         <SiteSettingsProvider value={settings}>
           <Navbar />

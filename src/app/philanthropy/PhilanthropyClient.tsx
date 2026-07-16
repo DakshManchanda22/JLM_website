@@ -12,28 +12,27 @@ import {
   useSpring,
   useTransform,
 } from 'framer-motion'
-import { Roboto } from 'next/font/google'
+import { Anton, Caveat_Brush, DM_Sans } from 'next/font/google'
 import Footer from '@/components/Footer'
 import type { PhilanthropyStatCard, PhilanthropyView } from '@/sanity/queries'
 
-// Was a handwritten brush face — now light Roboto so the hero reads airy, not heavy.
-const caveatBrush = Roboto({
+// Handwritten hero quote — the "Now i've got the support" brush style.
+const caveatBrush = Caveat_Brush({
   subsets: ['latin'],
-  weight: ['300'],
-  style: ['normal', 'italic'],
+  weight: ['400'],
   variable: '--font-caveat-brush',
 })
 
-// Display heading face (was Anton) — Roboto black for a bold, tall-cap feel.
-const anton = Roboto({
+// Tall condensed display face for the "PROGRAMS" heading.
+const anton = Anton({
   subsets: ['latin'],
-  weight: ['900'],
+  weight: ['400'],
   variable: '--font-anton',
 })
 
-const dmSans = Roboto({
+const dmSans = DM_Sans({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '700'],
+  weight: ['300', '400', '500', '600', '700'],
   variable: '--font-dm-sans',
 })
 
@@ -1233,9 +1232,6 @@ function PoliciesSection({
   docs: PolicyDoc[]
   reduce: boolean
 }) {
-  // Roboto 900 is far wider than the old condensed display face, so scale the
-  // heading down to fit its column instead of overflowing the margin.
-  const headingRef = useFitText(84)
   return (
     <section className="bg-[#0c0c0c] px-[7vw] py-20 text-white md:py-28">
       <div className="mx-auto grid max-w-[1200px] grid-cols-1 items-center gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:gap-14">
@@ -1258,7 +1254,6 @@ function PoliciesSection({
 
         <div>
           <h2
-            ref={headingRef}
             className={anton.className}
             style={{
               margin: 0,

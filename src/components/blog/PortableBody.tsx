@@ -1,17 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { PortableText, type PortableTextComponents } from '@portabletext/react'
 import Link from 'next/link'
-import { Roboto } from 'next/font/google'
+import { Cormorant_Garamond, DM_Sans } from 'next/font/google'
 
 import { urlFor } from '@/sanity/image'
 import InlineImage from './InlineImage'
 import PullQuote from './PullQuote'
 
-const cormorant = Roboto({
+const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
-  weight: ['500', '700'],
+  weight: ['500', '600', '700'],
 })
-const dmSans = Roboto({ subsets: ['latin'], weight: ['400', '500', '700'] })
+const dmSans = DM_Sans({ subsets: ['latin'] })
 
 /**
  * Maps Sanity Portable Text blocks to editorial-style React.

@@ -5,12 +5,12 @@ import Link from 'next/link'
 import { useEffect, useMemo, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { Roboto } from 'next/font/google'
+import { Abril_Fatface, Cormorant_Garamond } from 'next/font/google'
 
 gsap.registerPlugin(ScrollTrigger)
 
-const abrilFatface = Roboto({ subsets: ['latin'], weight: '900' })
-const cormorant = Roboto({ subsets: ['latin'], weight: ['500', '700'] })
+const abrilFatface = Abril_Fatface({ subsets: ['latin'], weight: '400' })
+const cormorant = Cormorant_Garamond({ subsets: ['latin'], weight: ['600', '700'] })
 
 export type Post = {
   title: string

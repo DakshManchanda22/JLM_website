@@ -15,6 +15,7 @@ export default defineType({
     { name: 'heroMode', title: 'Hero mode' },
     { name: 'heroVideo', title: 'Hero · Video' },
     { name: 'hero', title: 'Hero · Photo carousel' },
+    { name: 'vision', title: 'Our Vision' },
     { name: 'quote', title: 'Quote' },
     { name: 'values', title: 'Values image' },
     { name: 'brands', title: 'Brand cards' },
@@ -148,7 +149,30 @@ export default defineType({
       ],
     }),
 
-    /* ─────────────── Quote section ─────────────── */
+    /* ─────────────── Our Vision ─────────────── */
+    defineField({
+      name: 'vision',
+      title: 'Our Vision',
+      type: 'object',
+      group: 'vision',
+      fields: [
+        defineField({
+          name: 'label',
+          title: 'Label',
+          type: 'string',
+          description: 'Small heading above the statement, e.g. "Our Vision".',
+        }),
+        defineField({
+          name: 'text',
+          title: 'Vision statement',
+          description: 'Reveals with a beige marker highlight as it scrolls into view.',
+          type: 'text',
+          rows: 3,
+        }),
+      ],
+    }),
+
+    /* ─────────────── Quote section (legacy — no longer rendered) ─────────────── */
     defineField({
       name: 'quote',
       title: 'Editorial quote',

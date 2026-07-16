@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { Roboto, Noto_Sans_Devanagari } from 'next/font/google'
+import { Inter, Noto_Sans_Devanagari } from 'next/font/google'
 import EmoformFeatures from './EmoformFeatures'
 import EmoformScrollytelling from './EmoformScrollytelling'
 import EmoformGumCare from './EmoformGumCare'
@@ -12,9 +12,9 @@ import type { EmoformView } from '@/sanity/queries'
 
 /* "Sensitivity ka" → Inter (Latin); "अंत, तुरंत" → Noto Sans Devanagari,
    which pairs cleanly with Inter and actually renders Devanagari glyphs. */
-const inter = Roboto({
+const inter = Inter({
   subsets: ['latin'],
-  weight: ['700', '900'],
+  weight: ['700', '800', '900'],
   variable: '--font-inter',
 })
 const devanagari = Noto_Sans_Devanagari({
@@ -33,21 +33,10 @@ export default function EmoformClient({ cms }: { cms?: EmoformView }) {
   const flag = cms?.heroFlag ?? 'Swiss Formula'
   const heroImg = cms?.heroImage
 
-  /* The wide gap between the Hindi words (baked-in non-breaking spaces) frames
-     the tube in landscape/desktop, but looks unnatural in portrait where no
-     tube sits between them. Collapse any run of spaces/NBSPs to one space when
-     the viewport is taller than it is wide. */
-  const [isPortrait, setIsPortrait] = useState(false)
-  useEffect(() => {
-    const mq = window.matchMedia('(orientation: portrait)')
-    const update = () => setIsPortrait(mq.matches)
-    update()
-    mq.addEventListener('change', update)
-    return () => mq.removeEventListener('change', update)
-  }, [])
-  const hero2Display = isPortrait
-    ? hero2.replace(/\s+/g, ' ').trim()
-    : hero2
+  /* The tagline now sits ABOVE the tube at every size (see headline block), so
+     the tube never sits between the Hindi words — collapse the baked-in wide
+     gap to a single space everywhere. */
+  const hero2Display = hero2.replace(/\s+/g, ' ').trim()
 
   /* Hold the slide-up until the full toothpaste image has decoded, so the
      tube is always sharp as it rises — never the blurry LQIP placeholder.
@@ -91,11 +80,9 @@ export default function EmoformClient({ cms }: { cms?: EmoformView }) {
           </div>
         </motion.div>
 
-        {/* ── Headline: when the screen is taller than it is wide (portrait) the
-             tagline sits ABOVE the product and on top in the stack so the tube
-             can never cover it. When wider than tall (landscape / desktop) it
-             centres BEHIND the product for the layered hero look. ── */}
-        <div className="absolute inset-0 z-30 flex flex-col items-center justify-start px-4 pt-[13vh] text-center select-none landscape:z-0 landscape:justify-center landscape:pt-0">
+        {/* ── Headline: sits ABOVE the product and on top of the stack at every
+             size, so the toothpaste tube can never cover the tagline. ── */}
+        <div className="absolute inset-0 z-30 flex flex-col items-center justify-start px-4 pt-[13vh] text-center select-none">
           <motion.span
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
@@ -154,6 +141,41 @@ export default function EmoformClient({ cms }: { cms?: EmoformView }) {
       {/* Closing blue behind the footer's rounded top corners so the curve
           blends into the CTA section instead of revealing white. */}
       <div style={{ backgroundColor: '#13285a' }}>
+        {/* Follow us — Emoform social links */}
+        <section className="px-6 pt-20 pb-6 text-center text-white md:pt-28">
+          <h3
+            className={`${inter.className} font-extrabold tracking-tight`}
+            style={{ fontSize: 'clamp(1.6rem, 3vw, 2.5rem)' }}
+          >
+            Follow Emoform
+          </h3>
+          <div className="mt-7 flex items-center justify-center gap-4">
+            <a
+              href={cms?.instagramUrl ?? 'https://www.instagram.com/emoform_r/'}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Follow Emoform on Instagram"
+              className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-white/10 text-white ring-1 ring-white/25 transition-transform hover:scale-105 hover:bg-white/15"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect x="3" y="3" width="18" height="18" rx="5" />
+                <circle cx="12" cy="12" r="4" />
+                <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none" />
+              </svg>
+            </a>
+            <a
+              href={cms?.facebookUrl ?? 'https://www.facebook.com/share/1DMTAMHt5D/?mibextid=wwXIfr'}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Follow Emoform on Facebook"
+              className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-white/10 text-white ring-1 ring-white/25 transition-transform hover:scale-105 hover:bg-white/15"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M14 9.5h2.5l.5-3H14V4.8c0-.9.3-1.5 1.6-1.5H17V.6C16.7.55 15.8.5 14.8.5 12.6.5 11 1.9 11 4.4v2.1H8.5v3H11V21h3V9.5z" />
+              </svg>
+            </a>
+          </div>
+        </section>
         <Footer />
       </div>
     </>
