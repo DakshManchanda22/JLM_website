@@ -7,7 +7,8 @@ import { DM_Sans } from 'next/font/google'
 import localFont from 'next/font/local'
 import { PortableText, type PortableTextComponents } from '@portabletext/react'
 import Footer from '@/components/Footer'
-import type { Bigen, BigenReel, BigenFeature, BigenProduct } from '@/sanity/queries'
+import SocialStamps from '@/components/SocialStamps'
+import type { Bigen, BigenReel, BigenFeature, BigenProduct, SocialCardContent } from '@/sanity/queries'
 
 // Google Sans (self-hosted) — bold, modern sans for a confident, manly look
 const googleSans = localFont({
@@ -595,6 +596,8 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
         products={cms.products ?? []}
         instagramUrl={cms.instagramUrl || D.instagramUrl}
         facebookUrl={cms.facebookUrl || D.facebookUrl}
+        instagramCard={cms.instagramCard}
+        facebookCard={cms.facebookCard}
       />
 
       {/* cream backdrop so the footer's rounded top corners blend with the
@@ -615,6 +618,8 @@ function ReelsSection({
   products,
   instagramUrl,
   facebookUrl,
+  instagramCard,
+  facebookCard,
 }: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   headline?: any[]
@@ -624,6 +629,8 @@ function ReelsSection({
   products: BigenProduct[]
   instagramUrl: string
   facebookUrl: string
+  instagramCard?: SocialCardContent
+  facebookCard?: SocialCardContent
 }) {
   const trackRef = useRef<HTMLDivElement>(null)
 
@@ -757,6 +764,8 @@ function ReelsSection({
           products={products}
           instagramUrl={instagramUrl}
           facebookUrl={facebookUrl}
+          instagramCard={instagramCard}
+          facebookCard={facebookCard}
         />
       </div>
     </section>
@@ -770,12 +779,16 @@ function ProductRange({
   products,
   instagramUrl,
   facebookUrl,
+  instagramCard,
+  facebookCard,
 }: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   headline?: any[]
   products: BigenProduct[]
   instagramUrl: string
   facebookUrl: string
+  instagramCard?: SocialCardContent
+  facebookCard?: SocialCardContent
 }) {
   // Fixed display order for the range, regardless of Sanity ordering.
   const RANGE_ORDER = ['beard color', 'speedy color', 'beard oil', 'hair color conditioner']
@@ -863,58 +876,34 @@ function ProductRange({
       </div>
 
       {/* Follow us */}
-      <div className="mt-24 flex flex-col items-center text-center md:mt-32">
-        <h3
-          className="text-[clamp(1.6rem,3vw,2.5rem)] font-bold text-[#1d1408]"
-          style={{ fontFamily: 'var(--font-google-sans)' }}
-        >
-          Join the community
-        </h3>
-        <div className="mt-7 flex items-center gap-4">
-          <a
-            href={instagramUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Follow Bigen on Instagram"
-            className="inline-flex h-14 w-14 items-center justify-center rounded-full text-white shadow-[0_12px_30px_-10px_rgba(40,29,9,0.55)] transition-transform hover:scale-105"
-            style={{ background: 'linear-gradient(135deg, #c79a3a 0%, #1d1408 100%)' }}
-          >
-            <svg
-              width="26"
-              height="26"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <rect x="3" y="3" width="18" height="18" rx="5" />
-              <circle cx="12" cy="12" r="4" />
-              <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
-            </svg>
-          </a>
-          <a
-            href={facebookUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Follow Bigen on Facebook"
-            className="inline-flex h-14 w-14 items-center justify-center rounded-full text-white shadow-[0_12px_30px_-10px_rgba(40,29,9,0.55)] transition-transform hover:scale-105"
-            style={{ background: 'linear-gradient(135deg, #c79a3a 0%, #1d1408 100%)' }}
-          >
-            <svg
-              width="26"
-              height="26"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              aria-hidden="true"
-            >
-              <path d="M14 13.5h2.5l1-4H14V7c0-1.03 0-2 2-2h1.5V1.64c-.33-.04-1.55-.14-2.84-.14-2.69 0-4.66 1.64-4.66 4.66V9.5H7v4h3v8.5h4z" />
-            </svg>
-          </a>
-        </div>
-      </div>
+      {/* TODO: replace the placeholder counts with real follower numbers. */}
+      <SocialStamps
+        heading="Join the community"
+        ink="#1d1408"
+        muted="#6b5d45"
+        notchColor="#f2ebdd"
+        fontClassName={googleSans.className}
+        cards={[
+          {
+            platform: 'instagram',
+            href: instagramUrl,
+            count: instagramCard?.followers ?? '30K',
+            heading: instagramCard?.heading ?? 'Sharp, every day',
+            subcopy: instagramCard?.subcopy ?? 'Grooming inspiration and looks that last.',
+            image: instagramCard?.image,
+            lqip: instagramCard?.lqip,
+          },
+          {
+            platform: 'facebook',
+            href: facebookUrl,
+            count: facebookCard?.followers ?? '22K',
+            heading: facebookCard?.heading ?? 'For the modern man',
+            subcopy: facebookCard?.subcopy ?? 'Tips, launches and stories from the Bigen community.',
+            image: facebookCard?.image,
+            lqip: facebookCard?.lqip,
+          },
+        ]}
+      />
     </div>
   )
 }

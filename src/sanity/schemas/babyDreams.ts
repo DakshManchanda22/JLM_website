@@ -1,4 +1,5 @@
 import { defineType, defineField, defineArrayMember } from 'sanity'
+import { socialCardFields } from './socialCard'
 
 /* Shared pastel tint options for the product-category tiles. */
 const TINTS = [
@@ -197,6 +198,9 @@ export default defineType({
       type: 'url',
       validation: (Rule) => Rule.uri({ scheme: ['https'] }),
     }),
+    ...socialCardFields('instagram', 'Instagram'),
+    ...socialCardFields('facebook', 'Facebook'),
+    ...socialCardFields('youtube', 'YouTube'),
   ],
   preview: {
     prepare: () => ({ title: 'Morisons Baby Dreams' }),

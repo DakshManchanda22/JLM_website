@@ -1,4 +1,5 @@
 import { defineType, defineField, defineArrayMember } from 'sanity'
+import { socialCardFields } from './socialCard'
 
 /**
  * Emoform brand page — every headline, label, caption, link and image on the
@@ -157,6 +158,8 @@ export default defineType({
       type: 'url',
       group: 'social',
     }),
+    ...socialCardFields('instagram', 'Instagram'),
+    ...socialCardFields('facebook', 'Facebook'),
   ],
   preview: { prepare: () => ({ title: 'Emoform' }) },
 })

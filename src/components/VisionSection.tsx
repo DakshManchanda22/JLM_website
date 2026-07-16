@@ -1,22 +1,18 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
-
-gsap.registerPlugin(ScrollTrigger)
+import {
+  KineticTextReveal,
+  type KineticTextRevealRef,
+} from '@/components/ui/kinetic-text-reveal'
 
 const DEFAULT_TEXT =
   'To be a sustainably growing, socially responsible organization that provides innovative, high-quality baby care products while becoming the market leader in the baby care industry.'
 
-// Warm beige accent (site palette) used as the marker highlight.
-const HIGHLIGHT = '#E8E0D5'
-
 /**
- * "Our Vision" statement. As the section reaches view, a beige marker
- * highlight sweeps left→right behind the text (per line, following the ragged
- * edges) via GSAP. Respects reduced-motion by showing the highlight already
- * drawn.
+ * "Our Vision" statement. As the section scrolls into view, the words rise into
+ * place with a soft blur and staggered timing (kinetic text reveal). Respects
+ * reduced-motion via the reveal component's own handling.
  */
 export default function VisionSection({
   label = 'Our Vision',
@@ -26,40 +22,26 @@ export default function VisionSection({
   text?: string
 }) {
   const sectionRef = useRef<HTMLElement>(null)
-  const markRef = useRef<HTMLSpanElement>(null)
+  const revealRef = useRef<KineticTextRevealRef>(null)
 
   useEffect(() => {
     const root = sectionRef.current
-    const mark = markRef.current
-    if (!root || !mark) return
+    if (!root) return
 
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      mark.style.backgroundSize = '100% 100%'
-      return
-    }
+    const io = new IntersectionObserver(
+      (entries, observer) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue
+          revealRef.current?.play()
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.3 },
+    )
 
-    const scroller = document.getElementById('page-scroller')
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        mark,
-        { backgroundSize: '0% 100%' },
-        {
-          backgroundSize: '100% 100%',
-          ease: 'power2.out',
-          duration: 0.9,
-          scrollTrigger: {
-            trigger: root,
-            scroller: scroller ?? undefined,
-            // Fires as the block is just coming into view.
-            start: 'top 72%',
-            once: true,
-          },
-        },
-      )
-    }, root)
-
-    return () => ctx.revert()
-  }, [])
+    io.observe(root)
+    return () => io.disconnect()
+  }, [text])
 
   return (
     <section ref={sectionRef} className="w-full bg-white px-4 pt-16 pb-6 md:px-8 md:pt-24 md:pb-8">
@@ -71,25 +53,20 @@ export default function VisionSection({
           {label}
         </span>
         <p
-          className="font-serif font-light leading-[1.25] tracking-tight text-[#111111] [text-wrap:balance]"
+          className="font-serif font-light leading-[1.25] tracking-tight text-[#111111]"
           style={{ fontSize: 'clamp(1.6rem, 3.4vw, 3.1rem)' }}
         >
-          <span
-            ref={markRef}
-            style={{
-              backgroundImage: `linear-gradient(${HIGHLIGHT}, ${HIGHLIGHT})`,
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: '0 0',
-              backgroundSize: '0% 100%',
-              WebkitBoxDecorationBreak: 'clone',
-              boxDecorationBreak: 'clone',
-              padding: '0.04em 0.1em',
-              margin: '0 -0.1em',
-              borderRadius: 3,
-            }}
-          >
-            {text}
-          </span>
+          <KineticTextReveal
+            ref={revealRef}
+            text={text}
+            autoPlay={false}
+            splitBy="words"
+            direction="up"
+            distance={26}
+            stagger={0.045}
+            blur
+            transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
+          />
         </p>
       </div>
     </section>

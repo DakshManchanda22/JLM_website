@@ -94,17 +94,14 @@ const DROPDOWNS: Record<string, string[]> = {
   'Our Brands': ['Morisons Baby Dreams', 'Bigen', 'Emoform', 'Morisons'],
 }
 
-const LEFT = ['Our Brands', 'Our People']
-const RIGHT_PLAIN = ['ESG & Philanthropy', 'Careers']
-const ALL_MOBILE = [...LEFT, ...RIGHT_PLAIN, 'Contact Us']
+// Order shown in the right-aligned desktop cluster (all right-aligned via ml-auto).
+// ESG and Philanthropy are two separate top-level links (no combined dropdown).
+const NAV_ITEMS = ['Our Brands', 'Our People', 'ESG', 'Philanthropy', 'Careers']
+const ALL_MOBILE = [...NAV_ITEMS, 'Contact Us']
 
 const slug = (s: string) => s.toLowerCase().replace(/\s+/g, '-')
 
-// Labels whose display text doesn't map cleanly to their route.
-const HREF_OVERRIDES: Record<string, string> = {
-  'ESG & Philanthropy': '/philanthropy',
-}
-const linkHref = (label: string) => HREF_OVERRIDES[label] ?? `/${slug(label)}`
+const linkHref = (label: string) => `/${slug(label)}`
 const EASE = [0.16, 1, 0.3, 1] as const
 
 const plainLink =
@@ -166,9 +163,24 @@ export default function Navbar() {
 
             {/* RIGHT — desktop: all tabs, right-aligned */}
             <div className="hidden md:flex items-center gap-7 ml-auto">
-              {LEFT.map((label) => {
+              {NAV_ITEMS.map((label) => {
                 const subs = DROPDOWNS[label]
                 const isActive = activeDropdown === label
+
+                // Plain link (no dropdown) — e.g. Careers.
+                if (!subs) {
+                  return (
+                    <Link
+                      key={label}
+                      href={linkHref(label)}
+                      onMouseEnter={() => setActiveDropdown(null)}
+                      className={plainLink}
+                    >
+                      {label}
+                    </Link>
+                  )
+                }
+
                 return (
                   <div
                     key={label}
@@ -210,16 +222,6 @@ export default function Navbar() {
                   </div>
                 )
               })}
-              {RIGHT_PLAIN.map((label) => (
-                <Link
-                  key={label}
-                  href={linkHref(label)}
-                  onMouseEnter={() => setActiveDropdown(null)}
-                  className={plainLink}
-                >
-                  {label}
-                </Link>
-              ))}
               <Link
                 href="/contact-us"
                 onMouseEnter={() => setActiveDropdown(null)}

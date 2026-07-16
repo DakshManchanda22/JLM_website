@@ -51,27 +51,15 @@ export default async function Home() {
         : []
     }) ?? []
 
-  // House brand card — appended in code (add it in Sanity later to make it
-  // fully editable). Skipped if a "Morisons" house card already exists.
-  const morisonsCard: Brand = {
-    name: 'Morisons',
-    shortName: 'Morisons',
-    tagline: 'The house of goodness — a century of trust, in every Indian home.',
-    href: '/morisons',
-    image:
-      'https://images.unsplash.com/photo-1521790797524-b2497295b8a0?w=1600&q=80&auto=format&fit=crop',
-  }
-  const combinedBrands: Brand[] = sanityBrands.some((b) => b.name.trim() === 'Morisons')
-    ? sanityBrands
-    : [...sanityBrands, morisonsCard]
-
-  // Fixed display order for the "Trusted in every Indian home" cards.
+  // Brand cards are managed entirely in Sanity (including the Morisons house
+  // card). We only enforce a stable display order so the row reads the same
+  // regardless of how the cards are ordered in the Studio.
   const BRAND_ORDER = ['Morisons Baby Dreams', 'Bigen', 'Emoform', 'Morisons']
   const rank = (name: string) => {
     const i = BRAND_ORDER.indexOf(name.trim())
     return i === -1 ? BRAND_ORDER.length : i
   }
-  const brands: Brand[] = [...combinedBrands].sort((a, b) => rank(a.name) - rank(b.name))
+  const brands: Brand[] = [...sanityBrands].sort((a, b) => rank(a.name) - rank(b.name))
 
   /* Values graphic below the quote — only when toggled on and an image is set.
      Default ON when the flag is unset so it shows until marketing hides it. */
@@ -126,6 +114,7 @@ export default async function Home() {
         stats={stats}
         heading={homepage?.statsHeading}
         note={homepage?.statsNote}
+        speed={homepage?.carouselSpeed}
       />
       <HomeFeatures features={features} />
       <div style={{ backgroundColor: '#FFFFFF' }}>
