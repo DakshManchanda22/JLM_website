@@ -8,6 +8,7 @@ import EmoformFeatures from './EmoformFeatures'
 import EmoformScrollytelling from './EmoformScrollytelling'
 import EmoformGumCare from './EmoformGumCare'
 import Footer from '@/components/Footer'
+import SocialStamps from '@/components/SocialStamps'
 import type { EmoformView } from '@/sanity/queries'
 
 /* "Sensitivity ka" → Inter (Latin); "अंत, तुरंत" → Noto Sans Devanagari,
@@ -33,10 +34,9 @@ export default function EmoformClient({ cms }: { cms?: EmoformView }) {
   const flag = cms?.heroFlag ?? 'Swiss Formula'
   const heroImg = cms?.heroImage
 
-  /* The tagline now sits ABOVE the tube at every size (see headline block), so
-     the tube never sits between the Hindi words — collapse the baked-in wide
-     gap to a single space everywhere. */
-  const hero2Display = hero2.replace(/\s+/g, ' ').trim()
+  /* Render the second (Hindi) line exactly as authored in Sanity — whitespace
+     preserved — so spacing between the words is controlled from the CMS. */
+  const hero2Display = hero2
 
   /* Hold the slide-up until the full toothpaste image has decoded, so the
      tube is always sharp as it rises — never the blurry LQIP placeholder.
@@ -80,9 +80,10 @@ export default function EmoformClient({ cms }: { cms?: EmoformView }) {
           </div>
         </motion.div>
 
-        {/* ── Headline: sits ABOVE the product and on top of the stack at every
-             size, so the toothpaste tube can never cover the tagline. ── */}
-        <div className="absolute inset-0 z-30 flex flex-col items-center justify-start px-4 pt-[13vh] text-center select-none">
+        {/* ── Headline: in PORTRAIT (mobile) the text sits on TOP of the tube;
+             in LANDSCAPE the tube rises up over the tagline, so the two Hindi
+             words open a wide gap for the tube to sit between them. ── */}
+        <div className="absolute inset-0 z-30 flex flex-col items-center justify-start px-4 pt-[13vh] text-center select-none landscape:z-10">
           <motion.span
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
@@ -96,7 +97,7 @@ export default function EmoformClient({ cms }: { cms?: EmoformView }) {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: EASE, delay: 0.1 }}
-            className={`${devanagari.className} block font-extrabold leading-[1.1] tracking-tight text-white`}
+            className={`${devanagari.className} block whitespace-pre-wrap font-extrabold leading-[1.1] tracking-tight text-white`}
             style={{ fontSize: 'clamp(2.75rem, 11vw, 13rem)' }}
           >
             {hero2Display}
@@ -106,7 +107,7 @@ export default function EmoformClient({ cms }: { cms?: EmoformView }) {
         {/* ── Toothpaste — width-driven like the headline; big up to the lg
              breakpoint (phones + tablets), trimmer on desktop. Bottom sits at
              the section edge with ~5% cropped. ── */}
-        <div className="absolute inset-0 z-10 flex items-end justify-center">
+        <div className="absolute inset-0 z-10 flex items-end justify-center landscape:z-20">
           <motion.div
             initial={{ y: '100%' }}
             animate={{ y: heroLoaded ? '0%' : '100%' }}
@@ -142,40 +143,34 @@ export default function EmoformClient({ cms }: { cms?: EmoformView }) {
           blends into the CTA section instead of revealing white. */}
       <div style={{ backgroundColor: '#13285a' }}>
         {/* Follow us — Emoform social links */}
-        <section className="px-6 pt-20 pb-6 text-center text-white md:pt-28">
-          <h3
-            className={`${inter.className} font-extrabold tracking-tight`}
-            style={{ fontSize: 'clamp(1.6rem, 3vw, 2.5rem)' }}
-          >
-            Follow Emoform
-          </h3>
-          <div className="mt-7 flex items-center justify-center gap-4">
-            <a
-              href={cms?.instagramUrl ?? 'https://www.instagram.com/emoform_r/'}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Follow Emoform on Instagram"
-              className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-white/10 text-white ring-1 ring-white/25 transition-transform hover:scale-105 hover:bg-white/15"
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <rect x="3" y="3" width="18" height="18" rx="5" />
-                <circle cx="12" cy="12" r="4" />
-                <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none" />
-              </svg>
-            </a>
-            <a
-              href={cms?.facebookUrl ?? 'https://www.facebook.com/share/1DMTAMHt5D/?mibextid=wwXIfr'}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Follow Emoform on Facebook"
-              className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-white/10 text-white ring-1 ring-white/25 transition-transform hover:scale-105 hover:bg-white/15"
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M14 9.5h2.5l.5-3H14V4.8c0-.9.3-1.5 1.6-1.5H17V.6C16.7.55 15.8.5 14.8.5 12.6.5 11 1.9 11 4.4v2.1H8.5v3H11V21h3V9.5z" />
-              </svg>
-            </a>
-          </div>
-        </section>
+        {/* TODO: replace the placeholder counts with real follower numbers. */}
+        <SocialStamps
+          heading="Follow Emoform"
+          headingColor="#ffffff"
+          notchColor="#13285a"
+          fontClassName={inter.className}
+          className="!pt-4 md:!pt-6"
+          cards={[
+            {
+              platform: 'instagram',
+              href: cms?.instagramUrl ?? 'https://www.instagram.com/emoform_r/',
+              count: cms?.instagramCard?.followers ?? '12K',
+              heading: cms?.instagramCard?.heading ?? 'Smiles worth sharing',
+              subcopy: cms?.instagramCard?.subcopy ?? 'Daily care tips for healthier gums and teeth.',
+              image: cms?.instagramCard?.image,
+              lqip: cms?.instagramCard?.lqip,
+            },
+            {
+              platform: 'facebook',
+              href: cms?.facebookUrl ?? 'https://www.facebook.com/share/1DMTAMHt5D/?mibextid=wwXIfr',
+              count: cms?.facebookCard?.followers ?? '9K',
+              heading: cms?.facebookCard?.heading ?? 'Care that connects',
+              subcopy: cms?.facebookCard?.subcopy ?? 'Advice and answers from the Emoform community.',
+              image: cms?.facebookCard?.image,
+              lqip: cms?.facebookCard?.lqip,
+            },
+          ]}
+        />
         <Footer />
       </div>
     </>

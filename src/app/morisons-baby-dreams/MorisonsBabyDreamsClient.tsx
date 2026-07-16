@@ -8,7 +8,8 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Nunito } from 'next/font/google'
 import Footer from '@/components/Footer'
-import type { BabyCategory, BabyDreams, BabyTint } from '@/sanity/queries'
+import SocialStamps, { type SocialStampCard } from '@/components/SocialStamps'
+import type { BabyCategory, BabyDreams, BabyTint, SocialCardContent } from '@/sanity/queries'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -223,6 +224,9 @@ export default function MorisonsBabyDreamsClient({
           instagramUrl={cms.instagramUrl || D.instagramUrl}
           facebookUrl={cms.facebookUrl || D.facebookUrl}
           youtubeUrl={cms.youtubeUrl || D.youtubeUrl}
+          instagramCard={cms.instagramCard}
+          facebookCard={cms.facebookCard}
+          youtubeCard={cms.youtubeCard}
         />
         <Footer />
       </div>
@@ -789,73 +793,54 @@ function Follow({
   instagramUrl,
   facebookUrl,
   youtubeUrl,
+  instagramCard,
+  facebookCard,
+  youtubeCard,
 }: {
   instagramUrl: string
   facebookUrl: string
   youtubeUrl: string
+  instagramCard?: SocialCardContent
+  facebookCard?: SocialCardContent
+  youtubeCard?: SocialCardContent
 }) {
-  const iconClass =
-    'inline-flex h-14 w-14 items-center justify-center rounded-full text-white shadow-[0_12px_28px_-10px_rgba(192,64,90,0.6)] transition-transform hover:scale-105'
-  const iconStyle = {
-    background: `linear-gradient(135deg, ${CORAL} 0%, ${CORAL_INK} 100%)`,
-  }
+  const cards: SocialStampCard[] = [
+    {
+      platform: 'instagram',
+      href: instagramUrl,
+      count: instagramCard?.followers ?? '25K',
+      heading: instagramCard?.heading ?? 'Everyday care, shared',
+      subcopy: instagramCard?.subcopy ?? 'Gentle routines, tips and little moments for your baby.',
+      image: instagramCard?.image,
+      lqip: instagramCard?.lqip,
+    },
+    {
+      platform: 'facebook',
+      href: facebookUrl,
+      count: facebookCard?.followers ?? '18K',
+      heading: facebookCard?.heading ?? 'Join our parent circle',
+      subcopy: facebookCard?.subcopy ?? 'Real stories and support from families like yours.',
+      image: facebookCard?.image,
+      lqip: facebookCard?.lqip,
+    },
+    {
+      platform: 'youtube',
+      href: youtubeUrl,
+      count: youtubeCard?.followers ?? '5K',
+      heading: youtubeCard?.heading ?? 'Watch & learn',
+      subcopy: youtubeCard?.subcopy ?? 'Simple how-tos and gentle routines, one short video at a time.',
+      image: youtubeCard?.image,
+      lqip: youtubeCard?.lqip,
+    },
+  ]
   return (
-    <section className="px-6 py-12 text-center md:py-16">
-      <h2
-        className="text-balance"
-        style={{
-          fontFamily: 'var(--font-nunito)',
-          fontWeight: 800,
-          letterSpacing: '-0.02em',
-          fontSize: 'clamp(1.75rem, 3.6vw, 2.75rem)',
-          color: INK,
-        }}
-      >
-        Follow along
-      </h2>
-      <p className="mx-auto mt-3 max-w-md text-[15px] leading-relaxed md:text-base" style={{ color: MUTED }}>
-        Join our community of parents on Instagram, Facebook and YouTube.
-      </p>
-      <div className="mt-8 flex items-center justify-center gap-4">
-        <a
-          href={instagramUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Follow Morisons Baby Dreams on Instagram"
-          className={iconClass}
-          style={iconStyle}
-        >
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <rect x="3" y="3" width="18" height="18" rx="5" />
-            <circle cx="12" cy="12" r="4" />
-            <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
-          </svg>
-        </a>
-        <a
-          href={facebookUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Follow Morisons Baby Dreams on Facebook"
-          className={iconClass}
-          style={iconStyle}
-        >
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M14 13.5h2.5l1-4H14V7c0-1.03 0-2 2-2h1.5V1.64c-.33-.04-1.55-.14-2.84-.14-2.69 0-4.66 1.64-4.66 4.66V9.5H7v4h3v8.5h4z" />
-          </svg>
-        </a>
-        <a
-          href={youtubeUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Follow Morisons Baby Dreams on YouTube"
-          className={iconClass}
-          style={iconStyle}
-        >
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-2C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.41 19C5.12 19.5 12 19.5 12 19.5s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-2 29 29 0 0 0 .46-5.29 29 29 0 0 0-.46-5.33zM9.75 15V8.5l5.75 3.25z" />
-          </svg>
-        </a>
-      </div>
-    </section>
+    <SocialStamps
+      heading="Follow along"
+      cards={cards}
+      ink={INK}
+      muted={MUTED}
+      notchColor={CREAM}
+      fontClassName={nunito.className}
+    />
   )
 }

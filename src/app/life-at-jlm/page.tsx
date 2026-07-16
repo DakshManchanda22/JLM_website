@@ -54,19 +54,6 @@ export default async function LifeAtJlmPage() {
         arentHeadline: data.arentHeadline,
         arentBody: data.arentBody,
         testimonials: data.testimonials?.filter((t) => t.quote && t.name),
-        valuesLabel: data.valuesLabel,
-        valuesHeadline: data.valuesHeadline,
-        valuesTagline: data.valuesTagline,
-        values: data.values
-          ?.map((v) => {
-            const url = resolveImageUrl(v.image, 1200)
-            if (!url || !v.title || !v.body) return null
-            return { icon: v.icon ?? '', title: v.title, body: v.body, img: url }
-          })
-          .filter(
-            (x): x is { icon: string; title: string; body: string; img: string } =>
-              x !== null,
-          ),
         workplaceLabel: data.workplaceLabel,
         workplaceHeadline: data.workplaceHeadline,
         workplaceTagline: data.workplaceTagline,
@@ -80,6 +67,7 @@ export default async function LifeAtJlmPage() {
             (x): x is { src: string; cap: string; aspect: number | undefined } =>
               x !== null,
           ),
+        carouselSpeed: data.carouselSpeed,
         togetherLabel: data.togetherLabel,
         togetherHeadline: data.togetherHeadline,
         togetherTagline: data.togetherTagline,

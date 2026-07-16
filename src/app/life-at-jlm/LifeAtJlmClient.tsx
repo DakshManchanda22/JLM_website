@@ -1,8 +1,8 @@
 'use client'
 
-import { createContext, useContext, useEffect, useRef, useState } from 'react'
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import Image from 'next/image'
-import { motion, AnimatePresence, animate, useInView, useReducedMotion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { Cormorant_Garamond, DM_Sans } from 'next/font/google'
 import Footer from '@/components/Footer'
 
@@ -30,15 +30,12 @@ export type LifeCms = {
   arentHeadline?: string
   arentBody?: string
   testimonials?: { quote: string; name: string; role: string }[]
-  valuesLabel?: string
-  valuesHeadline?: string
-  valuesTagline?: string
-  values?: { icon: string; title: string; body: string; img: string }[]
   workplaceLabel?: string
   workplaceHeadline?: string
   workplaceTagline?: string
   workplaceBody?: string
   workplaceImages?: { src: string; cap: string; aspect?: number }[]
+  carouselSpeed?: number
   togetherLabel?: string
   togetherHeadline?: string
   togetherTagline?: string
@@ -111,66 +108,46 @@ const DEFAULT_TESTIMONIALS = [
   },
 ]
 
-const DEFAULT_VALUES = [
-  {
-    icon: '',
-    title: 'Customer & Quality Focus',
-    body: 'We deliver high-quality products and services to delight our customers by recognising areas of improvement and continuously exploring new ways of improving our offerings.',
-    img: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=900&h=1200&fit=crop&auto=format',
-  },
-  {
-    icon: '',
-    title: 'Trust & Empowerment',
-    body: 'We weave employee empowerment into the daily roles of our people. We enable, inspire, and encourage individuals to take steps to improve their work experience, increase their engagement, and help build an inclusive culture.',
-    img: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=900&h=1200&fit=crop&auto=format',
-  },
-  {
-    icon: '',
-    title: 'Cost Focus',
-    body: 'We identify the drivers of cost in the value chain and control them — without compromising on quality or identity.',
-    img: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=900&h=1200&fit=crop&auto=format',
-  },
-  {
-    icon: '',
-    title: 'Corporate Citizenship',
-    body: 'Corporate citizenship is our company\'s responsibility towards society. We adhere to the highest standards in ethical behaviour, environmental sustainability, and legal responsibility — balancing the needs of our customers, our community, and the environment around us.',
-    img: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=900&h=1200&fit=crop&auto=format',
-  },
-  {
-    icon: '',
-    title: 'Care & Respect For People',
-    body: 'We believe in a responsible and supportive environment where people treat each other respectfully regardless of origin, education, religion, beliefs, physical ability, gender, or sexual identity.',
-    img: 'https://images.unsplash.com/photo-1591348278863-a8fb3887e2aa?w=900&h=1200&fit=crop&auto=format',
-  },
-  {
-    icon: '',
-    title: 'Learning & Experimentation',
-    body: 'JLM is committed to a culture that encourages professionalism and excellence through learning and development — supporting innovative approaches, fresh solutions, and the continuous search for new ways to advance our goals.',
-    img: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=900&h=1200&fit=crop&auto=format',
-  },
-  {
-    icon: '',
-    title: 'Executing with Accountability & Collaboration',
-    body: 'Accountability is the duty of every Morisoner to be answerable for their actions and decisions, and to accept responsibility for them. Collaboration between teams reduces redundancy and improves the quality of our work — and wherever possible, we work closely with others to coordinate our efforts.',
-    img: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=900&h=1200&fit=crop&auto=format',
-  },
-]
-
 /* ─────────────────────── reusable bits ─────────────────────── */
 
-function Sporting({ children }: { children: React.ReactNode }) {
+/* Infinite, auto-scrolling marquee. Renders two identical groups and slides the
+   track by exactly one group width, so the loop is seamless. Pauses on hover
+   and respects prefers-reduced-motion (see globals.css). */
+function Marquee<T>({
+  items,
+  renderItem,
+  direction = 'left',
+  duration = 45,
+  gap = 18,
+  className = '',
+}: {
+  items: T[]
+  renderItem: (item: T, i: number) => ReactNode
+  direction?: 'left' | 'right'
+  duration?: number
+  gap?: number
+  className?: string
+}) {
+  const name = direction === 'left' ? 'marquee-left' : 'marquee-right'
+  const Group = ({ hidden }: { hidden?: boolean }) => (
+    <div className="flex shrink-0" aria-hidden={hidden}>
+      {items.map((it, i) => (
+        <div key={i} className="shrink-0" style={{ marginRight: gap }}>
+          {renderItem(it, i)}
+        </div>
+      ))}
+    </div>
+  )
   return (
-    <p
-      className={`${serifClass} italic`}
-      style={{
-        fontWeight: 400,
-        fontSize: 'clamp(20px, 2.2vw, 28px)',
-        color: INK,
-        lineHeight: 1.35,
-      }}
-    >
-      {children}
-    </p>
+    <div className={`overflow-hidden ${className}`}>
+      <div
+        className="marquee-track flex w-max"
+        style={{ animationName: name, animationDuration: `${duration}s` }}
+      >
+        <Group />
+        <Group hidden />
+      </div>
+    </div>
   )
 }
 
@@ -575,16 +552,7 @@ function TestimonialsBlock() {
     'A hundred years of building goodness — in the words of the people who do it every day.'
   const ITEMS =
     cms.testimonials && cms.testimonials.length > 0 ? cms.testimonials : DEFAULT_TESTIMONIALS
-
-  const scrollerRef = useRef<HTMLDivElement>(null)
-  const nudge = (dir: 1 | -1) => {
-    const el = scrollerRef.current
-    if (!el) return
-    // One card-width (incl. gap) per click; falls back to ~80% of the viewport.
-    const card = el.querySelector('figure')
-    const step = card ? (card as HTMLElement).offsetWidth + 20 : el.clientWidth * 0.8
-    el.scrollBy({ left: dir * step, behavior: 'smooth' })
-  }
+  const speed = cms.carouselSpeed && cms.carouselSpeed > 0 ? cms.carouselSpeed : 2
 
   return (
     <section
@@ -638,25 +606,26 @@ function TestimonialsBlock() {
         </p>
       </div>
 
-      {/* horizontal, snap-scrolling row of quote cards */}
-      <div
-        ref={scrollerRef}
-        className="hide-scrollbar mt-[8vh] flex items-stretch gap-5 overflow-x-auto overflow-y-hidden pb-4 snap-x snap-mandatory"
-        style={{ paddingLeft: '6vw', paddingRight: '6vw', scrollPaddingLeft: '6vw' }}
-      >
-        {ITEMS.map((t, i) => {
+      {/* auto-scrolling marquee of quote cards (pauses on hover) */}
+      <Marquee
+        items={ITEMS}
+        direction="left"
+        duration={Math.max(28, ITEMS.length * 9) / speed}
+        gap={20}
+        className="mt-[8vh]"
+        renderItem={(t, i) => {
           const s = CARD_STYLES[i % CARD_STYLES.length]
+          // Longer quotes step the font down so every card stays the same size,
+          // but the floor stays large enough to fill the card comfortably.
+          const len = t.quote.length
+          const qFont =
+            len > 260 ? 20 : len > 210 ? 21.5 : len > 160 ? 23 : len > 110 ? 25 : 27
           return (
-            <motion.figure
-              key={i}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-60px' }}
-              transition={{ duration: 0.7, ease: EASE, delay: (i % 4) * 0.08 }}
-              className="snap-start shrink-0 flex flex-col justify-between"
+            <figure
+              className="flex flex-col justify-between overflow-hidden"
               style={{
-                width: 'min(80vw, 380px)',
-                minHeight: 460,
+                width: 'min(86vw, 410px)',
+                height: 440,
                 backgroundColor: s.bg,
                 color: s.fg,
                 border: s.border,
@@ -666,7 +635,7 @@ function TestimonialsBlock() {
             >
               <blockquote
                 className={dmSans.className}
-                style={{ fontSize: 'clamp(17px, 1.5vw, 20px)', lineHeight: 1.45, fontWeight: 400 }}
+                style={{ fontSize: qFont, lineHeight: 1.42, fontWeight: 400 }}
               >
                 “{t.quote}”
               </blockquote>
@@ -683,277 +652,10 @@ function TestimonialsBlock() {
                   </div>
                 )}
               </figcaption>
-            </motion.figure>
+            </figure>
           )
-        })}
-      </div>
-
-      {/* Scroll affordance — hints there are more cards to the right. */}
-      <div className="mt-8 flex justify-end gap-3" style={{ paddingRight: '6vw' }}>
-        <button
-          type="button"
-          onClick={() => nudge(-1)}
-          aria-label="Previous testimonials"
-          className="flex h-11 w-11 items-center justify-center rounded-full border border-white/25 text-white/85 transition-colors hover:border-white/60 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
-        </button>
-        <button
-          type="button"
-          onClick={() => nudge(1)}
-          aria-label="More testimonials"
-          className="flex h-11 w-11 items-center justify-center rounded-full border border-white/25 text-white/85 transition-colors hover:border-white/60 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-            <path d="M9 18l6-6-6-6" />
-          </svg>
-        </button>
-      </div>
-    </section>
-  )
-}
-
-/* ────────── /2 VALUES — hover-driven list + image ────────── */
-
-function ValuesBlock() {
-  const cms = useLife()
-  const HEADLINE =
-    cms.valuesHeadline ?? 'Seven values we quietly refuse to compromise on.'
-  const TAGLINE = cms.valuesTagline ?? 'All of the above — with long-term thinking.'
-  const VALUES = cms.values && cms.values.length > 0 ? cms.values : DEFAULT_VALUES
-  const [active, setActive] = useState(0)
-  return (
-    <section
-      id="values"
-      className="relative w-full"
-      style={{ backgroundColor: '#FFFFFF', padding: '14vh 6vw' }}
-    >
-      <div className="max-w-[820px]">
-        <h2
-          className={`${serifClass} mt-6`}
-          style={{
-            fontSize: 'clamp(32px, 4.2vw, 58px)',
-            lineHeight: 1.08,
-            fontWeight: 300,
-            color: INK,
-            textWrap: 'balance',
-          }}
-        >
-          {HEADLINE}
-        </h2>
-        <div className="mt-6">
-          <Sporting>{TAGLINE}</Sporting>
-        </div>
-      </div>
-
-      <div className="mt-[10vh] grid grid-cols-1 md:grid-cols-12 gap-x-10 gap-y-12">
-        {/* list */}
-        <div className="md:col-span-7">
-          {VALUES.map((v, i) => {
-            const isActive = active === i
-            return (
-              <div
-                key={v.title}
-                onMouseEnter={() => setActive(i)}
-                className="group relative py-8 cursor-default"
-                style={{ borderTop: `1px solid ${isActive ? INK : FAINT}`, transition: 'border-color 300ms' }}
-              >
-                <div className="flex items-baseline gap-6">
-                  <span
-                    className={`${dmSans.className}`}
-                    style={{
-                      fontSize: 13,
-                      color: MUTED,
-                      letterSpacing: '0.08em',
-                      width: 28,
-                      flexShrink: 0,
-                    }}
-                  >
-                    0{i + 1}
-                  </span>
-                  <div className="flex-1">
-                    <div className="flex items-baseline">
-                      <h3
-                        className={cormorant.className}
-                        style={{
-                          fontSize: 'clamp(28px, 3.4vw, 48px)',
-                          color: INK,
-                          fontWeight: 400,
-                          lineHeight: 1.1,
-                          fontStyle: isActive ? 'italic' : 'normal',
-                          transition: 'font-style 200ms',
-                        }}
-                      >
-                        {v.title}
-                      </h3>
-                    </div>
-                    <AnimatePresence initial={false}>
-                      {isActive && (
-                        <motion.p
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.45, ease: EASE }}
-                          className={`${dmSans.className} overflow-hidden`}
-                          style={{ color: MUTED, fontSize: 15, lineHeight: 1.7, maxWidth: '54ch' }}
-                        >
-                          <span className="block pt-4">{v.body}</span>
-                        </motion.p>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                </div>
-              </div>
-            )
-          })}
-          <div style={{ borderTop: `1px solid ${FAINT}` }} />
-        </div>
-
-        {/* image reveal */}
-        <div className="md:col-span-5 md:sticky md:top-24 self-start">
-          <div
-            className="relative w-full overflow-hidden"
-            style={{ aspectRatio: '3 / 4', borderRadius: 18, backgroundColor: FAINT }}
-          >
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={active}
-                initial={{ opacity: 0, scale: 1.04 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.98 }}
-                transition={{ duration: 0.7, ease: EASE }}
-                className="absolute inset-0"
-              >
-                <Image
-                  src={VALUES[active].img}
-                  alt={VALUES[active].title}
-                  fill
-                  sizes="(max-width: 768px) 90vw, 38vw"
-                  style={{ objectFit: 'cover' }}
-                />
-              </motion.div>
-            </AnimatePresence>
-            <div
-              className={`${serifClass} italic absolute bottom-5 left-5`}
-              style={{ color: '#FFFFFF', fontSize: 22, textShadow: '0 2px 12px rgba(0,0,0,0.4)' }}
-            >
-              {VALUES[active].title}
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  )
-}
-
-/* ───────────────── Stat cards (below Values) ───────────────── */
-
-/* Stat cards modelled exactly on the reference travel card: photo on top,
-   coloured title, subtitle, an icon detail row, a dark pill CTA and a heart.
-   Images (and the reference placeholder copy) are swappable later. */
-const STAT_GREEN = '#58C15C'
-const STAT_PINK = '#E85CA0'
-const STAT_CARDS = [
-  {
-    img: 'https://cdn.sanity.io/images/vfv5lxgr/production/3fcd078e887bbc2e9b45f385fb0866b427175c42-1269x855.jpg?w=1200&h=960&fit=crop&auto=format',
-    number: 400,
-    suffix: '',
-    label: 'Work strength',
-    color: STAT_GREEN,
-  },
-  {
-    img: 'https://cdn.sanity.io/images/vfv5lxgr/production/27fb52f31800ba6875c50e0916bcdeefd86dcc05-3024x4032.jpg?w=1200&h=960&fit=crop&auto=format',
-    number: 10,
-    suffix: '%',
-    label: 'Gender parity',
-    color: STAT_PINK,
-  },
-] as const
-
-/* Counts from 0 → `to` once the number scrolls into view. Honours
-   prefers-reduced-motion by jumping straight to the final value. */
-function CountUp({ to, duration = 1 }: { to: number; duration?: number }) {
-  const ref = useRef<HTMLSpanElement>(null)
-  const inView = useInView(ref, { once: true, margin: '-60px' })
-  const reduce = useReducedMotion()
-  const [val, setVal] = useState(0)
-  useEffect(() => {
-    if (!inView) return
-    if (reduce) {
-      setVal(to)
-      return
-    }
-    const controls = animate(0, to, {
-      duration,
-      ease: [0.25, 1, 0.5, 1],
-      onUpdate: (v) => setVal(Math.round(v)),
-    })
-    return () => controls.stop()
-  }, [inView, to, duration, reduce])
-  return <span ref={ref}>{val}</span>
-}
-
-function StatsBlock() {
-  return (
-    <section
-      className="relative w-full"
-      style={{ backgroundColor: '#FFFFFF', padding: '12vh 6vw' }}
-    >
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-14 max-w-[1240px] mx-auto">
-        {STAT_CARDS.map((c, i) => (
-          <motion.div
-            key={c.label}
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-80px' }}
-            transition={{ duration: 0.7, ease: EASE, delay: i * 0.1 }}
-            className="mx-auto w-full max-w-[580px]"
-            style={{
-              backgroundColor: '#FFFFFF',
-              borderRadius: 30,
-              padding: 24,
-              boxShadow:
-                '0 40px 80px -28px rgba(0,0,0,0.30), 0 8px 20px -10px rgba(0,0,0,0.14)',
-            }}
-          >
-            <div
-              className="relative w-full overflow-hidden"
-              style={{ aspectRatio: '5 / 4', borderRadius: 22, backgroundColor: FAINT }}
-            >
-              <Image
-                src={c.img}
-                alt=""
-                fill
-                sizes="(max-width: 768px) 92vw, 560px"
-                style={{ objectFit: 'cover' }}
-              />
-            </div>
-            <div className="px-3 pt-7 pb-3">
-              <div
-                className={dmSans.className}
-                style={{
-                  fontSize: 'clamp(72px, 8.4vw, 116px)',
-                  lineHeight: 0.95,
-                  fontWeight: 700,
-                  letterSpacing: '-0.03em',
-                  color: c.color,
-                }}
-              >
-                <CountUp to={c.number} />
-                {c.suffix}
-              </div>
-              <div
-                className={`${dmSans.className} mt-3`}
-                style={{ fontSize: 'clamp(22px, 2.4vw, 30px)', fontWeight: 500, color: c.color }}
-              >
-                {c.label}
-              </div>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+        }}
+      />
     </section>
   )
 }
@@ -983,15 +685,17 @@ function WorkplaceBlock() {
     cms.workplaceImages && cms.workplaceImages.length > 0
       ? cms.workplaceImages
       : DEFAULT_PHOTOS
+  // Sanity carousel speed multiplier (default 2× faster than the base durations).
+  const speed = cms.carouselSpeed && cms.carouselSpeed > 0 ? cms.carouselSpeed : 2
 
   return (
     <section
       id="workplace"
-      className="relative w-full"
-      style={{ backgroundColor: INK, padding: '16vh 6vw' }}
+      className="relative w-full overflow-hidden"
+      style={{ backgroundColor: INK, padding: '16vh 0' }}
     >
       {/* centered header */}
-      <div className="mx-auto max-w-[820px] text-center">
+      <div className="mx-auto max-w-[940px] px-6 text-center">
         <motion.p
           initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -1036,36 +740,57 @@ function WorkplaceBlock() {
         </motion.p>
       </div>
 
-      {/* Pinterest-style masonry: CSS columns keep flowing as marketing adds
-          photos, each image keeps its own (vertical or horizontal) proportions,
-          and the gaps stay tight. */}
-      <div
-        className="mx-auto mt-[9vh] max-w-[1200px] columns-2 lg:columns-3"
-        style={{ columnGap: 10 }}
-      >
-        {photos.map((p, i) => (
-          <div key={i} style={{ breakInside: 'avoid', marginBottom: 10 }}>
-            <motion.div
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-60px' }}
-              transition={{ duration: 0.7, ease: EASE, delay: (i % 3) * 0.06 }}
-              className="relative overflow-hidden"
-              style={{
-                aspectRatio: p.aspect && p.aspect > 0 ? p.aspect : 1.5,
-                borderRadius: 14,
-                backgroundColor: '#1E1E1E',
-              }}
-            >
-              <Image
-                src={p.src}
-                alt={p.cap ?? ''}
-                fill
-                sizes="(max-width: 640px) 48vw, (max-width: 1024px) 46vw, 380px"
-                style={{ objectFit: 'cover' }}
-              />
-            </motion.div>
-          </div>
+      {/* Three auto-scrolling rows, alternating direction (→, ←, →). Each row
+          is a full-bleed marquee that pauses on hover. */}
+      <div className="mt-10 flex flex-col gap-3 sm:mt-14 sm:gap-4">
+        {([
+          { dir: 'right', dur: 55 },
+          { dir: 'left', dur: 48 },
+          { dir: 'right', dur: 62 },
+        ] as const).map((row, r) => (
+          <Marquee
+            key={r}
+            items={photos.map((_, i) => photos[(i + r * 2) % photos.length])}
+            direction={row.dir}
+            duration={row.dur / speed}
+            gap={14}
+            renderItem={(p) => (
+              <div
+                className="relative overflow-hidden"
+                style={{
+                  width: 'clamp(200px, 56vw, 300px)',
+                  aspectRatio: '3 / 4',
+                  borderRadius: 16,
+                  backgroundColor: '#1E1E1E',
+                }}
+              >
+                <Image
+                  src={p.src}
+                  alt={p.cap ?? ''}
+                  fill
+                  sizes="300px"
+                  style={{ objectFit: 'cover' }}
+                />
+                {p.cap && (
+                  <>
+                    <div
+                      className="pointer-events-none absolute inset-x-0 bottom-0"
+                      style={{
+                        height: '55%',
+                        background: 'linear-gradient(to top, rgba(0,0,0,0.72), rgba(0,0,0,0))',
+                      }}
+                    />
+                    <div
+                      className={`${serifClass} absolute inset-x-4 bottom-4 text-white`}
+                      style={{ fontSize: 'clamp(16px, 1.4vw, 20px)', fontWeight: 500, lineHeight: 1.2 }}
+                    >
+                      {p.cap}
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+          />
         ))}
       </div>
     </section>
@@ -1127,8 +852,6 @@ export default function LifeAtJlmClient({ cms = {} }: { cms?: LifeCms }) {
         <IntroParagraph />
         <CaptionStrip />
         <TestimonialsBlock />
-        <ValuesBlock />
-        <StatsBlock />
         <WorkplaceBlock />
         {/* Section above is black (#111111); a rounded footer top would reveal
             white notches, so sit flush for a seamless black expanse. */}

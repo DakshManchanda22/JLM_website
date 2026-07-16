@@ -4,6 +4,31 @@ import { groq } from 'next-sanity'
 import { client } from './client'
 import { imageWithLqip, resolveImage } from './resolveImage'
 
+/* ── Social "stamp" cards (brand Follow us sections) ──────────────────── */
+export type SocialCardContent = {
+  followers?: string
+  heading?: string
+  subcopy?: string
+  image?: string
+  lqip?: string
+}
+
+/** GROQ fragment for one platform's card fields. */
+const socialCardProjection = (p: string) =>
+  `${p}Followers, ${p}CardHeading, ${p}CardSubcopy, ${p}CardImage{ ${imageWithLqip} }`
+
+/** Map the raw fields for one platform into a SocialCardContent. */
+function resolveSocialCard(raw: any, p: string): SocialCardContent {
+  const img = resolveImage(raw[`${p}CardImage`], 900)
+  return {
+    followers: raw[`${p}Followers`],
+    heading: raw[`${p}CardHeading`],
+    subcopy: raw[`${p}CardSubcopy`],
+    image: img?.url,
+    lqip: img?.lqip,
+  }
+}
+
 export type PostListItem = {
   _id: string
   title: string
@@ -172,6 +197,7 @@ export type Homepage = {
   statsHeading?: string
   statsNote?: string
   stats?: StatData[]
+  carouselSpeed?: number
   features?: HomeFeatureData[]
 }
 
@@ -211,6 +237,7 @@ export const homepageQuery = groq`*[_type == "homepage"][0]{
   },
   statsHeading,
   statsNote,
+  carouselSpeed,
   stats[]{
     number,
     label,
@@ -303,15 +330,12 @@ export type LifeAtJlm = {
   arentHeadline?: string
   arentBody?: string
   testimonials?: { quote: string; name: string; role: string }[]
-  valuesLabel?: string
-  valuesHeadline?: string
-  valuesTagline?: string
-  values?: { icon: string; title: string; body: string; image: any }[]
   workplaceLabel?: string
   workplaceHeadline?: string
   workplaceTagline?: string
   workplaceBody?: string
   workplaceImages?: { image: any; caption: string; aspect?: number }[]
+  carouselSpeed?: number
   togetherLabel?: string
   togetherHeadline?: string
   togetherTagline?: string
@@ -336,10 +360,9 @@ export const lifeAtJlmQuery = groq`*[_type == "lifeAtJlm"][0]{
   peopleLabel, peopleHeadline, peopleTagline, peopleBody,
   arentEyebrow, arentHeadline, arentBody,
   testimonials[]{ quote, name, role },
-  valuesLabel, valuesHeadline, valuesTagline,
-  values[]{ icon, title, body, image },
   workplaceLabel, workplaceHeadline, workplaceTagline, workplaceBody,
   workplaceImages[]{ image, caption, "aspect": image.asset->metadata.dimensions.aspectRatio },
+  carouselSpeed,
   togetherLabel, togetherHeadline, togetherTagline, togetherBody,
   togetherBrands[]{ name, tag },
   togetherClosingMark, togetherClosingLine, togetherCtaLabel, togetherCtaHref,
@@ -482,6 +505,8 @@ export type Bigen = {
   // social
   instagramUrl?: string
   facebookUrl?: string
+  instagramCard?: SocialCardContent
+  facebookCard?: SocialCardContent
 }
 
 export const bigenQuery = groq`*[_type == "bigen"][0]{
@@ -502,6 +527,8 @@ export const bigenQuery = groq`*[_type == "bigen"][0]{
   products[]{ name, desc, href, image{ ${imageWithLqip} } },
   instagramUrl,
   facebookUrl,
+  ${socialCardProjection('instagram')},
+  ${socialCardProjection('facebook')},
 }`
 
 export async function fetchBigen(): Promise<Bigen | null> {
@@ -527,6 +554,8 @@ export async function fetchBigen(): Promise<Bigen | null> {
       const r = resolveImage(p.image, 800)
       return { ...p, image: r?.url, lqip: r?.lqip }
     }),
+    instagramCard: resolveSocialCard(raw, 'instagram'),
+    facebookCard: resolveSocialCard(raw, 'facebook'),
   }
 }
 
@@ -559,6 +588,8 @@ export type EmoformView = {
   ctaButtonHref?: string
   instagramUrl?: string
   facebookUrl?: string
+  instagramCard?: SocialCardContent
+  facebookCard?: SocialCardContent
 }
 
 export const emoformQuery = groq`*[_type == "emoform"][0]{
@@ -569,6 +600,8 @@ export const emoformQuery = groq`*[_type == "emoform"][0]{
   steps[]{ tag, title, sub, image{ ${imageWithLqip} }, points },
   ctaTitle, ctaSubtext, ctaButtonLabel, ctaButtonHref,
   instagramUrl, facebookUrl,
+  ${socialCardProjection('instagram')},
+  ${socialCardProjection('facebook')},
 }`
 
 export async function fetchEmoform(): Promise<EmoformView | null> {
@@ -607,6 +640,8 @@ export async function fetchEmoform(): Promise<EmoformView | null> {
     ctaButtonHref: raw.ctaButtonHref,
     instagramUrl: raw.instagramUrl,
     facebookUrl: raw.facebookUrl,
+    instagramCard: resolveSocialCard(raw, 'instagram'),
+    facebookCard: resolveSocialCard(raw, 'facebook'),
   }
 }
 
@@ -641,6 +676,9 @@ export type BabyDreams = {
   instagramUrl?: string
   facebookUrl?: string
   youtubeUrl?: string
+  instagramCard?: SocialCardContent
+  facebookCard?: SocialCardContent
+  youtubeCard?: SocialCardContent
 }
 
 export const babyDreamsQuery = groq`*[_type == "babyDreams"][0]{
@@ -653,6 +691,9 @@ export const babyDreamsQuery = groq`*[_type == "babyDreams"][0]{
   rangeHeadline, rangeIntro,
   blogsHeadline, blogsIntro,
   instagramUrl, facebookUrl, youtubeUrl,
+  ${socialCardProjection('instagram')},
+  ${socialCardProjection('facebook')},
+  ${socialCardProjection('youtube')},
 }`
 
 export async function fetchBabyDreams(): Promise<BabyDreams | null> {
@@ -691,6 +732,9 @@ export async function fetchBabyDreams(): Promise<BabyDreams | null> {
     instagramUrl: raw.instagramUrl,
     facebookUrl: raw.facebookUrl,
     youtubeUrl: raw.youtubeUrl,
+    instagramCard: resolveSocialCard(raw, 'instagram'),
+    facebookCard: resolveSocialCard(raw, 'facebook'),
+    youtubeCard: resolveSocialCard(raw, 'youtube'),
   }
 }
 
@@ -719,6 +763,11 @@ export type PhilanthropyView = {
   programsHeading?: string
   programsIntro?: string
   stages?: PhilanthropyStage[]
+  impactLogo?: string
+  impactLogoLqip?: string
+  impactHeading?: string
+  impactIntro?: string
+  impactStats?: { value?: string; label?: string }[]
   purposeEyebrow?: string
   purposeHeading?: string
   purposeBackgroundWord?: string
@@ -731,6 +780,7 @@ export type PhilanthropyView = {
   esgGallery?: { url: string; lqip?: string; w: number; h: number }[]
   socialWord?: string
   socialGallery?: { url: string; lqip?: string; w: number; h: number }[]
+  carouselSpeed?: number
   policiesHeading?: string
   policiesIntro?: string
   policiesImage?: string
@@ -757,6 +807,9 @@ export const philanthropyQuery = groq`*[_type == "philanthropy"][0]{
     title, lead, body,
     images[]{ ${imageWithLqip} },
   },
+  impactLogo{ ${imageWithLqip} },
+  impactHeading, impactIntro,
+  impactStats[]{ value, label },
   purposeEyebrow, purposeHeading, purposeBackgroundWord,
   purposeImages[]{ ${imageWithLqip} },
   beliefEyebrow, beliefText,
@@ -773,6 +826,7 @@ export const philanthropyQuery = groq`*[_type == "philanthropy"][0]{
     "dw": asset->metadata.dimensions.width,
     "dh": asset->metadata.dimensions.height,
   },
+  carouselSpeed,
   policiesHeading, policiesIntro,
   policiesImage{ ${imageWithLqip} },
   policyDocuments[]{ title, url },
@@ -811,6 +865,13 @@ export async function fetchPhilanthropy(): Promise<PhilanthropyView | null> {
         })
         .filter(Boolean),
     })),
+    impactLogo: resolveImage(raw.impactLogo, 1200)?.url,
+    impactLogoLqip: resolveImage(raw.impactLogo, 1200)?.lqip,
+    impactHeading: raw.impactHeading,
+    impactIntro: raw.impactIntro,
+    impactStats: (raw.impactStats || [])
+      .map((s: any) => ({ value: s.value, label: s.label }))
+      .filter((s: any) => s.value && s.label),
     purposeEyebrow: raw.purposeEyebrow,
     purposeHeading: raw.purposeHeading,
     purposeBackgroundWord: raw.purposeBackgroundWord,
@@ -839,6 +900,7 @@ export async function fetchPhilanthropy(): Promise<PhilanthropyView | null> {
       })
       .filter(Boolean),
     socialWord: raw.socialWord,
+    carouselSpeed: raw.carouselSpeed,
     socialGallery: (raw.socialGallery || [])
       .map((im: any) => {
         const r = resolveImage(im, 1400)

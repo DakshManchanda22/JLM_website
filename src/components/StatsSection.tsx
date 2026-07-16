@@ -13,39 +13,6 @@ export type Stat = {
   body: string
 }
 
-const DEFAULT_STATS: Stat[] = [
-  {
-    number: '100+',
-    label: 'Years',
-    body: 'From 1920 to today, J.L. Morison has stood for trust, honesty, and the small everyday goodness that holds a family together.',
-  },
-  {
-    number: '4',
-    label: 'Brands',
-    body: 'Each beloved in its category, each shaped by the same uncompromising values that have defined Morison since 1920.',
-  },
-  {
-    number: '1',
-    label: 'Promise',
-    body: 'To make products that earn a permanent place on every Indian shelf — gently, honestly, generation after generation.',
-  },
-  {
-    number: '—',
-    label: 'Turnover',
-    body: 'Steady, responsible growth built on brands Indian families reach for year after year.',
-  },
-  {
-    number: '—',
-    label: 'Distributors',
-    body: 'A trusted distribution network that carries our brands into homes across the country.',
-  },
-  {
-    number: '400+',
-    label: 'Employee Strength',
-    body: 'The people behind the promise — a growing team building goodness every single day.',
-  },
-]
-
 /* White scallop bumps that sit on top of the dark brand section above,
    creating the soft curvy intersection. Each tile is a true semicircle
    (width = 2 × height) so the bumps read as round, not flattened ovals. */
@@ -99,12 +66,18 @@ export default function StatsSection({
   stats,
   heading,
   note,
+  speed,
 }: {
   stats?: Stat[]
   heading?: string
   note?: string
+  /** Carousel speed multiplier from Sanity. 1 = normal, higher = faster. */
+  speed?: number
 }) {
-  const STATS = stats && stats.length > 0 ? stats : DEFAULT_STATS
+  // Stat cards come entirely from Sanity — no code defaults.
+  const STATS = stats ?? []
+  // Seconds for one full loop, sped up by the Sanity multiplier (default 2×).
+  const loopDuration = 45 / (speed && speed > 0 ? speed : 2)
   const HEADING = heading && heading.length > 0 ? heading : DEFAULT_HEADING
   const NOTE = note && note.length > 0 ? note : DEFAULT_NOTE
   const sectionRef = useRef<HTMLElement>(null)
@@ -133,6 +106,9 @@ export default function StatsSection({
 
     return () => ctx.revert()
   }, [])
+
+  // Nothing to show until stats are added in Sanity.
+  if (STATS.length === 0) return null
 
   return (
     <section ref={sectionRef} className="relative bg-white">
@@ -183,28 +159,35 @@ export default function StatsSection({
         }}
       >
         <motion.div
-          className="flex w-max gap-5 px-6 md:gap-6 md:px-12"
+          className="flex w-max"
           animate={{ x: ['0%', '-50%'] }}
-          transition={{ duration: 45, ease: 'linear', repeat: Infinity }}
+          transition={{ duration: loopDuration, ease: 'linear', repeat: Infinity }}
           style={{ willChange: 'transform' }}
         >
-          {[...STATS, ...STATS].map((stat, i) => (
-            <div
-              key={`${stat.label}-${i}`}
-              className="flex w-[270px] shrink-0 flex-col rounded-[28px] bg-[#F6F3EE] p-8 md:w-[340px] md:p-10"
-            >
-              <span
-                className="font-serif font-light leading-none text-[#111111]"
-                style={{ fontSize: 'clamp(3.25rem, 6vw, 5.5rem)' }}
-              >
-                {stat.number}
-              </span>
-              <span className="mt-4 text-[#111111] text-sm font-medium tracking-[0.18em] uppercase">
-                {stat.label}
-              </span>
-              <p className="mt-4 text-[#555555] text-sm leading-relaxed">
-                {stat.body}
-              </p>
+          {/* Two identical groups. Every card carries its own right margin (incl.
+              the last one in each group), so the two groups are perfectly
+              periodic and a −50% shift loops seamlessly for ANY number of stats. */}
+          {[0, 1].map((group) => (
+            <div className="flex shrink-0" key={group} aria-hidden={group === 1}>
+              {STATS.map((stat, i) => (
+                <div
+                  key={`${stat.label}-${i}`}
+                  className="flex w-[270px] shrink-0 flex-col rounded-[28px] bg-[#F6F3EE] p-8 mr-5 md:mr-6 md:w-[340px] md:p-10"
+                >
+                  <span
+                    className="font-serif font-light leading-none text-[#111111]"
+                    style={{ fontSize: 'clamp(3.25rem, 6vw, 5.5rem)' }}
+                  >
+                    {stat.number}
+                  </span>
+                  <span className="mt-4 text-[#111111] text-sm font-medium tracking-[0.18em] uppercase">
+                    {stat.label}
+                  </span>
+                  <p className="mt-4 text-[#555555] text-sm leading-relaxed">
+                    {stat.body}
+                  </p>
+                </div>
+              ))}
             </div>
           ))}
         </motion.div>

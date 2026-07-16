@@ -1,10 +1,10 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
-
-gsap.registerPlugin(ScrollTrigger)
+import {
+  KineticTextReveal,
+  type KineticTextRevealRef,
+} from '@/components/ui/kinetic-text-reveal'
 
 const DEFAULT_LINES: string[] = [
   'For over a century, we have been',
@@ -26,39 +26,34 @@ export default function QuoteSection({
   const ATTRIBUTION = attribution?.trim()
 
   const sectionRef = useRef<HTMLElement>(null)
+  const lineRefs = useRef<(KineticTextRevealRef | null)[]>([])
 
+  // Trigger the kinetic reveal once the quote scrolls into view, cascading
+  // line by line so the words rise like an editorial pull-quote.
   useEffect(() => {
     const root = sectionRef.current
     if (!root) return
 
-    const scroller = document.getElementById('page-scroller')
-
-    const ctx = gsap.context(() => {
-      const words = root.querySelectorAll('[data-word]')
-
-      gsap.fromTo(
-        words,
-        { opacity: 0.28 },
-        {
-          opacity: 1,
-          ease: 'none',
-          duration: 0.3,
-          stagger: 0.06,
-          scrollTrigger: {
-            trigger: root,
-            scroller: scroller ?? undefined,
-            // Complete the reveal by the time the quote is comfortably in view
-            // so a long quote never rests with a faded tail.
-            start: 'top 80%',
-            end: 'top 35%',
-            scrub: 1,
-          },
+    const timeouts: number[] = []
+    const io = new IntersectionObserver(
+      (entries, observer) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue
+          lineRefs.current.forEach((line, i) => {
+            timeouts.push(window.setTimeout(() => line?.play(), i * 200))
+          })
+          observer.disconnect()
         }
-      )
-    }, root)
+      },
+      { threshold: 0.3 }
+    )
 
-    return () => ctx.revert()
-  }, [])
+    io.observe(root)
+    return () => {
+      io.disconnect()
+      timeouts.forEach((t) => window.clearTimeout(t))
+    }
+  }, [LINES.length])
 
   return (
     <section
@@ -71,20 +66,20 @@ export default function QuoteSection({
           style={{ fontSize: 'clamp(1.5rem, 3.2vw, 3rem)' }}
         >
           {LINES.map((line, li) => (
-            <span
-              key={li}
-              className="block"
-            >
-              {line.split(' ').map((word, wi) => (
-                <span
-                  key={`${li}-${wi}`}
-                  data-word
-                  className="inline-block mr-[0.25em]"
-                  style={{ opacity: 0.28 }}
-                >
-                  {word}
-                </span>
-              ))}
+            <span key={li} className="block">
+              <KineticTextReveal
+                ref={(el) => {
+                  lineRefs.current[li] = el
+                }}
+                text={line}
+                autoPlay={false}
+                splitBy="words"
+                direction="up"
+                distance={22}
+                stagger={0.055}
+                blur
+                transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+              />
             </span>
           ))}
         </p>

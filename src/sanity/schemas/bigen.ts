@@ -1,4 +1,5 @@
 import { defineType, defineField, defineArrayMember } from 'sanity'
+import { socialCardFields } from './socialCard'
 
 /**
  * Inline rich text for headlines / copy: lets editors make selected words
@@ -311,6 +312,8 @@ export default defineType({
       type: 'url',
       validation: (Rule) => Rule.uri({ scheme: ['https'] }),
     }),
+    ...socialCardFields('instagram', 'Instagram'),
+    ...socialCardFields('facebook', 'Facebook'),
   ],
   preview: {
     prepare: () => ({ title: 'Bigen' }),

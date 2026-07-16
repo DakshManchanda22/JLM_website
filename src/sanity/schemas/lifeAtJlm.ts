@@ -17,9 +17,8 @@ export default defineType({
     { name: 'caption', title: 'Caption strip' },
     { name: 'people', title: '1 · People' },
     { name: 'arent', title: '2 · Employee testimonials' },
-    { name: 'values', title: '3 · Values' },
-    { name: 'workplace', title: '4 · Workplace' },
-    { name: 'together', title: '5 · Together' },
+    { name: 'workplace', title: '3 · Workplace' },
+    { name: 'together', title: '4 · Together' },
   ],
   fields: [
     /* ───── Intro curtain photos ───── */
@@ -153,31 +152,7 @@ export default defineType({
       ],
     }),
 
-    /* ───── 3 · Values ───── */
-    defineField({ name: 'valuesLabel', title: 'Label (e.g. "/2 Values")', group: 'values', type: 'string' }),
-    defineField({ name: 'valuesHeadline', title: 'Headline', group: 'values', type: 'text', rows: 3 }),
-    defineField({ name: 'valuesTagline', title: 'Italic tagline', group: 'values', type: 'string' }),
-    defineField({
-      name: 'values',
-      title: 'Value items (hover-driven list)',
-      group: 'values',
-      type: 'array',
-      of: [
-        defineArrayMember({
-          type: 'object',
-          name: 'valueItem',
-          fields: [
-            defineField({ name: 'icon', title: 'Emoji icon', type: 'string' }),
-            defineField({ name: 'title', title: 'Title', type: 'string' }),
-            defineField({ name: 'body', title: 'Body', type: 'text', rows: 4 }),
-            defineField({ name: 'image', title: 'Image (shown on hover)', type: 'image', options: { hotspot: true } }),
-          ],
-          preview: { select: { title: 'title', subtitle: 'body', media: 'image' } },
-        }),
-      ],
-    }),
-
-    /* ───── 4 · Workplace ───── */
+    /* ───── 3 · Workplace ───── */
     defineField({ name: 'workplaceLabel', title: 'Label', group: 'workplace', type: 'string' }),
     defineField({ name: 'workplaceHeadline', title: 'Headline', group: 'workplace', type: 'text', rows: 3 }),
     defineField({ name: 'workplaceTagline', title: 'Italic tagline', group: 'workplace', type: 'string' }),
@@ -199,8 +174,19 @@ export default defineType({
         }),
       ],
     }),
+    defineField({
+      name: 'carouselSpeed',
+      title: 'Carousel scroll speed',
+      group: 'workplace',
+      description:
+        'How fast the auto-scrolling photo carousels move. 1 = normal, higher = faster ' +
+        '(e.g. 2 = twice as fast).',
+      type: 'number',
+      initialValue: 2,
+      validation: (Rule) => Rule.min(0.5).max(5),
+    }),
 
-    /* ───── 5 · Together ───── */
+    /* ───── 4 · Together ───── */
     defineField({ name: 'togetherLabel', title: 'Label', group: 'together', type: 'string' }),
     defineField({ name: 'togetherHeadline', title: 'Headline', group: 'together', type: 'text', rows: 3 }),
     defineField({ name: 'togetherTagline', title: 'Italic tagline', group: 'together', type: 'string' }),

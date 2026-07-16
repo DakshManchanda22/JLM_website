@@ -293,7 +293,10 @@ export default defineType({
       title: 'Stat cards',
       type: 'array',
       group: 'stats',
-      validation: (Rule) => Rule.min(1).max(6),
+      description:
+        'The metric cards in the looping carousel. Add as many as you like; the ' +
+        'carousel keeps scrolling infinitely no matter how many there are.',
+      validation: (Rule) => Rule.min(1).max(20),
       of: [
         defineArrayMember({
           type: 'object',
@@ -326,6 +329,19 @@ export default defineType({
           },
         }),
       ],
+    }),
+
+    /* ─────────────── Carousel speed ─────────────── */
+    defineField({
+      name: 'carouselSpeed',
+      title: 'Carousel scroll speed',
+      description:
+        'How fast the auto-scrolling metric cards move. 1 = normal, higher = faster ' +
+        '(e.g. 2 = twice as fast, 3 = three times as fast).',
+      type: 'number',
+      group: 'stats',
+      initialValue: 2,
+      validation: (Rule) => Rule.min(0.5).max(5),
     }),
 
     /* ─────────────── Feature sections ─────────────── */

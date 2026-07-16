@@ -16,6 +16,7 @@ export default defineType({
     { name: 'hero', title: 'Hero' },
     { name: 'difference', title: 'Making a difference' },
     { name: 'programs', title: 'Programmes' },
+    { name: 'impact', title: 'Impact (5 years)' },
     { name: 'purpose', title: 'Purpose collage' },
     { name: 'belief', title: 'Belief statement' },
     { name: 'stats', title: 'Stat cards' },
@@ -149,6 +150,62 @@ export default defineType({
             }),
           ],
           preview: { select: { title: 'title', subtitle: 'lead', media: 'images.0' } },
+        }),
+      ],
+    }),
+
+    /* ───────────── Impact (5-year milestone stats) ───────────── */
+    defineField({
+      name: 'impactLogo',
+      title: 'Impact — logo image',
+      group: 'impact',
+      description: 'The Project Kaamyaab logo shown above the headline.',
+      type: 'image',
+      options: { hotspot: true },
+    }),
+    defineField({
+      name: 'impactHeading',
+      title: 'Impact — headline',
+      group: 'impact',
+      description: 'e.g. "Five years of Project Kaamyaab".',
+      type: 'string',
+    }),
+    defineField({
+      name: 'impactIntro',
+      title: 'Impact — supporting line',
+      group: 'impact',
+      description: 'A short sentence below the headline.',
+      type: 'text',
+      rows: 2,
+    }),
+    defineField({
+      name: 'impactStats',
+      title: 'Impact — numbers',
+      group: 'impact',
+      description:
+        'The big numbers, shown in a row (they count up on scroll). e.g. "1,655" / "Women trained".',
+      type: 'array',
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'impactStat',
+          fields: [
+            defineField({
+              name: 'value',
+              title: 'Number / value',
+              description: 'e.g. "5", "1,655", "220+".',
+              type: 'string',
+              validation: (Rule) => Rule.required(),
+            }),
+            defineField({
+              name: 'label',
+              title: 'Label',
+              description: 'e.g. "Years of impact", "Women trained".',
+              type: 'string',
+              validation: (Rule) => Rule.required(),
+            }),
+          ],
+          preview: { select: { title: 'value', subtitle: 'label' } },
         }),
       ],
     }),
@@ -307,6 +364,17 @@ export default defineType({
       type: 'array',
       of: [defineArrayMember({ type: 'image', options: { hotspot: true } })],
       options: { layout: 'grid' },
+    }),
+    defineField({
+      name: 'carouselSpeed',
+      title: 'Carousel scroll speed (Environment & Social)',
+      group: 'social',
+      description:
+        'How fast the Environment and Social photo carousels scroll. 1 = normal, ' +
+        'higher = faster (e.g. 2 = twice as fast).',
+      type: 'number',
+      initialValue: 2,
+      validation: (Rule) => Rule.min(0.5).max(5),
     }),
 
     /* ───────────── Policies (dark split + document table) ───────────── */
