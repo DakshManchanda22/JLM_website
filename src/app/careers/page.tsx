@@ -2,19 +2,19 @@
 
 import { useState, useRef } from 'react'
 import { motion } from 'framer-motion'
-import { Roboto } from 'next/font/google'
+import { Cormorant_Garamond, DM_Sans } from 'next/font/google'
 import Footer from '@/components/Footer'
 
-const cormorant = Roboto({
+const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
   weight: ['300', '400', '500'],
   style: ['normal', 'italic'],
   variable: '--font-cormorant',
 })
 
-const dmSans = Roboto({
+const dmSans = DM_Sans({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '700'],
+  weight: ['300', '400', '500', '600'],
   variable: '--font-dm-sans',
 })
 
@@ -145,7 +145,7 @@ export default function CareersPage() {
             style={{
               fontSize: 'clamp(40px, 6vw, 84px)',
               lineHeight: 1.04,
-              fontWeight: 400,
+              fontWeight: 300,
               color: INK,
             }}
           >

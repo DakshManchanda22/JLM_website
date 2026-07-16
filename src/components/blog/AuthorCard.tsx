@@ -1,7 +1,7 @@
 import Image from 'next/image'
-import { Roboto } from 'next/font/google'
+import { DM_Sans } from 'next/font/google'
 
-const dmSans = Roboto({ subsets: ['latin'], weight: ['400', '500', '700'] })
+const dmSans = DM_Sans({ subsets: ['latin'] })
 
 type Props = {
   name: string

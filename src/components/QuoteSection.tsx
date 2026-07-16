@@ -38,7 +38,7 @@ export default function QuoteSection({
 
       gsap.fromTo(
         words,
-        { opacity: 0.12 },
+        { opacity: 0.28 },
         {
           opacity: 1,
           ease: 'none',
@@ -47,8 +47,10 @@ export default function QuoteSection({
           scrollTrigger: {
             trigger: root,
             scroller: scroller ?? undefined,
-            start: 'top 65%',
-            end: 'bottom 80%',
+            // Complete the reveal by the time the quote is comfortably in view
+            // so a long quote never rests with a faded tail.
+            start: 'top 80%',
+            end: 'top 35%',
             scrub: 1,
           },
         }
@@ -65,8 +67,8 @@ export default function QuoteSection({
     >
       <blockquote className="max-w-5xl mx-auto">
         <p
-          className="font-serif font-light text-[#111111] leading-[1.25] tracking-tight"
-          style={{ fontSize: 'clamp(1.75rem, 4.2vw, 4rem)' }}
+          className="font-serif text-[#111111] leading-[1.3] tracking-tight [text-wrap:balance]"
+          style={{ fontSize: 'clamp(1.5rem, 3.2vw, 3rem)' }}
         >
           {LINES.map((line, li) => (
             <span
@@ -78,7 +80,7 @@ export default function QuoteSection({
                   key={`${li}-${wi}`}
                   data-word
                   className="inline-block mr-[0.25em]"
-                  style={{ opacity: 0.12 }}
+                  style={{ opacity: 0.28 }}
                 >
                   {word}
                 </span>

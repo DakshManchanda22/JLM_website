@@ -1,5 +1,5 @@
 import HeroSlideshow, { type Slide, type HeroVideo } from '@/components/HeroSlideshow'
-import QuoteSection from '@/components/QuoteSection'
+import VisionSection from '@/components/VisionSection'
 import BrandCards, { type Brand } from '@/components/BrandCards'
 import StatsSection, { type Stat } from '@/components/StatsSection'
 import HomeFeatures, { type HomeFeature } from '@/components/HomeFeatures'
@@ -34,21 +34,44 @@ export default async function Home() {
         }
       : undefined
 
-  const brands: Brand[] | undefined = homepage?.brands?.flatMap((b) => {
-    const r = resolveImage(b.image, 1600)
-    return r
-      ? [
-          {
-            name: b.name,
-            shortName: b.shortName ?? b.name,
-            tagline: b.tagline,
-            href: b.href,
-            image: r.url,
-            lqip: r.lqip,
-          },
-        ]
-      : []
-  })
+  const sanityBrands: Brand[] =
+    homepage?.brands?.flatMap((b) => {
+      const r = resolveImage(b.image, 1600)
+      return r
+        ? [
+            {
+              name: b.name,
+              shortName: b.shortName ?? b.name,
+              tagline: b.tagline,
+              href: b.href,
+              image: r.url,
+              lqip: r.lqip,
+            },
+          ]
+        : []
+    }) ?? []
+
+  // House brand card — appended in code (add it in Sanity later to make it
+  // fully editable). Skipped if a "Morisons" house card already exists.
+  const morisonsCard: Brand = {
+    name: 'Morisons',
+    shortName: 'Morisons',
+    tagline: 'The house of goodness — a century of trust, in every Indian home.',
+    href: '/morisons',
+    image:
+      'https://images.unsplash.com/photo-1521790797524-b2497295b8a0?w=1600&q=80&auto=format&fit=crop',
+  }
+  const combinedBrands: Brand[] = sanityBrands.some((b) => b.name.trim() === 'Morisons')
+    ? sanityBrands
+    : [...sanityBrands, morisonsCard]
+
+  // Fixed display order for the "Trusted in every Indian home" cards.
+  const BRAND_ORDER = ['Morisons Baby Dreams', 'Bigen', 'Emoform', 'Morisons']
+  const rank = (name: string) => {
+    const i = BRAND_ORDER.indexOf(name.trim())
+    return i === -1 ? BRAND_ORDER.length : i
+  }
+  const brands: Brand[] = [...combinedBrands].sort((a, b) => rank(a.name) - rank(b.name))
 
   /* Values graphic below the quote — only when toggled on and an image is set.
      Default ON when the flag is unset so it shows until marketing hides it. */
@@ -90,10 +113,7 @@ export default async function Home() {
         video={heroVideo}
         intervalMs={(homepage?.heroSlideInterval ?? 5) * 1000}
       />
-      <QuoteSection
-        lines={homepage?.quote?.lines}
-        attribution={homepage?.quote?.attribution}
-      />
+      <VisionSection label={homepage?.vision?.label} text={homepage?.vision?.text} />
       {valuesResolved && (
         <ValuesImage
           image={valuesResolved.url}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { motion } from 'framer-motion'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
@@ -19,14 +20,29 @@ const DEFAULT_STATS: Stat[] = [
     body: 'From 1920 to today, J.L. Morison has stood for trust, honesty, and the small everyday goodness that holds a family together.',
   },
   {
-    number: '3',
+    number: '4',
     label: 'Brands',
-    body: 'Morisons Baby Dreams, Emoform, and Bigen — each beloved in its category, each shaped by the same uncompromising values.',
+    body: 'Each beloved in its category, each shaped by the same uncompromising values that have defined Morison since 1920.',
   },
   {
     number: '1',
     label: 'Promise',
     body: 'To make products that earn a permanent place on every Indian shelf — gently, honestly, generation after generation.',
+  },
+  {
+    number: '—',
+    label: 'Turnover',
+    body: 'Steady, responsible growth built on brands Indian families reach for year after year.',
+  },
+  {
+    number: '—',
+    label: 'Distributors',
+    body: 'A trusted distribution network that carries our brands into homes across the country.',
+  },
+  {
+    number: '400+',
+    label: 'Employee Strength',
+    body: 'The people behind the promise — a growing team building goodness every single day.',
   },
 ]
 
@@ -36,23 +52,13 @@ const DEFAULT_STATS: Stat[] = [
 const SCALLOP =
   "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='48'%3E%3Cpath d='M0 48 A48 48 0 0 1 96 48 Z' fill='%23ffffff'/%3E%3C/svg%3E\")"
 
-/* Split "100+" → { prefix: "", value: 100, suffix: "+", decimals: 0 } so we can
-   count up the numeric part while keeping any prefix/suffix intact. Returns null
-   when there's no number to animate (e.g. a non-numeric label). */
-function parseNumber(raw: string) {
-  const m = String(raw).match(/^(\D*)(\d+(?:\.\d+)?)(.*)$/)
-  if (!m) return null
-  const decimals = m[2].includes('.') ? m[2].split('.')[1].length : 0
-  return { prefix: m[1], value: parseFloat(m[2]), suffix: m[3], decimals }
-}
-
 const DEFAULT_HEADING = 'Building Goodness Everyday for over a Century'
 const DEFAULT_NOTE = 'Since 1920'
 
 /* Scales the heading's font-size down until it wraps onto exactly `lines` rows,
    so the copy always fills the same number of lines no matter how long it is.
    The heading has a font-independent (rem) width, so the wrap point is stable. */
-function useFitLines(lines = 2, maxPx = 72, minPx = 16) {
+function useFitLines(lines = 2, maxPx = 84, minPx = 16) {
   const ref = useRef<HTMLHeadingElement>(null)
 
   useEffect(() => {
@@ -104,7 +110,7 @@ export default function StatsSection({
   const sectionRef = useRef<HTMLElement>(null)
   const headingRef = useFitLines(2)
 
-  /* Fade-up reveal of the heading + cards, and count-up of the numbers */
+  /* Fade-up reveal of the header row (heading + note) */
   useEffect(() => {
     const root = sectionRef.current
     if (!root) return
@@ -122,31 +128,6 @@ export default function StatsSection({
           scroller: scroller ?? undefined,
           start: 'top 78%',
         },
-      })
-
-      /* Count each number up from 0 when it scrolls into view */
-      gsap.utils.toArray<HTMLElement>('[data-stat-number]').forEach((el) => {
-        const value = parseFloat(el.dataset.value || '0')
-        const prefix = el.dataset.prefix || ''
-        const suffix = el.dataset.suffix || ''
-        const decimals = parseInt(el.dataset.decimals || '0', 10)
-        const counter = { v: 0 }
-        const render = () =>
-          (el.textContent = prefix + counter.v.toFixed(decimals) + suffix)
-        render() // start at 0 before the tween fires
-
-        gsap.to(counter, {
-          v: value,
-          duration: 1.6,
-          ease: 'power2.out',
-          onUpdate: render,
-          scrollTrigger: {
-            trigger: el,
-            scroller: scroller ?? undefined,
-            start: 'top 88%',
-            once: true,
-          },
-        })
       })
     }, root)
 
@@ -168,14 +149,14 @@ export default function StatsSection({
         }}
       />
 
-      <div className="max-w-7xl mx-auto px-6 md:px-12 pt-20 md:pt-28 pb-24 md:pb-32">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 pt-20 md:pt-28 pb-10 md:pb-14">
         {/* Header row — big editorial heading left, small note right */}
-        <div className="mb-12 md:mb-16 flex items-end justify-between gap-6 flex-wrap">
+        <div className="flex items-end justify-between gap-6 flex-wrap">
           <h2
             ref={headingRef}
             data-stat-reveal
-            className="font-serif font-semibold tracking-tight leading-[0.95] text-[#111111] max-w-[20rem] md:max-w-[34rem] [text-wrap:balance]"
-            style={{ fontSize: 'clamp(2.25rem, 5vw, 4.5rem)' }}
+            className="font-serif font-normal tracking-tight leading-[0.95] text-[#111111] max-w-[22rem] md:max-w-[38rem] [text-wrap:balance]"
+            style={{ fontSize: 'clamp(2.5rem, 5.5vw, 5.25rem)' }}
           >
             {HEADING}
           </h2>
@@ -187,28 +168,34 @@ export default function StatsSection({
           </p>
         </div>
 
-        {/* Metric cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
-          {STATS.map((stat) => {
-            const parsed = parseNumber(stat.number)
-            return (
+      </div>
+
+      {/* Moving metric carousel — cards scroll continuously left. The list is
+          duplicated so a −50% shift loops seamlessly. Edges fade out via a mask
+          so cards enter/exit softly. */}
+      <div
+        className="relative overflow-hidden pb-24 md:pb-32"
+        style={{
+          WebkitMaskImage:
+            'linear-gradient(to right, transparent, black 5%, black 95%, transparent)',
+          maskImage:
+            'linear-gradient(to right, transparent, black 5%, black 95%, transparent)',
+        }}
+      >
+        <motion.div
+          className="flex w-max gap-5 px-6 md:gap-6 md:px-12"
+          animate={{ x: ['0%', '-50%'] }}
+          transition={{ duration: 45, ease: 'linear', repeat: Infinity }}
+          style={{ willChange: 'transform' }}
+        >
+          {[...STATS, ...STATS].map((stat, i) => (
             <div
-              key={`${stat.number}-${stat.label}`}
-              data-stat-reveal
-              className="rounded-[28px] bg-[#F6F3EE] p-8 md:p-10 flex flex-col"
+              key={`${stat.label}-${i}`}
+              className="flex w-[270px] shrink-0 flex-col rounded-[28px] bg-[#F6F3EE] p-8 md:w-[340px] md:p-10"
             >
               <span
-                className="font-serif font-semibold leading-none text-[#111111]"
+                className="font-serif font-light leading-none text-[#111111]"
                 style={{ fontSize: 'clamp(3.25rem, 6vw, 5.5rem)' }}
-                {...(parsed
-                  ? {
-                      'data-stat-number': true,
-                      'data-value': parsed.value,
-                      'data-prefix': parsed.prefix,
-                      'data-suffix': parsed.suffix,
-                      'data-decimals': parsed.decimals,
-                    }
-                  : {})}
               >
                 {stat.number}
               </span>
@@ -219,9 +206,8 @@ export default function StatsSection({
                 {stat.body}
               </p>
             </div>
-            )
-          })}
-        </div>
+          ))}
+        </motion.div>
       </div>
     </section>
   )

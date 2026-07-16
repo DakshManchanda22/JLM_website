@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { motion, useReducedMotion } from 'framer-motion'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { Roboto } from 'next/font/google'
+import { Nunito } from 'next/font/google'
 import Footer from '@/components/Footer'
 import type { BabyCategory, BabyDreams, BabyTint } from '@/sanity/queries'
 
@@ -15,9 +15,9 @@ gsap.registerPlugin(ScrollTrigger)
 /* ── Type system: Nunito — a soft, rounded, friendly sans used across the whole
    page (bold weights for headings, regular for body), matching the warm,
    tender feel of the Baby Dreams brand. ── */
-const nunito = Roboto({
+const nunito = Nunito({
   subsets: ['latin'],
-  weight: ['400', '500', '700', '900'],
+  weight: ['400', '500', '600', '700', '800', '900'],
   variable: '--font-nunito',
 })
 

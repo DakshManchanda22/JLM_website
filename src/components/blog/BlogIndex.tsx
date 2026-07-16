@@ -3,18 +3,18 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Roboto } from 'next/font/google'
+import { Abril_Fatface, Cormorant_Garamond, DM_Sans } from 'next/font/google'
 import { motion } from 'framer-motion'
 
 import Footer from '@/components/Footer'
 import type { PostListItem } from '@/sanity/queries'
 
-const abrilFatface = Roboto({ subsets: ['latin'], weight: '900' })
-const cormorant = Roboto({
+const abrilFatface = Abril_Fatface({ subsets: ['latin'], weight: '400' })
+const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
-  weight: ['500', '700'],
+  weight: ['500', '600', '700'],
 })
-const dmSans = Roboto({ subsets: ['latin'], weight: ['400', '500', '700'] })
+const dmSans = DM_Sans({ subsets: ['latin'] })
 
 const EASE = [0.16, 1, 0.3, 1] as const
 const ALL = 'All Category' as const

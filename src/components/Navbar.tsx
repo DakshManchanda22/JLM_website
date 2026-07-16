@@ -91,7 +91,7 @@ function Logo({ className }: { className?: string }) {
 
 const DROPDOWNS: Record<string, string[]> = {
   'Our People': ['Our Story', 'Leadership Team', 'Life at JLM'],
-  'Our Brands': ['Morisons', 'Morisons Baby Dreams', 'Emoform', 'Bigen'],
+  'Our Brands': ['Morisons Baby Dreams', 'Bigen', 'Emoform', 'Morisons'],
 }
 
 const LEFT = ['Our Brands', 'Our People']

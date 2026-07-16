@@ -3,22 +3,25 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { Roboto } from 'next/font/google'
+import { DM_Sans } from 'next/font/google'
+import localFont from 'next/font/local'
 import { PortableText, type PortableTextComponents } from '@portabletext/react'
 import Footer from '@/components/Footer'
 import type { Bigen, BigenReel, BigenFeature, BigenProduct } from '@/sanity/queries'
 
-// Was self-hosted "Google Sans" — now Roboto (bold) to match the site typeface.
-const googleSans = Roboto({
-  subsets: ['latin'],
-  weight: ['500', '700'],
+// Google Sans (self-hosted) — bold, modern sans for a confident, manly look
+const googleSans = localFont({
+  src: [
+    { path: '../fonts/GoogleSans-500.woff2', weight: '500', style: 'normal' },
+    { path: '../fonts/GoogleSans-700.woff2', weight: '700', style: 'normal' },
+  ],
   variable: '--font-google-sans',
   display: 'swap',
 })
 
-const dmSans = Roboto({
+const dmSans = DM_Sans({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '700', '900'],
+  weight: ['300', '400', '500', '600', '700', '800'],
   variable: '--font-dm-sans',
 })
 
@@ -28,7 +31,7 @@ const EASE = [0.16, 1, 0.3, 1] as const
 const D = {
   heroHeadline1: 'Specially',
   heroHeadline2: 'formulated',
-  heroHeadline3: "for men's beard",
+  heroHeadline3: 'for men',
   heroEyebrow: "Japan's No.1 · Men's Beard",
   heroCtaLabel: 'Shop now',
   heroCtaHref: 'https://www.amazon.in/s?k=bigen',
@@ -287,30 +290,12 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
                       'linear-gradient(95deg, #f5e487 0%, #d8b04a 60%, #c79a3a 100%)',
                   }}
                 >
-                  {cms.heroHeadline3 || D.heroHeadline3}
+                  {/* Fixed to "for men" in code — the Sanity value is stale and the
+                      API token is read-only. Update Sanity, then restore cms.heroHeadline3. */}
+                  {D.heroHeadline3}
                 </span>
               </motion.h1>
 
-              {/* Shop now CTA — label + link are editable in Sanity. inline-flex so
-                  the pill hugs the text at any length and stays on one line. */}
-              <motion.a
-                {...fadeUp}
-                transition={{ duration: 0.7, ease: EASE, delay: 0.16 }}
-                href={cms.heroCtaHref || D.heroCtaHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-8 inline-flex w-fit max-w-full items-center gap-2 whitespace-nowrap rounded-full px-7 py-3.5 text-sm font-bold text-[#1d1408] shadow-[0_14px_30px_-12px_rgba(0,0,0,0.6)] transition-transform hover:-translate-y-0.5"
-                style={{
-                  backgroundImage:
-                    'linear-gradient(135deg, #f5e487 0%, #d8b04a 55%, #c79a3a 100%)',
-                  fontFamily: 'var(--font-google-sans)',
-                }}
-              >
-                {cms.heroCtaLabel || D.heroCtaLabel}
-                <span aria-hidden className="transition-transform">
-                  →
-                </span>
-              </motion.a>
             </div>
 
             {/* ── RIGHT: hero photo with big gold "Japan's No.1" behind ── */}
@@ -792,6 +777,15 @@ function ProductRange({
   instagramUrl: string
   facebookUrl: string
 }) {
+  // Fixed display order for the range, regardless of Sanity ordering.
+  const RANGE_ORDER = ['beard color', 'speedy color', 'beard oil', 'hair color conditioner']
+  const rank = (name?: string) => {
+    const n = (name ?? '').toLowerCase().replace(/colour/g, 'color')
+    const i = RANGE_ORDER.findIndex((o) => n.includes(o))
+    return i === -1 ? RANGE_ORDER.length : i
+  }
+  const orderedProducts = [...products].sort((a, b) => rank(a.name) - rank(b.name))
+
   return (
     <div className="mt-24 md:mt-32">
       {/* heading */}
@@ -810,7 +804,7 @@ function ProductRange({
 
       {/* cards */}
       <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {products.map((p, i) => (
+        {orderedProducts.map((p, i) => (
           <motion.div
             key={`${p.name}-${i}`}
             initial={{ opacity: 0, y: 28 }}

@@ -1,38 +1,36 @@
 'use client'
 
-import Image from 'next/image'
-import { useState } from 'react'
-import { Roboto } from 'next/font/google'
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import type { ReactNode } from 'react'
+import { Cormorant_Garamond, DM_Sans } from 'next/font/google'
+import { motion, useReducedMotion } from 'framer-motion'
 import Footer from '@/components/Footer'
 
-const cormorant = Roboto({
+const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '700'],
+  weight: ['300', '400', '500', '600'],
   style: ['normal', 'italic'],
   variable: '--font-cormorant',
 })
 
-const dmSans = Roboto({
+const dmSans = DM_Sans({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '700'],
+  weight: ['400', '500', '600', '700'],
   variable: '--font-dm-sans',
-})
-
-const anton = Roboto({
-  subsets: ['latin'],
-  weight: '900',
-  variable: '--font-anton',
 })
 
 /* ─────────────── palette ─────────────── */
 const INK = '#111111'
 const MUTED = '#555555'
-const BEIGE = '#E8E0D5'
+const HAIRLINE = '#E6E2D9'
+
+/* Five sequential era tones — navy → teal → moss → ochre → plum. Darkened from
+   the reference so every one clears 4.5:1 on white and stays legible as small
+   label text, while still reading as its hue. */
+const TONES = ['#16324F', '#14706F', '#55731D', '#8F5B0C', '#5F3F82'] as const
 
 const EASE = [0.16, 1, 0.3, 1] as const
 
-/* ─────────────── types ─────────────── */
+/* ─────────────── types (Sanity-editable) ─────────────── */
 
 export type Era = {
   number: string
@@ -77,11 +75,11 @@ export type OurStoryCms = {
 /* ─────────────── defaults ─────────────── */
 
 const DEFAULT_STAGES: JourneyStage[] = [
-  { period: '1920s', name: 'Trading Company', note: 'A heritage in fair, considered commerce.' },
-  { period: '1940s — 2000s', name: 'Global Brand Partner', note: 'Bringing the world’s best to India.' },
-  { period: '1980s onward', name: 'Manufacturer & Distributor', note: 'Building real capability on the ground.' },
-  { period: '2011 onward', name: 'Own Brand Builder', note: 'Morisons Baby Dreams leads the way.' },
-  { period: 'Today', name: 'Modern FMCG Company', note: 'Three brands, one promise, every Indian home.' },
+  { name: 'Trading Company' },
+  { name: 'Global Brand Partner' },
+  { name: 'Manufacturer & Distributor' },
+  { name: 'Own Brand Builder' },
+  { name: 'Modern FMCG Company' },
 ]
 
 const DEFAULT_ERAS: Era[] = [
@@ -89,59 +87,94 @@ const DEFAULT_ERAS: Era[] = [
     number: '01',
     dateRange: '1920 — 1940',
     title: 'Global Origins',
-    body: 'The story begins in the UK, with a small trading house carrying European craft to a still-young Indian market. From the very first shipment, the choice is set: stand for trust, stand for quality, and let the work speak for itself.',
-    image: 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=1400&h=1700&fit=crop&auto=format',
+    body: 'The story begins in the UK, with a small trading house carrying European craft into a still-young Indian market — and a first principle that never changes: stand for trust, stand for quality.',
   },
   {
     number: '02',
     dateRange: '1940 — 2000',
     title: 'Strategic Partnerships',
-    body: 'Six decades of patient brand-building alongside the world’s most discerning names. Each collaboration deepens our distribution, sharpens our standards, and earns the trust of Indian shopkeepers and Indian families alike.',
-    image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1400&h=1700&fit=crop&auto=format',
+    body: 'Six decades of patient brand-building alongside the world’s most discerning names. Each collaboration deepens our distribution, sharpens our standards, and earns lasting credibility.',
   },
   {
     number: '03',
     dateRange: '2001 — 2010',
     title: 'Brand Reinvention',
-    body: 'A decisive turn. The company pivots from carrying others’ brands to building our own — led by Morisons Baby Dreams, a brand made specifically for Indian mothers and the babies they raise.',
-    image: 'https://images.unsplash.com/photo-1555252333-9f8e92e65df9?w=1400&h=1700&fit=crop&auto=format',
+    body: 'A decisive turn — from carrying others’ brands to building our own, led by Morisons Baby Dreams, a brand made specifically for Indian mothers and the babies they raise.',
   },
   {
     number: '04',
     dateRange: '2011 — 2020',
     title: 'Digital & Manufacturing Transformation',
-    body: 'We invest in our own factories, our own systems, and our own omnichannel presence. Production capability moves in-house. Technology moves alongside it. Distribution reaches every postcode that matters.',
-    image: 'https://images.unsplash.com/photo-1565728744382-61accd4aa148?w=1400&h=1700&fit=crop&auto=format',
+    body: 'We invest in our own factories, our own systems, and our own omnichannel presence. Production moves in-house, technology moves alongside it, and distribution reaches every postcode that matters.',
   },
   {
     number: '05',
     dateRange: '2021 — Present',
     title: 'Future-Focused Growth',
     body: 'Baby care widens. ESG, analytics, and modern retail are no longer adjacent — they are how we operate. A hundred-year company keeps its first principles while writing its next chapter.',
-    image: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=1400&h=1700&fit=crop&auto=format',
   },
 ]
 
 const DEFAULT_PILLARS: Pillar[] = [
-  { name: 'Trusted Legacy', description: 'A century of trust, earned product by product, generation by generation.' },
-  { name: 'Consumer Centric', description: 'The Indian family sits at the centre of every decision we make.' },
-  { name: 'Innovation Driven', description: 'Curiosity is the engine — we test, we measure, we keep improving.' },
-  { name: 'Sustainable Future', description: 'Goodness for the families of today, and the planet of tomorrow.' },
-  { name: 'People First', description: 'Our people are our foundation. Their growth is our growth.' },
+  { name: 'Trusted Legacy' },
+  { name: 'Consumer Centric' },
+  { name: 'Innovation Driven' },
+  { name: 'Sustainable Future' },
+  { name: 'People First' },
+]
+
+/* ─────────────── icons ─────────────── */
+
+function Svg({ children }: { children: ReactNode }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.6}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ width: '100%', height: '100%' }}
+    >
+      {children}
+    </svg>
+  )
+}
+
+const STEP_ICONS: ReactNode[] = [
+  <path key="d" d="M3 17h18M4 17l1.5-8h13L20 17M9 9V6a3 3 0 013-3 3 3 0 013 3v3" />,
+  <path key="d" d="M8 12l3 3 6-7M3 12a9 9 0 1018 0 9 9 0 00-18 0z" />,
+  <path key="d" d="M3 21V10l6-4 6 4v11M15 21V13l6-3v11H15z" />,
+  <path key="d" d="M12 2l2.4 5.5L20 8.3l-4 4 1 6-5-2.8-5 2.8 1-6-4-4 5.6-.8z" />,
+  <path key="d" d="M4 19h16M6 19V9l4-3 4 3v10M14 19v-6l3-2 3 2v6" />,
+]
+
+const VALUE_ICONS: ReactNode[] = [
+  <path key="d" d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z" />,
+  <path key="d" d="M12 21s-8-4.5-8-11a4 4 0 018-1 4 4 0 018 1c0 6.5-8 11-8 11z" />,
+  <g key="d">
+    <circle cx="12" cy="12" r="4" />
+    <path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" />
+  </g>,
+  <path key="d" d="M4 20c8-1 12-6 12-14 0 0-9 0-12 6-2 4-1 6 0 8z" />,
+  <g key="d">
+    <circle cx="9" cy="8" r="3" />
+    <path d="M2 20c0-3.5 3-6 7-6s7 2.5 7 6M17 8a3 3 0 100 6M22 20c0-2.8-1.9-5-4.5-5.7" />
+  </g>,
 ]
 
 /* ─────────────── small bits ─────────────── */
 
-/** Renders text with *asterisk-wrapped* segments turned italic. */
-function MaybeItalic({ children }: { children: string }) {
-  const parts = children.split(/(\*[^*]+\*)/g)
+/** Renders text with *asterisk-wrapped* segments turned italic in `color`. */
+function Emphasis({ text, color }: { text: string; color: string }) {
+  const parts = text.split(/(\*[^*]+\*)/g)
   return (
     <>
       {parts.map((p, i) =>
         p.startsWith('*') && p.endsWith('*') ? (
-          <span key={i} className="italic" style={{ fontWeight: 500 }}>
+          <em key={i} style={{ fontStyle: 'italic', color }}>
             {p.slice(1, -1)}
-          </span>
+          </em>
         ) : (
           <span key={i}>{p}</span>
         ),
@@ -150,497 +183,337 @@ function MaybeItalic({ children }: { children: string }) {
   )
 }
 
-function Eyebrow({ children, color = MUTED }: { children: React.ReactNode; color?: string }) {
+function SectionLabel({ children }: { children: ReactNode }) {
   return (
-    <div className="flex items-center gap-3">
-      <span className="block h-px w-8" style={{ backgroundColor: color, opacity: 0.45 }} />
-      <span
-        className={`${dmSans.className} uppercase`}
-        style={{ fontSize: 11, letterSpacing: '0.3em', color, fontWeight: 500 }}
+    <div className="mb-11 flex items-baseline gap-4 md:mb-16 md:gap-5">
+      <h2
+        className={cormorant.className}
+        style={{
+          margin: 0,
+          fontStyle: 'italic',
+          fontWeight: 500,
+          fontSize: 'clamp(24px, 3vw, 34px)',
+          letterSpacing: '-0.01em',
+          color: INK,
+        }}
       >
         {children}
-      </span>
+      </h2>
+      <span aria-hidden className="h-px flex-1" style={{ backgroundColor: HAIRLINE }} />
     </div>
   )
 }
 
-/* ────────────────────────── HERO ────────────────────────── */
+/* ────────────────────────── INTRO ────────────────────────── */
 
-function Hero({ cms }: { cms: OurStoryCms }) {
+function Intro({ cms }: { cms: OurStoryCms }) {
   const reduce = useReducedMotion() ?? false
-  const top = cms.headlineTop ?? 'A hundred years of'
-  const bottom = cms.headlineBottom ?? 'building *goodness*.'
+  const eyebrow = cms.eyebrow ?? 'Our Story'
+  const headline =
+    cms.headlineTop ??
+    'One family business, *five reinventions*, and a century of showing up for Indian homes.'
   const tagline =
     cms.heroTagline ??
-    'From global partnerships to homegrown leadership, a century of evolving with India while building brands that families trust for generations.'
-  const est = cms.establishedMark ?? 'Est. 1920'
-  const estYear = est.replace(/[^0-9]/g, '') || '1920'
-  const heroImage =
-    cms.heroImage ??
-    'https://images.unsplash.com/photo-1521791136064-7986c2920216?w=1400&h=1800&fit=crop&auto=format'
+    'From a trading company navigating colonial routes to a modern FMCG house building brands people welcome into their homes — over 100 years of evolving with India, while building brands that families trust for generations.'
 
-  // staggered rise, motivated as the statement assembling on load
   const rise = (delay: number) =>
     reduce
-      ? { initial: false, animate: { opacity: 1, y: 0 }, transition: { duration: 0 } }
+      ? { initial: false as const }
       : {
-          initial: { opacity: 0, y: 30 },
+          initial: { opacity: 0, y: 22 },
           animate: { opacity: 1, y: 0 },
-          transition: { duration: 1, ease: EASE, delay },
+          transition: { duration: 0.9, ease: EASE, delay },
         }
 
   return (
-    <section
-      className="relative w-full overflow-hidden flex flex-col lg:block"
-      style={{ backgroundColor: '#FFFFFF', minHeight: '100dvh' }}
-    >
-      {/* IMAGE — full-bleed right on desktop, top band on mobile; left-wiping curtain reveal */}
-      <motion.div
-        initial={reduce ? false : { clipPath: 'inset(0 0 0 100%)' }}
-        animate={{ clipPath: 'inset(0 0 0 0%)' }}
-        transition={{ duration: 1.2, ease: EASE, delay: 0.15 }}
-        className="relative w-full h-[42vh] lg:absolute lg:top-0 lg:right-0 lg:h-full lg:w-[46%]"
-      >
-        <motion.div
-          initial={reduce ? false : { scale: 1.08 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 1.6, ease: EASE, delay: 0.15 }}
-          className="absolute inset-0"
-        >
-          <Image
-            src={heroImage}
-            alt="JL Morison, a century of building goodness"
-            fill
-            sizes="(max-width: 1024px) 100vw, 46vw"
-            style={{ objectFit: 'cover' }}
-            priority
-          />
-        </motion.div>
-        {/* left fade — lets the headline overlap the photo and stay legible */}
-        <div
-          aria-hidden
-          className="absolute inset-0 hidden lg:block pointer-events-none"
-          style={{ background: 'linear-gradient(90deg, #FFFFFF 0%, rgba(255,255,255,0) 26%)' }}
-        />
-        {/* top fade — keeps the navbar legible over the photo */}
-        <div
-          aria-hidden
-          className="absolute inset-x-0 top-0 pointer-events-none"
-          style={{ height: 120, background: 'linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0) 100%)' }}
-        />
-      </motion.div>
-
-      {/* COPY — left column, vertically centred on desktop */}
-      <div className="relative z-10 flex flex-col justify-center w-full lg:w-[62%] lg:min-h-[100dvh] px-[7vw] lg:pl-[6vw] lg:pr-10 pt-12 lg:pt-0 pb-14">
-        <h1 className={`${cormorant.className}`} style={{ margin: 0 }}>
-          <motion.span
-            {...rise(0.1)}
-            className="block"
-            style={{
-              fontSize: 'clamp(44px, 5.6vw, 96px)',
-              fontWeight: 300,
-              lineHeight: 1.02,
-              color: INK,
-              letterSpacing: '-0.015em',
-            }}
-          >
-            {top}
-          </motion.span>
-          <motion.span
-            {...rise(0.26)}
-            className="block"
-            style={{
-              fontSize: 'clamp(44px, 5.6vw, 96px)',
-              fontWeight: 300,
-              lineHeight: 1.12,
-              color: INK,
-              letterSpacing: '-0.015em',
-              marginTop: '0.02em',
-              paddingBottom: '0.12em',
-            }}
-          >
-            <MaybeItalic>{bottom}</MaybeItalic>
-          </motion.span>
-        </h1>
-
+    <section className="w-full bg-white px-6 pb-16 pt-28 text-center md:px-8 md:pb-20 md:pt-36">
+      <div className="mx-auto max-w-[820px]">
         <motion.p
-          {...rise(0.45)}
-          className={`${cormorant.className} italic mt-8`}
+          {...rise(0)}
+          className={`${dmSans.className} uppercase`}
+          style={{ margin: '0 0 22px', fontSize: 12, fontWeight: 700, letterSpacing: '0.28em', color: MUTED }}
+        >
+          {eyebrow}
+        </motion.p>
+        <motion.h1
+          {...rise(0.1)}
+          className={cormorant.className}
           style={{
-            fontSize: 'clamp(17px, 1.4vw, 23px)',
-            lineHeight: 1.55,
-            fontWeight: 400,
+            margin: '0 auto',
+            maxWidth: '18ch',
+            fontSize: 'clamp(36px, 5.2vw, 64px)',
+            fontWeight: 500,
+            lineHeight: 1.08,
+            letterSpacing: '-0.02em',
+            color: INK,
+            textWrap: 'balance',
+          }}
+        >
+          <Emphasis text={headline} color={TONES[1]} />
+        </motion.h1>
+        <motion.p
+          {...rise(0.24)}
+          className={dmSans.className}
+          style={{
+            margin: '28px auto 0',
+            maxWidth: '58ch',
+            fontSize: 'clamp(15.5px, 1.3vw, 17px)',
+            lineHeight: 1.75,
             color: MUTED,
-            maxWidth: '44ch',
+            textWrap: 'pretty',
           }}
         >
           {tagline}
         </motion.p>
+      </div>
+    </section>
+  )
+}
 
-        <motion.div {...rise(0.6)} className="mt-12">
-          <div className="flex items-center gap-3 mb-3">
-            <span aria-hidden className="block" style={{ height: 1, width: 40, backgroundColor: INK, opacity: 0.5 }} />
-            <span
-              className={`${dmSans.className} uppercase`}
-              style={{ fontSize: 10, letterSpacing: '0.34em', color: MUTED }}
-            >
-              Established
-            </span>
-          </div>
+/* ────────────────────────── JOURNEY (stepper) ────────────────────────── */
+
+function Journey({ cms }: { cms: OurStoryCms }) {
+  const reduce = useReducedMotion() ?? false
+  const stages = (cms.journeyStages && cms.journeyStages.length > 0 ? cms.journeyStages : DEFAULT_STAGES).slice(0, 5)
+
+  return (
+    <section className="w-full bg-white px-6 pb-24 pt-4 md:px-8 md:pb-28">
+      <div className="mx-auto max-w-[1100px]">
+        <SectionLabel>{cms.journeyHeadline ?? 'The journey in a nutshell'}</SectionLabel>
+
+        <div className="relative">
+          {/* Connecting thread — runs between the first and last dot centres
+              (each column is 20% wide, so 10% → 90%). Sits behind the dots,
+              which carry a white ring so the line reads as passing behind. */}
+          <div
+            aria-hidden
+            className="absolute hidden md:block"
+            style={{
+              top: 6,
+              left: '10%',
+              right: '10%',
+              height: 2,
+              opacity: 0.6,
+              background: `linear-gradient(90deg, ${TONES.join(', ')})`,
+            }}
+          />
+
+          <ol className="m-0 grid list-none grid-cols-1 gap-9 p-0 md:grid-cols-5 md:gap-0">
+            {stages.map((s, i) => {
+              const tone = TONES[i % TONES.length]
+              return (
+                <motion.li
+                  key={`${s.name}-${i}`}
+                  initial={reduce ? false : { opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-60px' }}
+                  transition={{ duration: 0.6, ease: EASE, delay: reduce ? 0 : i * 0.09 }}
+                  className="relative flex items-center gap-5 text-left md:flex-col md:items-center md:gap-0 md:text-center"
+                >
+                  <span
+                    aria-hidden
+                    className="shrink-0 rounded-full"
+                    style={{
+                      width: 14,
+                      height: 14,
+                      backgroundColor: tone,
+                      boxShadow: `0 0 0 6px #fff, 0 0 0 7px ${HAIRLINE}`,
+                    }}
+                  />
+                  <span
+                    aria-hidden
+                    className="flex shrink-0 items-center justify-center rounded-full md:mt-6"
+                    style={{ width: 46, height: 46, border: `1px solid ${HAIRLINE}`, color: tone, padding: 12 }}
+                  >
+                    <Svg>{STEP_ICONS[i % STEP_ICONS.length]}</Svg>
+                  </span>
+                  <span
+                    className={dmSans.className}
+                    style={{ marginTop: 0, fontSize: 15, fontWeight: 700, letterSpacing: '0.01em', color: INK }}
+                  >
+                    {s.name}
+                  </span>
+                </motion.li>
+              )
+            })}
+          </ol>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ────────────────────────── ERAS (timeline) ────────────────────────── */
+
+function Eras({ cms }: { cms: OurStoryCms }) {
+  const reduce = useReducedMotion() ?? false
+  const eras = (cms.eras && cms.eras.length > 0 ? cms.eras : DEFAULT_ERAS).slice(0, 5)
+
+  return (
+    <section className="w-full bg-white px-6 pb-24 pt-4 md:px-8 md:pb-28">
+      <div className="mx-auto max-w-[1100px]">
+        <SectionLabel>{cms.erasHeadline ?? 'Five defining eras'}</SectionLabel>
+
+        <div>
+          {eras.map((e, i) => {
+            const tone = TONES[i % TONES.length]
+            const last = i === eras.length - 1
+            return (
+              <motion.div
+                key={`${e.number}-${i}`}
+                initial={reduce ? false : { opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-80px' }}
+                transition={{ duration: 0.6, ease: EASE }}
+                className="grid grid-cols-1 gap-x-7 gap-y-2 py-8 md:grid-cols-[76px_1fr] md:py-9"
+                style={{ borderTop: `1px solid ${HAIRLINE}`, borderBottom: last ? `1px solid ${HAIRLINE}` : undefined }}
+              >
+                <div
+                  className={cormorant.className}
+                  style={{ fontStyle: 'italic', fontWeight: 500, fontSize: 'clamp(38px, 4vw, 56px)', lineHeight: 1, color: tone }}
+                >
+                  {e.number}
+                </div>
+                <div>
+                  <div
+                    className={`${dmSans.className} uppercase`}
+                    style={{ marginBottom: 8, fontSize: 12.5, fontWeight: 700, letterSpacing: '0.16em', color: tone }}
+                  >
+                    {e.dateRange}
+                  </div>
+                  <h3
+                    className={cormorant.className}
+                    style={{ margin: '0 0 10px', fontSize: 'clamp(21px, 2.2vw, 26px)', fontWeight: 600, lineHeight: 1.2, color: INK }}
+                  >
+                    {e.title}
+                  </h3>
+                  <p
+                    className={dmSans.className}
+                    style={{ margin: 0, maxWidth: '62ch', fontSize: 15.5, lineHeight: 1.7, color: MUTED, textWrap: 'pretty' }}
+                  >
+                    {e.body}
+                  </p>
+                </div>
+              </motion.div>
+            )
+          })}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ────────────────────────── PULL QUOTE ────────────────────────── */
+
+function PullQuote({ cms }: { cms: OurStoryCms }) {
+  const reduce = useReducedMotion() ?? false
+  const quote =
+    cms.closingLine ??
+    '“From global partnerships to homegrown leadership — J.L. Morison’s journey reflects over 100 years of evolving with consumer needs, while building trusted brands for generations.”'
+
+  return (
+    <section className="w-full bg-white px-6 pb-24 md:px-8 md:pb-28">
+      <div className="mx-auto max-w-[1100px]">
+        <motion.div
+          initial={reduce ? false : { opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-80px' }}
+          transition={{ duration: 0.7, ease: EASE }}
+          className="relative grid grid-cols-1 items-center gap-8 overflow-hidden md:grid-cols-[auto_1fr_auto] md:gap-9"
+          style={{
+            backgroundColor: INK,
+            color: '#FBFAF7',
+            borderRadius: '24px 24px 96px 24px',
+            padding: 'clamp(40px, 6vw, 66px) clamp(28px, 5vw, 58px)',
+          }}
+        >
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0"
+            style={{ background: 'radial-gradient(600px 300px at 90% 115%, rgba(95,63,130,0.4), transparent 70%)' }}
+          />
           <span
-            className={`${anton.className} block`}
-            style={{ fontSize: 'clamp(26px, 3vw, 44px)', lineHeight: 1, color: INK, letterSpacing: '0.01em' }}
+            aria-hidden
+            className="relative flex shrink-0 items-center justify-center rounded-full"
+            style={{ width: 52, height: 52, border: '1px solid rgba(251,250,247,0.28)', color: '#FBFAF7', padding: 14 }}
           >
-            {estYear}
+            <Svg>{VALUE_ICONS[1]}</Svg>
           </span>
+          <p
+            className={cormorant.className}
+            style={{
+              position: 'relative',
+              margin: 0,
+              fontStyle: 'italic',
+              fontWeight: 400,
+              fontSize: 'clamp(20px, 2.4vw, 27px)',
+              lineHeight: 1.5,
+            }}
+          >
+            {quote}
+          </p>
+          <div className="relative md:text-right">
+            <div className={cormorant.className} style={{ fontSize: 22, letterSpacing: '0.04em' }}>
+              J.L. Morison
+            </div>
+            <div
+              className={`${dmSans.className} uppercase`}
+              style={{ marginTop: 4, fontSize: 11, letterSpacing: '0.2em', color: 'rgba(251,250,247,0.62)' }}
+            >
+              Since 1920
+            </div>
+          </div>
         </motion.div>
       </div>
     </section>
   )
 }
 
-/* ──────────────────── CHAPTERS (interactive) ──────────────────── */
+/* ────────────────────────── VALUES ────────────────────────── */
 
-type Chapter = Era & { role?: string }
-
-function ChapterRow({
-  chapter,
-  active,
-  onOpen,
-  onToggle,
-  reduce,
-}: {
-  chapter: Chapter
-  active: boolean
-  onOpen: () => void
-  onToggle: () => void
-  reduce: boolean
-}) {
-  return (
-    <div
-      style={{
-        borderTop: `1px solid ${active ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.16)'}`,
-        transition: 'border-color 0.45s ease',
-      }}
-    >
-      <button
-        type="button"
-        onMouseEnter={onOpen}
-        onFocus={onOpen}
-        onClick={onToggle}
-        aria-expanded={active}
-        className="w-full text-left"
-        style={{ padding: '24px 0', background: 'none', border: 'none', cursor: 'pointer' }}
-      >
-        <div className="flex items-center gap-5 md:gap-8">
-          <span
-            className={`${anton.className}`}
-            style={{
-              fontSize: 'clamp(18px, 1.9vw, 28px)',
-              color: active ? BEIGE : 'rgba(255,255,255,0.35)',
-              lineHeight: 1,
-              transition: 'color 0.45s ease',
-              minWidth: 40,
-            }}
-          >
-            {chapter.number}
-          </span>
-          <span
-            className={`${dmSans.className} uppercase hidden sm:block`}
-            style={{ fontSize: 11, letterSpacing: '0.26em', color: 'rgba(255,255,255,0.55)', minWidth: 128 }}
-          >
-            {chapter.dateRange}
-          </span>
-          <span
-            className={`${cormorant.className} italic flex-1`}
-            style={{
-              fontSize: 'clamp(26px, 3.4vw, 48px)',
-              lineHeight: 1.04,
-              fontWeight: 400,
-              color: active ? '#FFFFFF' : 'rgba(255,255,255,0.5)',
-              transition: 'color 0.45s ease',
-            }}
-          >
-            {chapter.title}
-          </span>
-          <span
-            aria-hidden
-            style={{
-              position: 'relative',
-              width: 20,
-              height: 20,
-              flexShrink: 0,
-              transition: 'opacity 0.45s ease',
-              opacity: active ? 0.9 : 0.5,
-            }}
-          >
-            {/* horizontal bar — always shown */}
-            <span style={{ position: 'absolute', top: '50%', left: 0, width: '100%', height: 1, backgroundColor: '#FFFFFF' }} />
-            {/* vertical bar — collapses when open, so + becomes - */}
-            <span
-              style={{
-                position: 'absolute',
-                left: '50%',
-                top: 0,
-                height: '100%',
-                width: 1,
-                backgroundColor: '#FFFFFF',
-                transformOrigin: 'center',
-                transform: active ? 'scaleY(0)' : 'scaleY(1)',
-                transition: 'transform 0.45s cubic-bezier(0.16,1,0.3,1)',
-              }}
-            />
-          </span>
-        </div>
-      </button>
-
-      <AnimatePresence initial={false}>
-        {active && (
-          <motion.div
-            key="drawer"
-            initial={reduce ? false : { height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={reduce ? { opacity: 0 } : { height: 0, opacity: 0 }}
-            transition={{ duration: reduce ? 0 : 0.55, ease: EASE }}
-            style={{ overflow: 'hidden' }}
-          >
-            <div
-              className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-center pb-12 md:pb-14"
-              style={{ paddingTop: 4 }}
-            >
-              {chapter.image && (
-                <div className="md:col-span-5">
-                  <div
-                    className="relative w-full overflow-hidden"
-                    style={{ aspectRatio: '4 / 5', maxWidth: 340, backgroundColor: BEIGE, borderRadius: 6 }}
-                  >
-                    <Image
-                      src={chapter.image}
-                      alt={chapter.title}
-                      fill
-                      sizes="(max-width: 768px) 90vw, 340px"
-                      style={{ objectFit: 'cover' }}
-                      {...(chapter.lqip
-                        ? { placeholder: 'blur' as const, blurDataURL: chapter.lqip }
-                        : {})}
-                    />
-                  </div>
-                </div>
-              )}
-              <div className={chapter.image ? 'md:col-span-7' : 'md:col-span-12'}>
-                {chapter.role && (
-                  <div className="flex items-center gap-3 mb-5">
-                    <span className="block h-px w-6" style={{ backgroundColor: BEIGE, opacity: 0.6 }} />
-                    <span
-                      className={`${dmSans.className} uppercase`}
-                      style={{ fontSize: 11, letterSpacing: '0.28em', color: BEIGE }}
-                    >
-                      {chapter.role}
-                    </span>
-                  </div>
-                )}
-                <p
-                  className={`${dmSans.className}`}
-                  style={{
-                    fontSize: 'clamp(16px, 1.25vw, 19px)',
-                    lineHeight: 1.7,
-                    color: 'rgba(255,255,255,0.72)',
-                    maxWidth: '56ch',
-                  }}
-                >
-                  {chapter.body}
-                </p>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  )
-}
-
-function Chapters({ cms }: { cms: OurStoryCms }) {
+function Values({ cms }: { cms: OurStoryCms }) {
   const reduce = useReducedMotion() ?? false
-  const eyebrow = cms.erasEyebrow ?? 'Five Defining Eras'
-  const headline = cms.journeyHeadline ?? 'In a nutshell.'
-  const eras = cms.eras && cms.eras.length > 0 ? cms.eras : DEFAULT_ERAS
-  const stages = cms.journeyStages && cms.journeyStages.length > 0 ? cms.journeyStages : DEFAULT_STAGES
-  const chapters: Chapter[] = eras.map((e, i) => ({ ...e, role: stages[i]?.name }))
-  /* Each row opens its own drawer below on hover. We never auto-collapse the
-     rows above, so the hovered heading never jumps upward (it just drops its
-     content beneath it, the way the first row already does). */
-  const [open, setOpen] = useState<Set<number>>(() => new Set([0]))
-  const openRow = (i: number) =>
-    setOpen((prev) => {
-      if (prev.has(i)) return prev
-      const next = new Set(prev)
-      next.add(i)
-      return next
-    })
-  const toggleRow = (i: number) =>
-    setOpen((prev) => {
-      const next = new Set(prev)
-      if (next.has(i)) next.delete(i)
-      else next.add(i)
-      return next
-    })
+  const values = (cms.pillars && cms.pillars.length > 0 ? cms.pillars : DEFAULT_PILLARS).slice(0, 5)
 
   return (
-    <section className="relative w-full" style={{ backgroundColor: INK, padding: '14vh 5vw 12vh' }}>
-      <div className="max-w-[1180px] mx-auto">
-        <div className="flex items-end justify-between gap-8 flex-wrap mb-12 md:mb-16">
-          <div>
-            <Eyebrow color={BEIGE}>{eyebrow}</Eyebrow>
-            <h2
-              className={`${cormorant.className} mt-5`}
-              style={{
-                fontSize: 'clamp(40px, 5.4vw, 84px)',
-                lineHeight: 1.02,
-                fontWeight: 300,
-                color: '#FFFFFF',
-                letterSpacing: '-0.01em',
-                margin: 0,
-              }}
-            >
-              <span className="italic">{headline}</span>
-            </h2>
-          </div>
-          <p
-            className={`${dmSans.className}`}
-            style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', maxWidth: 280, lineHeight: 1.6 }}
-          >
-            A century in five chapters. Select one to read it.
-          </p>
-        </div>
-
-        <div>
-          {chapters.map((c, i) => (
-            <ChapterRow
-              key={`${c.number}-${i}`}
-              chapter={c}
-              active={open.has(i)}
-              onOpen={() => openRow(i)}
-              onToggle={() => toggleRow(i)}
-              reduce={reduce}
-            />
-          ))}
-          <div style={{ borderTop: '1px solid rgba(255,255,255,0.16)' }} />
-        </div>
-      </div>
-    </section>
-  )
-}
-
-/* ──────────────────── PILLARS ──────────────────── */
-
-function Pillars({ cms }: { cms: OurStoryCms }) {
-  const eyebrow = cms.pillarsEyebrow ?? 'Five values that guide us'
-  const headline = cms.pillarsHeadline ?? 'The next hundred years.'
-  const pillars = cms.pillars && cms.pillars.length > 0 ? cms.pillars : DEFAULT_PILLARS
-
-  return (
-    <section
-      className="relative w-full"
-      style={{ backgroundColor: '#FFFFFF', color: INK, padding: '18vh 5vw 14vh' }}
-    >
-      <div className="max-w-[1400px] mx-auto">
-        <div className="flex items-end justify-between gap-8 flex-wrap mb-16">
-          <div>
-            <Eyebrow color={INK}>{eyebrow}</Eyebrow>
-            <h2
-              className={`${cormorant.className} mt-6`}
-              style={{
-                fontSize: 'clamp(48px, 6vw, 96px)',
-                lineHeight: 1.02,
-                fontWeight: 300,
-                color: INK,
-                letterSpacing: '-0.015em',
-                margin: 0,
-              }}
-            >
-              <span className="italic">{headline}</span>
-            </h2>
-          </div>
-        </div>
-
-        <div
-          className="grid grid-cols-1 md:grid-cols-5 gap-y-12 gap-x-8 border-t"
-          style={{ borderColor: 'rgba(17,17,17,0.14)', paddingTop: 36 }}
+    <section className="w-full bg-white px-6 pb-28 md:px-8 md:pb-36">
+      <div className="mx-auto max-w-[1100px]">
+        <motion.div
+          initial={reduce ? false : { opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 0.6, ease: EASE }}
+          className="flex flex-wrap justify-center md:justify-between"
+          style={{ borderTop: `1px solid ${HAIRLINE}`, borderBottom: `1px solid ${HAIRLINE}` }}
         >
-          {pillars.map((p, i) => (
-            <div key={`${p.name}-${i}`} className="relative">
-              <div
-                className={`${anton.className}`}
-                style={{ fontSize: 28, lineHeight: 1, color: INK, letterSpacing: '0.02em' }}
-              >
-                {String(i + 1).padStart(2, '0')}
-              </div>
-              <h3
-                className={`${cormorant.className} mt-5`}
-                style={{
-                  fontSize: 'clamp(20px, 1.6vw, 26px)',
-                  lineHeight: 1.2,
-                  fontWeight: 500,
-                  color: INK,
-                  margin: 0,
-                }}
-              >
-                {p.name}
-              </h3>
-              {p.description && (
-                <p
-                  className={`${dmSans.className} mt-3`}
-                  style={{ fontSize: 13, lineHeight: 1.6, color: INK }}
-                >
-                  {p.description}
-                </p>
-              )}
+          {values.map((p, i) => (
+            <div
+              key={`${p.name}-${i}`}
+              className={`${dmSans.className} flex items-center gap-2.5 border-l-0 px-5 py-6 md:border-l md:border-[#E6E2D9] md:py-7 md:first:border-l-0`}
+              style={{ fontSize: 13.5, fontWeight: 500, letterSpacing: '0.01em', color: INK }}
+            >
+              <span aria-hidden className="shrink-0" style={{ width: 18, height: 18, color: INK }}>
+                <Svg>{VALUE_ICONS[i % VALUE_ICONS.length]}</Svg>
+              </span>
+              {p.name}
             </div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   )
 }
 
-/* ──────────────────── CLOSING ──────────────────── */
-
-function Closing({ cms }: { cms: OurStoryCms }) {
-  const line = cms.closingLine ?? 'Three brands. One promise. Every Indian home.'
-
-  return (
-    <section className="relative w-full" style={{ backgroundColor: '#FFFFFF', padding: '18vh 5vw' }}>
-      <div className="max-w-[1100px] mx-auto text-center">
-        <h2
-          className={`${cormorant.className}`}
-          style={{
-            fontSize: 'clamp(38px, 5vw, 76px)',
-            lineHeight: 1.08,
-            fontWeight: 300,
-            fontStyle: 'italic',
-            color: INK,
-            letterSpacing: '-0.01em',
-            margin: 0,
-          }}
-        >
-          {line}
-        </h2>
-
-        <div className="mx-auto mt-12" style={{ height: 1, width: 96, backgroundColor: INK, opacity: 0.4 }} />
-      </div>
-    </section>
-  )
-}
-
-/* ──────────────────── PAGE ──────────────────── */
+/* ────────────────────────── PAGE ────────────────────────── */
 
 export default function OurStoryClient({ cms = {} }: { cms?: OurStoryCms }) {
   return (
-    <div className={`${cormorant.variable} ${dmSans.variable} ${anton.variable}`}>
-      <Hero cms={cms} />
-      <Chapters cms={cms} />
-      <Pillars cms={cms} />
-      <Closing cms={cms} />
+    <div className={`${cormorant.variable} ${dmSans.variable} bg-white`}>
+      <Intro cms={cms} />
+      <Journey cms={cms} />
+      <Eras cms={cms} />
+      <PullQuote cms={cms} />
+      <Values cms={cms} />
       <Footer />
     </div>
   )

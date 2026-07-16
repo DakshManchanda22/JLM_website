@@ -1,20 +1,19 @@
 'use client'
 
 import { useState } from 'react'
-import { Roboto } from 'next/font/google'
+import { Cormorant_Garamond, DM_Sans } from 'next/font/google'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Footer from '@/components/Footer'
 
-const cormorant = Roboto({
+const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '700'],
+  weight: ['300', '400', '500', '600'],
   variable: '--font-cormorant',
 })
 
-const dmSans = Roboto({
+const dmSans = DM_Sans({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '700'],
   variable: '--font-dm-sans',
 })
 
@@ -202,9 +201,25 @@ export default function ContactPage() {
     e.preventDefault()
     if (!validate()) return
     setStatus('sending')
-    // TODO: wire up Resend / Formspree here
-    await new Promise((r) => setTimeout(r, 1000))
-    setStatus('sent')
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          firstName: form.firstName,
+          lastName: form.lastName,
+          email: form.email,
+          message: form.message,
+        }),
+      })
+      if (!res.ok) {
+        setStatus('error')
+        return
+      }
+      setStatus('sent')
+    } catch {
+      setStatus('error')
+    }
   }
 
   const inputBase =
@@ -405,6 +420,12 @@ export default function ContactPage() {
                     </label>
                     {errors.privacy && <p className="text-xs text-red-500 mt-1 ml-7">{errors.privacy}</p>}
                   </div>
+
+                  {status === 'error' && (
+                    <p className="text-xs text-red-500">
+                      Something went wrong. Please try again, or email us directly.
+                    </p>
+                  )}
 
                   {/* Submit */}
                   <button

@@ -158,6 +158,10 @@ export type Homepage = {
   heroVideo?: HeroVideo
   heroSlides?: HeroSlide[]
   heroSlideInterval?: number
+  vision?: {
+    label?: string
+    text?: string
+  }
   quote?: {
     lines?: string[]
     attribution?: string
@@ -184,6 +188,10 @@ export const homepageQuery = groq`*[_type == "homepage"][0]{
     image{ ${imageWithLqip} },
     brand,
     tagline,
+  },
+  vision{
+    label,
+    text,
   },
   quote{
     lines,
@@ -549,6 +557,8 @@ export type EmoformView = {
   ctaSubtext?: string
   ctaButtonLabel?: string
   ctaButtonHref?: string
+  instagramUrl?: string
+  facebookUrl?: string
 }
 
 export const emoformQuery = groq`*[_type == "emoform"][0]{
@@ -558,6 +568,7 @@ export const emoformQuery = groq`*[_type == "emoform"][0]{
   featuresImage{ ${imageWithLqip} },
   steps[]{ tag, title, sub, image{ ${imageWithLqip} }, points },
   ctaTitle, ctaSubtext, ctaButtonLabel, ctaButtonHref,
+  instagramUrl, facebookUrl,
 }`
 
 export async function fetchEmoform(): Promise<EmoformView | null> {
@@ -594,6 +605,8 @@ export async function fetchEmoform(): Promise<EmoformView | null> {
     ctaSubtext: raw.ctaSubtext,
     ctaButtonLabel: raw.ctaButtonLabel,
     ctaButtonHref: raw.ctaButtonHref,
+    instagramUrl: raw.instagramUrl,
+    facebookUrl: raw.facebookUrl,
   }
 }
 

@@ -15,6 +15,7 @@ export default defineType({
     { name: 'features', title: '5-in-1 section' },
     { name: 'steps', title: 'Scroll sections' },
     { name: 'cta', title: 'Closing CTA' },
+    { name: 'social', title: 'Social links' },
   ],
   fields: [
     /* ─────────────── Hero ─────────────── */
@@ -141,6 +142,20 @@ export default defineType({
       title: 'Button link',
       type: 'url',
       group: 'cta',
+    }),
+
+    /* ─────────────── Social links ─────────────── */
+    defineField({
+      name: 'instagramUrl',
+      title: 'Instagram URL',
+      type: 'url',
+      group: 'social',
+    }),
+    defineField({
+      name: 'facebookUrl',
+      title: 'Facebook URL',
+      type: 'url',
+      group: 'social',
     }),
   ],
   preview: { prepare: () => ({ title: 'Emoform' }) },
