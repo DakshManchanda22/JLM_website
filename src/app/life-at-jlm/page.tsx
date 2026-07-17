@@ -46,6 +46,7 @@ export default async function LifeAtJlmPage() {
             (x): x is { src: string; caption: string; aspect: number | undefined } =>
               x !== null,
           ),
+        introStatement: data.introStatement,
         peopleLabel: data.peopleLabel,
         peopleHeadline: data.peopleHeadline,
         peopleTagline: data.peopleTagline,
@@ -68,15 +69,6 @@ export default async function LifeAtJlmPage() {
               x !== null,
           ),
         carouselSpeed: data.carouselSpeed,
-        togetherLabel: data.togetherLabel,
-        togetherHeadline: data.togetherHeadline,
-        togetherTagline: data.togetherTagline,
-        togetherBody: data.togetherBody,
-        togetherBrands: data.togetherBrands,
-        togetherClosingMark: data.togetherClosingMark,
-        togetherClosingLine: data.togetherClosingLine,
-        togetherCtaLabel: data.togetherCtaLabel,
-        togetherCtaHref: data.togetherCtaHref,
       }
     : {}
 

@@ -6,17 +6,15 @@ import {
   type KineticTextRevealRef,
 } from '@/components/ui/kinetic-text-reveal'
 
-const DEFAULT_TEXT =
-  'To be a sustainably growing, socially responsible organization that provides innovative, high-quality baby care products while becoming the market leader in the baby care industry.'
-
 /**
  * "Our Vision" statement. As the section scrolls into view, the words rise into
  * place with a soft blur and staggered timing (kinetic text reveal). Respects
- * reduced-motion via the reveal component's own handling.
+ * reduced-motion via the reveal component's own handling. All content comes from
+ * Sanity (Homepage → Vision).
  */
 export default function VisionSection({
-  label = 'Our Vision',
-  text = DEFAULT_TEXT,
+  label = '',
+  text = '',
 }: {
   label?: string
   text?: string

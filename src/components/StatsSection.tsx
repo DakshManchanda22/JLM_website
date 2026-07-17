@@ -19,9 +19,6 @@ export type Stat = {
 const SCALLOP =
   "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='48'%3E%3Cpath d='M0 48 A48 48 0 0 1 96 48 Z' fill='%23ffffff'/%3E%3C/svg%3E\")"
 
-const DEFAULT_HEADING = 'Building Goodness Everyday for over a Century'
-const DEFAULT_NOTE = 'Since 1920'
-
 /* Scales the heading's font-size down until it wraps onto exactly `lines` rows,
    so the copy always fills the same number of lines no matter how long it is.
    The heading has a font-independent (rem) width, so the wrap point is stable. */
@@ -78,8 +75,8 @@ export default function StatsSection({
   const STATS = stats ?? []
   // Seconds for one full loop, sped up by the Sanity multiplier (default 2×).
   const loopDuration = 45 / (speed && speed > 0 ? speed : 2)
-  const HEADING = heading && heading.length > 0 ? heading : DEFAULT_HEADING
-  const NOTE = note && note.length > 0 ? note : DEFAULT_NOTE
+  const HEADING = heading ?? ''
+  const NOTE = note ?? ''
   const sectionRef = useRef<HTMLElement>(null)
   const headingRef = useFitLines(2)
 

@@ -96,7 +96,7 @@ const DROPDOWNS: Record<string, string[]> = {
 
 // Order shown in the right-aligned desktop cluster (all right-aligned via ml-auto).
 // ESG and Philanthropy are two separate top-level links (no combined dropdown).
-const NAV_ITEMS = ['Our Brands', 'Our People', 'ESG', 'Philanthropy', 'Careers']
+const NAV_ITEMS = ['Our Brands', 'Our People', 'ESG', 'Philanthropy']
 const ALL_MOBILE = [...NAV_ITEMS, 'Contact Us']
 
 const slug = (s: string) => s.toLowerCase().replace(/\s+/g, '-')
@@ -167,7 +167,7 @@ export default function Navbar() {
                 const subs = DROPDOWNS[label]
                 const isActive = activeDropdown === label
 
-                // Plain link (no dropdown) — e.g. Careers.
+                // Plain link (no dropdown) — e.g. ESG, Philanthropy.
                 if (!subs) {
                   return (
                     <Link
