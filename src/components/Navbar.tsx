@@ -20,22 +20,18 @@ function Logo({ className }: { className?: string }) {
   )
 }
 
-/* Circular outlined arrow button (an up-arrow rotated 90° to point right, or
-   -90° to point left / back) — used on the mobile menu rows. */
+/* Plain arrow (an up-arrow rotated 90° to point right, or -90° to point left /
+   back) — used on the mobile menu rows. */
 function CircleArrow({ dir = 'right' }: { dir?: 'right' | 'left' }) {
   return (
-    <span
-      aria-hidden
-      className="inline-flex shrink-0 items-center justify-center rounded-full text-white"
-      style={{ width: 46, height: 46, border: '1.5px solid #ffffff' }}
-    >
+    <span aria-hidden className="inline-flex shrink-0 items-center justify-center text-white">
       <svg
-        width="22"
-        height="22"
+        width="27"
+        height="27"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
-        strokeWidth="2.4"
+        strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
         style={{ transform: `rotate(${dir === 'right' ? 90 : -90}deg)` }}
