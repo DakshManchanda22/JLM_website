@@ -72,57 +72,6 @@ export type OurStoryCms = {
   closingSubline?: string
 }
 
-/* ─────────────── defaults ─────────────── */
-
-const DEFAULT_STAGES: JourneyStage[] = [
-  { name: 'Trading Company' },
-  { name: 'Global Brand Partner' },
-  { name: 'Manufacturer & Distributor' },
-  { name: 'Own Brand Builder' },
-  { name: 'Modern FMCG Company' },
-]
-
-const DEFAULT_ERAS: Era[] = [
-  {
-    number: '01',
-    dateRange: '1920 — 1940',
-    title: 'Global Origins',
-    body: 'The story begins in the UK, with a small trading house carrying European craft into a still-young Indian market — and a first principle that never changes: stand for trust, stand for quality.',
-  },
-  {
-    number: '02',
-    dateRange: '1940 — 2000',
-    title: 'Strategic Partnerships',
-    body: 'Six decades of patient brand-building alongside the world’s most discerning names. Each collaboration deepens our distribution, sharpens our standards, and earns lasting credibility.',
-  },
-  {
-    number: '03',
-    dateRange: '2001 — 2010',
-    title: 'Brand Reinvention',
-    body: 'A decisive turn — from carrying others’ brands to building our own, led by Morisons Baby Dreams, a brand made specifically for Indian mothers and the babies they raise.',
-  },
-  {
-    number: '04',
-    dateRange: '2011 — 2020',
-    title: 'Digital & Manufacturing Transformation',
-    body: 'We invest in our own factories, our own systems, and our own omnichannel presence. Production moves in-house, technology moves alongside it, and distribution reaches every postcode that matters.',
-  },
-  {
-    number: '05',
-    dateRange: '2021 — Present',
-    title: 'Future-Focused Growth',
-    body: 'Baby care widens. ESG, analytics, and modern retail are no longer adjacent — they are how we operate. A hundred-year company keeps its first principles while writing its next chapter.',
-  },
-]
-
-const DEFAULT_PILLARS: Pillar[] = [
-  { name: 'Trusted Legacy' },
-  { name: 'Consumer Centric' },
-  { name: 'Innovation Driven' },
-  { name: 'Sustainable Future' },
-  { name: 'People First' },
-]
-
 /* ─────────────── icons ─────────────── */
 
 function Svg({ children }: { children: ReactNode }) {
@@ -208,13 +157,9 @@ function SectionLabel({ children }: { children: ReactNode }) {
 
 function Intro({ cms }: { cms: OurStoryCms }) {
   const reduce = useReducedMotion() ?? false
-  const eyebrow = cms.eyebrow ?? 'Our Story'
-  const headline =
-    cms.headlineTop ??
-    'One family business, *five reinventions*, and a century of showing up for Indian homes.'
-  const tagline =
-    cms.heroTagline ??
-    'From a trading company navigating colonial routes to a modern FMCG house building brands people welcome into their homes — over 100 years of evolving with India, while building brands that families trust for generations.'
+  const eyebrow = cms.eyebrow ?? ''
+  const headline = cms.headlineTop ?? ''
+  const tagline = cms.heroTagline ?? ''
 
   const rise = (delay: number) =>
     reduce
@@ -274,12 +219,12 @@ function Intro({ cms }: { cms: OurStoryCms }) {
 
 function Journey({ cms }: { cms: OurStoryCms }) {
   const reduce = useReducedMotion() ?? false
-  const stages = (cms.journeyStages && cms.journeyStages.length > 0 ? cms.journeyStages : DEFAULT_STAGES).slice(0, 5)
+  const stages = (cms.journeyStages ?? []).slice(0, 5)
 
   return (
     <section className="w-full bg-white px-6 pb-24 pt-4 md:px-8 md:pb-28">
       <div className="mx-auto max-w-[1100px]">
-        <SectionLabel>{cms.journeyHeadline ?? 'The journey in a nutshell'}</SectionLabel>
+        <SectionLabel>{cms.journeyHeadline ?? ''}</SectionLabel>
 
         <div className="relative">
           {/* Connecting thread — runs between the first and last dot centres
@@ -347,12 +292,12 @@ function Journey({ cms }: { cms: OurStoryCms }) {
 
 function Eras({ cms }: { cms: OurStoryCms }) {
   const reduce = useReducedMotion() ?? false
-  const eras = (cms.eras && cms.eras.length > 0 ? cms.eras : DEFAULT_ERAS).slice(0, 5)
+  const eras = (cms.eras ?? []).slice(0, 5)
 
   return (
     <section className="w-full bg-white px-6 pb-24 pt-4 md:px-8 md:pb-28">
       <div className="mx-auto max-w-[1100px]">
-        <SectionLabel>{cms.erasHeadline ?? 'Five defining eras'}</SectionLabel>
+        <SectionLabel>{cms.erasHeadline ?? ''}</SectionLabel>
 
         <div>
           {eras.map((e, i) => {
@@ -407,9 +352,7 @@ function Eras({ cms }: { cms: OurStoryCms }) {
 
 function PullQuote({ cms }: { cms: OurStoryCms }) {
   const reduce = useReducedMotion() ?? false
-  const quote =
-    cms.closingLine ??
-    '“From global partnerships to homegrown leadership — J.L. Morison’s journey reflects over 100 years of evolving with consumer needs, while building trusted brands for generations.”'
+  const quote = cms.closingLine ?? ''
 
   return (
     <section className="w-full bg-white px-6 pb-24 md:px-8 md:pb-28">
@@ -473,7 +416,7 @@ function PullQuote({ cms }: { cms: OurStoryCms }) {
 
 function Values({ cms }: { cms: OurStoryCms }) {
   const reduce = useReducedMotion() ?? false
-  const values = (cms.pillars && cms.pillars.length > 0 ? cms.pillars : DEFAULT_PILLARS).slice(0, 5)
+  const values = (cms.pillars ?? []).slice(0, 5)
 
   return (
     <section className="w-full bg-white px-6 pb-28 md:px-8 md:pb-36">
