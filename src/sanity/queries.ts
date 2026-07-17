@@ -322,6 +322,7 @@ export type LifeAtJlm = {
   heroCaptionLarge?: string
   anchors?: { num: string; label: string; targetId: string; image: any }[]
   captionStrip?: { image: any; caption: string; aspect?: number }[]
+  introStatement?: string
   peopleLabel?: string
   peopleHeadline?: string
   peopleTagline?: string
@@ -336,15 +337,6 @@ export type LifeAtJlm = {
   workplaceBody?: string
   workplaceImages?: { image: any; caption: string; aspect?: number }[]
   carouselSpeed?: number
-  togetherLabel?: string
-  togetherHeadline?: string
-  togetherTagline?: string
-  togetherBody?: string
-  togetherBrands?: { name: string; tag: string }[]
-  togetherClosingMark?: string
-  togetherClosingLine?: string
-  togetherCtaLabel?: string
-  togetherCtaHref?: string
 }
 
 export const lifeAtJlmQuery = groq`*[_type == "lifeAtJlm"][0]{
@@ -357,15 +349,13 @@ export const lifeAtJlmQuery = groq`*[_type == "lifeAtJlm"][0]{
   heroCaptionLarge,
   anchors[]{ num, label, targetId, image },
   captionStrip[]{ image, caption, "aspect": image.asset->metadata.dimensions.aspectRatio },
+  introStatement,
   peopleLabel, peopleHeadline, peopleTagline, peopleBody,
   arentEyebrow, arentHeadline, arentBody,
   testimonials[]{ quote, name, role },
   workplaceLabel, workplaceHeadline, workplaceTagline, workplaceBody,
   workplaceImages[]{ image, caption, "aspect": image.asset->metadata.dimensions.aspectRatio },
   carouselSpeed,
-  togetherLabel, togetherHeadline, togetherTagline, togetherBody,
-  togetherBrands[]{ name, tag },
-  togetherClosingMark, togetherClosingLine, togetherCtaLabel, togetherCtaHref,
 }`
 
 export async function fetchLifeAtJlm(): Promise<LifeAtJlm | null> {
@@ -768,32 +758,6 @@ export type PhilanthropyView = {
   impactHeading?: string
   impactIntro?: string
   impactStats?: { value?: string; label?: string }[]
-  purposeEyebrow?: string
-  purposeHeading?: string
-  purposeBackgroundWord?: string
-  purposeImages?: { url: string; lqip?: string }[]
-  beliefEyebrow?: string
-  beliefText?: string
-  statCards?: PhilanthropyStatCard[]
-  esgWord?: string
-  esgIntro?: string
-  esgGallery?: { url: string; lqip?: string; w: number; h: number }[]
-  socialWord?: string
-  socialGallery?: { url: string; lqip?: string; w: number; h: number }[]
-  carouselSpeed?: number
-  policiesHeading?: string
-  policiesIntro?: string
-  policiesImage?: string
-  policiesImageLqip?: string
-  policyDocuments?: { title?: string; url?: string }[]
-}
-
-export type PhilanthropyStatCard = {
-  title?: string
-  value?: string
-  body?: string
-  tag?: string
-  icon?: string
 }
 
 export const philanthropyQuery = groq`*[_type == "philanthropy"][0]{
@@ -810,26 +774,6 @@ export const philanthropyQuery = groq`*[_type == "philanthropy"][0]{
   impactLogo{ ${imageWithLqip} },
   impactHeading, impactIntro,
   impactStats[]{ value, label },
-  purposeEyebrow, purposeHeading, purposeBackgroundWord,
-  purposeImages[]{ ${imageWithLqip} },
-  beliefEyebrow, beliefText,
-  statCards[]{ title, value, body, tag, icon },
-  esgWord, esgIntro,
-  esgGallery[]{
-    ${imageWithLqip},
-    "dw": asset->metadata.dimensions.width,
-    "dh": asset->metadata.dimensions.height,
-  },
-  socialWord,
-  socialGallery[]{
-    ${imageWithLqip},
-    "dw": asset->metadata.dimensions.width,
-    "dh": asset->metadata.dimensions.height,
-  },
-  carouselSpeed,
-  policiesHeading, policiesIntro,
-  policiesImage{ ${imageWithLqip} },
-  policyDocuments[]{ title, url },
 }`
 
 export async function fetchPhilanthropy(): Promise<PhilanthropyView | null> {
@@ -872,6 +816,69 @@ export async function fetchPhilanthropy(): Promise<PhilanthropyView | null> {
     impactStats: (raw.impactStats || [])
       .map((s: any) => ({ value: s.value, label: s.label }))
       .filter((s: any) => s.value && s.label),
+  }
+}
+
+/* ─────────────────────────── ESG ─────────────────────────── */
+
+export type PhilanthropyStatCard = {
+  title?: string
+  value?: string
+  body?: string
+  tag?: string
+  icon?: string
+}
+
+export type EsgView = {
+  purposeEyebrow?: string
+  purposeHeading?: string
+  purposeBackgroundWord?: string
+  purposeImages?: { url: string; lqip?: string }[]
+  beliefEyebrow?: string
+  beliefText?: string
+  statCards?: PhilanthropyStatCard[]
+  esgWord?: string
+  esgIntro?: string
+  esgGallery?: { url: string; lqip?: string; w: number; h: number }[]
+  socialWord?: string
+  socialGallery?: { url: string; lqip?: string; w: number; h: number }[]
+  carouselSpeed?: number
+  policiesHeading?: string
+  policiesIntro?: string
+  policiesImage?: string
+  policiesImageLqip?: string
+  policyDocuments?: { title?: string; url?: string }[]
+}
+
+export const esgQuery = groq`*[_type == "esg"][0]{
+  purposeEyebrow, purposeHeading, purposeBackgroundWord,
+  purposeImages[]{ ${imageWithLqip} },
+  beliefEyebrow, beliefText,
+  statCards[]{ title, value, body, tag, icon },
+  esgWord, esgIntro,
+  esgGallery[]{
+    ${imageWithLqip},
+    "dw": asset->metadata.dimensions.width,
+    "dh": asset->metadata.dimensions.height,
+  },
+  socialWord,
+  socialGallery[]{
+    ${imageWithLqip},
+    "dw": asset->metadata.dimensions.width,
+    "dh": asset->metadata.dimensions.height,
+  },
+  carouselSpeed,
+  policiesHeading, policiesIntro,
+  policiesImage{ ${imageWithLqip} },
+  policyDocuments[]{ title, url },
+}`
+
+export async function fetchEsg(): Promise<EsgView | null> {
+  if (!client) return null
+  const raw: any = await client.fetch(esgQuery)
+  if (!raw) return null
+
+  return {
     purposeEyebrow: raw.purposeEyebrow,
     purposeHeading: raw.purposeHeading,
     purposeBackgroundWord: raw.purposeBackgroundWord,
@@ -916,4 +923,128 @@ export async function fetchPhilanthropy(): Promise<PhilanthropyView | null> {
       .map((d: any) => ({ title: d.title, url: d.url }))
       .filter((d: any) => d.title && d.url),
   }
+}
+
+/* ─────────────────────────── Careers ─────────────────────────── */
+
+export type CareersView = {
+  eyebrow?: string
+  headline?: string
+  headlineItalic?: string
+  tagline?: string
+  body?: string
+  heroImage?: string
+  heroImageLqip?: string
+  submitLabel?: string
+  successMessage?: string
+  recipientEmails?: string[]
+}
+
+export const careersQuery = groq`*[_type == "careers"][0]{
+  eyebrow, headline, headlineItalic, tagline, body,
+  heroImage{ ${imageWithLqip} },
+  submitLabel, successMessage,
+  recipientEmails,
+}`
+
+export async function fetchCareers(): Promise<CareersView | null> {
+  if (!client) return null
+  const raw: any = await client.fetch(careersQuery)
+  if (!raw) return null
+  const hero = resolveImage(raw.heroImage, 2000)
+  return {
+    eyebrow: raw.eyebrow,
+    headline: raw.headline,
+    headlineItalic: raw.headlineItalic,
+    tagline: raw.tagline,
+    body: raw.body,
+    heroImage: hero?.url,
+    heroImageLqip: hero?.lqip,
+    submitLabel: raw.submitLabel,
+    successMessage: raw.successMessage,
+    recipientEmails: (raw.recipientEmails || []).filter(Boolean),
+  }
+}
+
+/** Recipient email(s) for job applications — used by the /api/careers route. */
+export async function fetchCareersRecipients(): Promise<string[]> {
+  if (!client) return []
+  const emails: string[] | null = await client.fetch(
+    groq`*[_type == "careers"][0].recipientEmails`,
+  )
+  return (emails || []).map((e) => e.trim()).filter(Boolean)
+}
+
+/* ─────────────────────────── Contact Us ─────────────────────────── */
+
+export type ContactOffice = {
+  title?: string
+  address?: string
+  phone?: string
+  phoneHref?: string
+  email?: string
+}
+
+export type ContactUsView = {
+  heading?: string
+  subcopy?: string
+  offices?: ContactOffice[]
+  formHeading?: string
+  formSuccessHeading?: string
+  formSuccessBody?: string
+  privacyPolicyUrl?: string
+  wheelHeading?: string
+  wheelCtaLabel?: string
+  wheelCtaHref?: string
+  portraits?: { url: string; lqip?: string }[]
+  recipientEmails?: string[]
+}
+
+export const contactUsQuery = groq`*[_type == "contactUs"][0]{
+  heading, subcopy,
+  offices[]{ title, address, phone, phoneHref, email },
+  formHeading, formSuccessHeading, formSuccessBody, privacyPolicyUrl,
+  wheelHeading, wheelCtaLabel, wheelCtaHref,
+  portraits[]{ ${imageWithLqip} },
+  recipientEmails,
+}`
+
+export async function fetchContactUs(): Promise<ContactUsView | null> {
+  if (!client) return null
+  const raw: any = await client.fetch(contactUsQuery)
+  if (!raw) return null
+  return {
+    heading: raw.heading,
+    subcopy: raw.subcopy,
+    offices: (raw.offices || []).map((o: any) => ({
+      title: o.title,
+      address: o.address,
+      phone: o.phone,
+      phoneHref: o.phoneHref,
+      email: o.email,
+    })),
+    formHeading: raw.formHeading,
+    formSuccessHeading: raw.formSuccessHeading,
+    formSuccessBody: raw.formSuccessBody,
+    privacyPolicyUrl: raw.privacyPolicyUrl,
+    wheelHeading: raw.wheelHeading,
+    wheelCtaLabel: raw.wheelCtaLabel,
+    wheelCtaHref: raw.wheelCtaHref,
+    portraits: (raw.portraits || [])
+      .map((im: any) => {
+        const r = resolveImage(im, 600)
+        return r ? { url: r.url, lqip: r.lqip } : null
+      })
+      .filter(Boolean),
+    recipientEmails: (raw.recipientEmails || []).filter(Boolean),
+  }
+}
+
+/** Recipient email(s) for contact enquiries — used by the /api/contact route. */
+export async function fetchContactRecipients(): Promise<string[]> {
+  if (!client) return []
+  const emails: string[] | null = await client.fetch(
+    groq`*[_type == "contactUs"][0].recipientEmails`,
+  )
+  return (emails || []).map((e) => e.trim()).filter(Boolean)
 }

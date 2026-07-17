@@ -47,6 +47,33 @@ export default defineConfig({
                           .schemaType('philanthropy')
                           .documentId('philanthropy'),
                       ),
+                    S.listItem()
+                      .title('ESG')
+                      .id('esg')
+                      .child(
+                        S.editor()
+                          .id('esg')
+                          .schemaType('esg')
+                          .documentId('esg'),
+                      ),
+                    S.listItem()
+                      .title('Careers')
+                      .id('careers')
+                      .child(
+                        S.editor()
+                          .id('careers')
+                          .schemaType('careers')
+                          .documentId('careers'),
+                      ),
+                    S.listItem()
+                      .title('Contact Us')
+                      .id('contactUs')
+                      .child(
+                        S.editor()
+                          .id('contactUs')
+                          .schemaType('contactUs')
+                          .documentId('contactUs'),
+                      ),
                   ]),
               ),
 

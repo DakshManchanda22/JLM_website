@@ -10,7 +10,7 @@ import {
 } from 'framer-motion'
 import { Anton, DM_Sans } from 'next/font/google'
 import Footer from '@/components/Footer'
-import type { PhilanthropyStatCard, PhilanthropyView } from '@/sanity/queries'
+import type { EsgView, PhilanthropyStatCard } from '@/sanity/queries'
 
 // Tall condensed display face for headings.
 const anton = Anton({
@@ -29,111 +29,11 @@ const BEIGE = '#E8E0D5'
 const INK = '#111111'
 const EASE = [0.16, 1, 0.3, 1] as const
 
-// ─────────────── Code defaults (used until Sanity is filled in) ───────────────
-
-const DEFAULT_BELIEF_TEXT =
-  'We believe sustainable growth goes beyond business. By nurturing our ' +
-  'environment and empowering our communities, we strive to create a positive ' +
-  'impact that lasts.'
-
-// All fallbacks below point at the Sanity CDN (same assets the CMS serves), so
-// nothing depends on local files. Sanity's fields override these when populated.
+// Photo shape used across the Environment + Social carousels and the lightbox.
 type GalleryImg = { url: string; lqip?: string; w: number; h: number }
-const sanityShot = (ref: string, w: number, h: number, ext = 'jpg'): GalleryImg => ({
-  url: `https://cdn.sanity.io/images/vfv5lxgr/production/${ref}-${w}x${h}.${ext}?w=1400&q=80&auto=format&fit=max`,
-  w,
-  h,
-})
 
-// JLM's own environment/sustainability photos (Sanity CDN).
-const DEFAULT_ENV_GALLERY: GalleryImg[] = [
-  sanityShot('393023ab59e80b214ddfc180bd071b76dbd93404', 4096, 2304),
-  sanityShot('7af19cd907cea172bf8e4a0f8ee3e5a2ba91defd', 4096, 2304),
-  sanityShot('463e56c7b205bf30413c16fd1e9717f942d17eb5', 4096, 2304),
-  sanityShot('c130eabb02d65d2704eb1a859c4aac88eefc9b80', 4096, 2304),
-  sanityShot('8cf826f61ca5dcfd76841537d39d4d2d20cf001d', 4096, 2304),
-  sanityShot('bd3afc73c3111f048bd657f2349a6d065375f857', 2304, 4096),
-]
-
-// Community / social photos (Project Kaamyaab, volunteering, factory life).
-const DEFAULT_SOCIAL_GALLERY: GalleryImg[] = [
-  sanityShot('3f3743a6613cb80ae6612f3b71e72cecbf546396', 5712, 4284),
-  sanityShot('439792954a2929053fd27c26338b05186d874cb0', 4284, 5712),
-  sanityShot('573b2f0523beb4bafc2ce4f60ca2ebcc46626c8f', 5712, 4284),
-  sanityShot('8c8a62782afeeeccf1f7bfb164dc8f28eb93b9f3', 1600, 1200),
-  sanityShot('9208702dcade8bf56e61b5935020eee49c32e0a5', 1592, 1194),
-  sanityShot('03b35a13cee97c403a79e76321e8dc51cdd35435', 900, 1600),
-  sanityShot('dce2a2c51f04ccda73e8b3584f453f0bc6814032', 960, 1280),
-  sanityShot('a65baa4f883397dd94d5f17e9a1f4da475788eb8', 1500, 1000),
-  sanityShot('6d955a7a4a54a45b3a502d50d800521c3d277bda', 1600, 1066),
-]
-
-// Corporate policy / disclosure documents (PDFs on GCS, open in a new tab).
+// One governance document row.
 type PolicyDoc = { name: string; href: string }
-const GOV = 'https://storage.googleapis.com/jlm_website_v2/Governance'
-const DEFAULT_POLICIES: PolicyDoc[] = [
-  { name: 'Code of Conduct for Employees', href: `${GOV}/CODE-OF-CONDUCT-v1-revised.pdf` },
-  { name: 'Environment, Health & Safety', href: `${GOV}/EHS-POLICY_03.11.2021-1.pdf` },
-  { name: 'Social Media Guidelines', href: `${GOV}/Social-Media-for-Employees-Final.pdf` },
-  { name: 'IMS Act Adherence', href: `${GOV}/Adherance-to-IMS-Act-WHO-Aug-19-2022.pdf` },
-  { name: 'Benefits of Breast Feeding', href: `${GOV}/0003_MBD-Breastfeeding-Leaflet_12X9-inch.pdf` },
-]
-// Governance photo (Sanity CDN). CMS `policiesImage` overrides this.
-const POLICIES_IMAGE =
-  'https://cdn.sanity.io/images/vfv5lxgr/production/6b01d6aecc6a6e266ffb72c21321f912fa55c37a-1502x1098.png?w=1400&q=80&auto=format&fit=max'
-
-const DEFAULT_STATS: PhilanthropyStatCard[] = [
-  {
-    title: 'Plastic Savings',
-    value: '15 MT +',
-    body: 'Increased plastic savings through technical packaging innovations — UV laminate, shrink packaging and pallet reuse.',
-    tag: 'Environment',
-    icon: 'recycle',
-  },
-  {
-    title: 'Green Energy',
-    value: '1,27,000',
-    body: 'Units of clean, green energy generated directly at the Waluj solar plant.',
-    tag: 'Environment',
-    icon: 'solarPanel',
-  },
-  {
-    title: 'Gender Parity',
-    value: '10%',
-    body: 'Women now represent 10% of the JLM team — 40 women, up from just 16 in 2020.',
-    tag: 'Social',
-    icon: 'people',
-  },
-  {
-    title: 'Community Impact',
-    value: '80+',
-    body: 'Volunteering programs completed across all regions and factories — supporting elders, children, and blood donation.',
-    tag: 'Social',
-    icon: 'community',
-  },
-  {
-    title: 'Tree Plantations',
-    value: '1000+',
-    body: 'Trees planted across all our factories.',
-    tag: 'Environment',
-    icon: 'leaf',
-  },
-  {
-    title: 'Water Saving',
-    value: '1,17,000L',
-    body: 'Water saved across factories through rainwater harvesting & spray jets. Water-saving nozzles installed across all JLM offices, leading to a 50% reduction compared to before.',
-    tag: 'Environment',
-    icon: 'water',
-  },
-]
-
-const DEFAULT_ENV_BODY =
-  'At JL Morison, we care for the planet. By adopting eco-friendly practices, ' +
-  'we are taking small steps towards a sustainable future. Our initiatives ' +
-  'include paper, water and electricity saving through responsible use, tree ' +
-  'plantation across our factories — with papaya, mango and other saplings — ' +
-  'along with the use of solar energy and rainwater harvesting to help nurture ' +
-  'a greener tomorrow.'
 
 // Brighter, more vivid brand green for the pinned word.
 const ENV_GREEN = '#2FBF3F'
@@ -141,13 +41,6 @@ const ENV_GREEN = '#2FBF3F'
 const SOCIAL_YELLOW = '#F4C838'
 
 type CardImage = { url: string; lqip?: string }
-
-// Three photos that start stacked and fan out into a collage under the ESG title.
-const DEFAULT_PURPOSE_IMAGES: CardImage[] = [
-  { url: 'https://images.unsplash.com/photo-1509099836639-18ba1795216d?w=1200&q=80&auto=format&fit=crop' },
-  { url: 'https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=1200&q=80&auto=format&fit=crop' },
-  { url: 'https://images.unsplash.com/photo-1544027993-37dbfe43562a?w=1200&q=80&auto=format&fit=crop' },
-]
 
 // End positions the three collage photos spring out to (desktop + mobile).
 const COLLAGE_SPREAD = [
@@ -181,42 +74,29 @@ function useFitText(maxPx = 200) {
   return ref
 }
 
-export default function EsgClient({ cms }: { cms?: PhilanthropyView }) {
+export default function EsgClient({ cms }: { cms?: EsgView }) {
   const reduce = useReducedMotion()
 
-  const purposeHeading = cms?.purposeHeading ?? 'ESG'
-  const purposeImages =
-    cms?.purposeImages && cms.purposeImages.length > 0
-      ? (cms.purposeImages as CardImage[])
-      : DEFAULT_PURPOSE_IMAGES
+  const purposeHeading = cms?.purposeHeading ?? ''
+  const purposeImages = (cms?.purposeImages ?? []) as CardImage[]
 
-  const beliefEyebrow = cms?.beliefEyebrow ?? 'Our commitment'
-  const beliefText = cms?.beliefText ?? DEFAULT_BELIEF_TEXT
-  const statCards =
-    cms?.statCards && cms.statCards.length > 0 ? cms.statCards : DEFAULT_STATS
+  const beliefEyebrow = cms?.beliefEyebrow
+  const beliefText = cms?.beliefText ?? ''
+  const statCards = cms?.statCards ?? []
 
-  const esgWord = cms?.esgWord ?? 'Environment'
-  const esgBody = cms?.esgIntro ?? DEFAULT_ENV_BODY
-  const esgGallery =
-    cms?.esgGallery && cms.esgGallery.length > 0 ? cms.esgGallery : DEFAULT_ENV_GALLERY
+  const esgWord = cms?.esgWord ?? ''
+  const esgBody = cms?.esgIntro
+  const esgGallery = cms?.esgGallery ?? []
   const carouselSpeed = cms?.carouselSpeed && cms.carouselSpeed > 0 ? cms.carouselSpeed : 2
-  const socialWord = cms?.socialWord ?? 'Social'
-  const socialGallery =
-    cms?.socialGallery && cms.socialGallery.length > 0
-      ? cms.socialGallery
-      : DEFAULT_SOCIAL_GALLERY
-  const policiesHeading = cms?.policiesHeading ?? 'Governance'
-  const policiesIntro =
-    cms?.policiesIntro ??
-    'The standards and commitments that guide how we work, published for everyone to read.'
-  const policiesImage = cms?.policiesImage ?? POLICIES_IMAGE
+  const socialWord = cms?.socialWord ?? ''
+  const socialGallery = cms?.socialGallery ?? []
+  const policiesHeading = cms?.policiesHeading ?? ''
+  const policiesIntro = cms?.policiesIntro ?? ''
+  const policiesImage = cms?.policiesImage ?? ''
   const policiesImageLqip = cms?.policiesImageLqip
-  const policyDocuments: PolicyDoc[] =
-    cms?.policyDocuments && cms.policyDocuments.length > 0
-      ? cms.policyDocuments
-          .filter((d) => d.title && d.url)
-          .map((d) => ({ name: d.title as string, href: d.url as string }))
-      : DEFAULT_POLICIES
+  const policyDocuments: PolicyDoc[] = (cms?.policyDocuments ?? [])
+    .filter((d) => d.title && d.url)
+    .map((d) => ({ name: d.title as string, href: d.url as string }))
 
   // ── Lightbox shared by the Environment + Social galleries ──
   const [lightboxImg, setLightboxImg] = useState<GalleryImg | null>(null)
