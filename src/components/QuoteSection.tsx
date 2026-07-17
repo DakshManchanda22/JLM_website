@@ -6,13 +6,6 @@ import {
   type KineticTextRevealRef,
 } from '@/components/ui/kinetic-text-reveal'
 
-const DEFAULT_LINES: string[] = [
-  'For over a century, we have been',
-  'building goodness for every',
-  'Indian family — one trusted brand,',
-  'one product, one promise at a time.',
-]
-
 export default function QuoteSection({
   lines,
   attribution,
@@ -20,7 +13,8 @@ export default function QuoteSection({
   lines?: string[]
   attribution?: string
 }) {
-  const LINES = lines && lines.length > 0 ? lines : DEFAULT_LINES
+  // All content comes from Sanity (Homepage → Quote); no hardcoded fallback.
+  const LINES = lines ?? []
   // No default — if marketing clears the attribution in Sanity, it disappears
   // (and its spacing goes with it) instead of falling back to hardcoded text.
   const ATTRIBUTION = attribution?.trim()

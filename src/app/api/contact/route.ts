@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
+import { fetchContactRecipients } from '@/sanity/queries'
 
 export const runtime = 'nodejs'
 
@@ -72,11 +73,18 @@ export async function POST(req: Request) {
     </div>
   </div>`
 
-  // Comma-separated list of recipients, falls back to the two support inboxes.
-  const toEmails = (process.env.CONTACT_TO_EMAILS || 'customercare@jlmorison.com,info@jlmorison.com')
-    .split(',')
-    .map((e) => e.trim())
-    .filter(Boolean)
+  // Recipients are managed in Sanity (Contact Us → "Send enquiries to"). Fall
+  // back to the CONTACT_TO_EMAILS env var, then the support inboxes, so the form
+  // still works if the CMS field is empty or unreachable.
+  const sanityRecipients = await fetchContactRecipients().catch(() => [])
+  const toEmails = (
+    sanityRecipients.length > 0
+      ? sanityRecipients
+      : (process.env.CONTACT_TO_EMAILS || 'customercare@jlmorison.com,info@jlmorison.com')
+          .split(',')
+          .map((e) => e.trim())
+          .filter(Boolean)
+  )
 
   // Sender must be on a domain verified inside Resend.
   const fromEmail =

@@ -4,7 +4,10 @@ import author from './author'
 import babyDreams from './babyDreams'
 import bigen from './bigen'
 import blockContent from './blockContent'
+import careers from './careers'
+import contactUs from './contactUs'
 import emoform from './emoform'
+import esg from './esg'
 import homepage from './homepage'
 import leader from './leader'
 import lifeAtJlm from './lifeAtJlm'
@@ -27,5 +30,8 @@ export const schemaTypes: SchemaTypeDefinition[] = [
   bigen,
   emoform,
   philanthropy,
+  esg,
+  careers,
+  contactUs,
   siteSettings,
 ]

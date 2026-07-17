@@ -22,6 +22,7 @@ export type LifeCms = {
   heroCaptionLarge?: string
   anchors?: { num: string; label: string; targetId: string; image: string }[]
   captionStrip?: { src: string; caption: string; aspect?: number }[]
+  introStatement?: string
   peopleLabel?: string
   peopleHeadline?: string
   peopleTagline?: string
@@ -36,15 +37,6 @@ export type LifeCms = {
   workplaceBody?: string
   workplaceImages?: { src: string; cap: string; aspect?: number }[]
   carouselSpeed?: number
-  togetherLabel?: string
-  togetherHeadline?: string
-  togetherTagline?: string
-  togetherBody?: string
-  togetherBrands?: { name: string; tag: string }[]
-  togetherClosingMark?: string
-  togetherClosingLine?: string
-  togetherCtaLabel?: string
-  togetherCtaHref?: string
 }
 
 const LifeCtx = createContext<LifeCms>({})
@@ -76,37 +68,6 @@ const MUTED = '#555555'
 /* Brand accent (CLAUDE.md) — used only as the animated highlight marker. */
 const BEIGE_ACCENT = '#E8E0D5'
 const EASE = [0.16, 1, 0.3, 1] as const
-
-/* ─────────────────────────── data ─────────────────────────── */
-
-/* Placeholder employee testimonials — marketing replaces these in Sanity
-   (Life at JL Morison → Employee testimonials). */
-const DEFAULT_TESTIMONIALS = [
-  {
-    quote:
-      'In fifteen years here, the thing that’s never changed is the feeling that the work matters — and that the people beside you care just as much as you do.',
-    name: 'Priya Nair',
-    role: 'R&D · Emoform',
-  },
-  {
-    quote:
-      'I joined straight out of college and was trusted with real responsibility within months. You’re never just a cog here; your ideas actually make it to the shelf.',
-    name: 'Arjun Mehta',
-    role: 'Brand Marketing · Baby Dreams',
-  },
-  {
-    quote:
-      'What I value most is the honesty. We talk openly about what’s working and what isn’t, and then we fix it together. That’s rare in a company this old.',
-    name: 'Fatima Sheikh',
-    role: 'Supply Chain',
-  },
-  {
-    quote:
-      'A hundred-year-old company that still feels like it’s just getting started. The pace is real, but so is the patience to get things right.',
-    name: 'Rohan Desai',
-    role: 'Sales · West Region',
-  },
-]
 
 /* ─────────────────────── reusable bits ─────────────────────── */
 
@@ -169,17 +130,6 @@ const INTRO_LAYOUT = [
   { left: '8vw', top: '-2vw', scale: 0.74 },
   { left: '-1vw', top: '3.9vw', scale: 0.74 },
 ]
-const DEFAULT_INTRO_SRCS = [
-  'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=1600&h=1100&fit=crop&auto=format',
-  'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1600&h=1100&fit=crop&auto=format',
-  'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=1600&h=1100&fit=crop&auto=format',
-  'https://images.unsplash.com/photo-1497366216548-37526070297c?w=1600&h=1100&fit=crop&auto=format',
-  'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=1600&h=1100&fit=crop&auto=format',
-  'https://images.unsplash.com/photo-1573497019418-b400bb3ab074?w=1600&h=1100&fit=crop&auto=format',
-]
-const DEFAULT_INTRO_FINAL_SRC =
-  'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=1800&h=1200&fit=crop&auto=format'
-
 const CURTAIN_DURATION_MS = 1500
 
 /* Choreography derived from however many collage photos are supplied, so the
@@ -199,8 +149,8 @@ function IntroCurtain({ onDone }: { onDone: () => void }) {
   const cms = useLife()
   const cmsSrcs = cms.introImages?.map((i) => i.url).filter(Boolean) as string[] | undefined
   /* Render exactly the photos provided — no padding, so no image repeats. */
-  const SRCS = cmsSrcs && cmsSrcs.length > 0 ? cmsSrcs : DEFAULT_INTRO_SRCS
-  const FINAL_SRC = cms.introFinalImage ?? DEFAULT_INTRO_FINAL_SRC
+  const SRCS = cmsSrcs ?? []
+  const FINAL_SRC = cms.introFinalImage ?? ''
   const {
     delays: INTRO_DELAYS_MS,
     finalFadeMs: FINAL_FADE_IN_MS,
@@ -289,14 +239,16 @@ function IntroCurtain({ onDone }: { onDone: () => void }) {
         }}
         className="absolute inset-0"
       >
-        <Image
-          src={FINAL_SRC}
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          style={{ objectFit: 'cover' }}
-        />
+        {FINAL_SRC && (
+          <Image
+            src={FINAL_SRC}
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            style={{ objectFit: 'cover' }}
+          />
+        )}
         <div className="absolute inset-0" style={{ backgroundColor: 'rgba(17,17,17,0.18)' }} />
       </motion.div>
     </motion.div>
@@ -309,10 +261,7 @@ function Hero() {
   const cms = useLife()
   /* Hero is mounted behind the curtain. Headline words animate
      in once the curtain begins lifting — timed to the same choreography. */
-  const introCount =
-    cms.introImages && cms.introImages.length > 0
-      ? cms.introImages.length
-      : DEFAULT_INTRO_SRCS.length
+  const introCount = cms.introImages?.length ?? 0
   /* On portrait viewports (taller than wide) the collage curtain is skipped, so
      the headline reveals shortly after load instead of waiting for the (absent)
      curtain to lift. Only the delay changes, so it's hydration-safe. */
@@ -323,13 +272,11 @@ function Hero() {
     ? 0.35
     : introTiming(introCount).liftMs / 1000 + 0.5 // headline rises as curtain pulls away
 
-  const HERO_IMG =
-    cms.heroImage ??
-    'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=2400&h=1600&fit=crop&auto=format'
-  const LINE1 = cms.heroLine1 ?? 'Life at'
-  const LINE2 = cms.heroLine2 ?? 'JL Morison'
-  const CAP_SMALL = cms.heroCaptionSmall ?? 'Since 1920'
-  const CAP_LARGE = cms.heroCaptionLarge ?? 'A century of building goodness, together.'
+  const HERO_IMG = cms.heroImage ?? ''
+  const LINE1 = cms.heroLine1 ?? ''
+  const LINE2 = cms.heroLine2 ?? ''
+  const CAP_SMALL = cms.heroCaptionSmall ?? ''
+  const CAP_LARGE = cms.heroCaptionLarge ?? ''
 
   return (
     <section
@@ -342,17 +289,19 @@ function Hero() {
     >
       {/* full-bleed group photo background */}
       <div className="absolute inset-0">
-        <Image
-          src={HERO_IMG}
-          alt="The JL Morison team"
-          fill
-          priority
-          sizes="100vw"
-          style={{ objectFit: 'cover' }}
-          {...(cms.heroImageLqip
-            ? { placeholder: 'blur' as const, blurDataURL: cms.heroImageLqip }
-            : {})}
-        />
+        {HERO_IMG && (
+          <Image
+            src={HERO_IMG}
+            alt="The JL Morison team"
+            fill
+            priority
+            sizes="100vw"
+            style={{ objectFit: 'cover' }}
+            {...(cms.heroImageLqip
+              ? { placeholder: 'blur' as const, blurDataURL: cms.heroImageLqip }
+              : {})}
+          />
+        )}
         {/* localised gradient for headline readability — keeps the photo's
             natural top edge so the navbar curve stays visible */}
         <div
@@ -442,6 +391,8 @@ function Hero() {
 /* ─────────────────── INTRO PARAGRAPH (post-hero) ────────────────── */
 
 function IntroParagraph() {
+  const cms = useLife()
+  if (!cms.introStatement) return null
   return (
     <section
       className="relative w-full"
@@ -460,16 +411,7 @@ function IntroParagraph() {
           color: INK,
         }}
       >
-        At JL Morison, we believe that a great organisation is built on both performance and
-        purpose. We&rsquo;ve created a workplace that carries the energy and mobility of a growing
-        company while offering the stability and openness of an established MNC — giving our people
-        a rare kind of foundation to grow from. Collaboration, honest communication, and a
-        genuinely positive culture aren&rsquo;t aspirations here; they&rsquo;re simply how we work.
-        Everything we do is grounded in{' '}
-        <span className="italic" style={{ fontWeight: 400 }}>
-          values we hold ourselves to
-        </span>
-        , every single day.
+        {cms.introStatement}
       </motion.p>
     </section>
   )
@@ -480,17 +422,7 @@ function IntroParagraph() {
 
 function CaptionStrip() {
   const cms = useLife()
-  const DEFAULT_ITEMS = [
-    {
-      src: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=900&h=1100&fit=crop&auto=format',
-      caption: 'Powered by chai (and a little chocolate)',
-    },
-    {
-      src: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=900&h=1100&fit=crop&auto=format',
-      caption: 'Quietly, unmistakably all in',
-    },
-  ]
-  const ITEMS = (cms.captionStrip && cms.captionStrip.length > 0 ? cms.captionStrip : DEFAULT_ITEMS).map(
+  const ITEMS = (cms.captionStrip ?? []).map(
     (it, i) => ({
       src: it.src,
       caption: it.caption,
@@ -546,12 +478,9 @@ const CARD_STYLES = [
 function TestimonialsBlock() {
   const cms = useLife()
   const reduce = useReducedMotion()
-  const HEADLINE = cms.arentHeadline ?? 'What our employees say'
-  const BODY =
-    cms.arentBody ??
-    'A hundred years of building goodness — in the words of the people who do it every day.'
-  const ITEMS =
-    cms.testimonials && cms.testimonials.length > 0 ? cms.testimonials : DEFAULT_TESTIMONIALS
+  const HEADLINE = cms.arentHeadline ?? ''
+  const BODY = cms.arentBody ?? ''
+  const ITEMS = cms.testimonials ?? []
   const speed = cms.carouselSpeed && cms.carouselSpeed > 0 ? cms.carouselSpeed : 2
 
   return (
@@ -664,27 +593,12 @@ function TestimonialsBlock() {
 
 function WorkplaceBlock() {
   const cms = useLife()
-  const HEADLINE =
-    cms.workplaceHeadline ?? 'A working day that makes room for actual thinking.'
-  const KICKER = cms.workplaceLabel ?? 'Life at JL Morison'
-  const BODY =
-    cms.workplaceBody ??
-    'A dynamic, engaging place where creativity thrives, collaboration is encouraged, and every milestone is celebrated together.'
+  const HEADLINE = cms.workplaceHeadline ?? ''
+  const KICKER = cms.workplaceLabel ?? ''
+  const BODY = cms.workplaceBody ?? ''
 
-  // Mixed orientations so the default state already reads as a Pinterest wall.
-  const DEFAULT_PHOTOS = [
-    { src: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&h=800&fit=crop&auto=format', cap: 'Teams at work', aspect: 1.5 },
-    { src: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=900&h=1200&fit=crop&auto=format', cap: 'Heads down, building', aspect: 0.75 },
-    { src: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=1200&h=800&fit=crop&auto=format', cap: 'In the room together', aspect: 1.5 },
-    { src: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=1000&h=1000&fit=crop&auto=format', cap: 'Milestones, marked', aspect: 1 },
-    { src: 'https://images.unsplash.com/photo-1543269865-cbf427effbad?w=1200&h=800&fit=crop&auto=format', cap: 'Celebrating together', aspect: 1.5 },
-    { src: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=900&h=1200&fit=crop&auto=format', cap: 'The everyday rhythm', aspect: 0.75 },
-  ]
   // Show every image marketing adds — the masonry just keeps growing.
-  const photos =
-    cms.workplaceImages && cms.workplaceImages.length > 0
-      ? cms.workplaceImages
-      : DEFAULT_PHOTOS
+  const photos = cms.workplaceImages ?? []
   // Sanity carousel speed multiplier (default 2× faster than the base durations).
   const speed = cms.carouselSpeed && cms.carouselSpeed > 0 ? cms.carouselSpeed : 2
 

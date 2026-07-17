@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import EsgClient from './EsgClient'
-import { fetchPhilanthropy } from '@/sanity/queries'
+import { fetchEsg } from '@/sanity/queries'
 
 export const metadata: Metadata = {
   title: 'ESG | JL Morison',
@@ -11,6 +11,6 @@ export const metadata: Metadata = {
 export const revalidate = 60
 
 export default async function EsgPage() {
-  const cms = await fetchPhilanthropy()
+  const cms = await fetchEsg()
   return <EsgClient cms={cms ?? undefined} />
 }

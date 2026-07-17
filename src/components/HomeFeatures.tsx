@@ -20,35 +20,13 @@ export type HomeFeature = {
   imageRight?: boolean
 }
 
-const DEFAULT_FEATURES: HomeFeature[] = [
-  {
-    eyebrow: 'Our people',
-    headline: 'Life at J.L. Morison, where everyday goodness begins.',
-    body: 'A century-old company with a young heart — built by people who care about the small things that make a brand worth trusting.',
-    ctaLabel: 'Explore life at JLM',
-    href: '/life-at-jlm',
-    image:
-      'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1400&q=80',
-    imageRight: false,
-  },
-  {
-    eyebrow: 'Purpose',
-    headline: 'Our mission & impact, building goodness for every Indian family.',
-    body: 'From honest products to the communities we support, our purpose runs deeper than what sits on the shelf.',
-    ctaLabel: 'See our impact',
-    href: '/philanthropy',
-    image:
-      'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=1400&q=80',
-    imageRight: true,
-  },
-]
-
 export default function HomeFeatures({
   features,
 }: {
   features?: HomeFeature[]
 }) {
-  const FEATURES = features && features.length > 0 ? features : DEFAULT_FEATURES
+  // Feature sections come entirely from Sanity (Homepage → Features).
+  const FEATURES = features ?? []
   const rootRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {

@@ -67,71 +67,6 @@ function useFitText(maxPx = 200) {
 
 type CardImage = { url: string; lqip?: string }
 
-// ─────────────── Code defaults (used until Sanity is filled in) ───────────────
-
-const HERO_IMAGE =
-  'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=2000&q=80&auto=format&fit=crop'
-const DIFFERENCE_IMAGE =
-  'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1400&q=80&auto=format&fit=crop'
-
-const DEFAULT_DIFFERENCE_BODY =
-  'Through Project Kaamyaab, JL Morison’s Corporate Philanthropy Program, we ' +
-  'provide vocational training to young mothers from lower socio-economic ' +
-  'backgrounds — helping them build the skills, confidence, and workplace ' +
-  'readiness to re-enter the workforce and create stronger futures for ' +
-  'themselves and their families.'
-
-const DEFAULT_PROGRAMS_INTRO =
-  'Goodness has always run deeper than what sits on the shelf. Across our ' +
-  'factories and the communities around them, we back programmes that create ' +
-  'real, lasting change — starting with the families who need it most. Here’s ' +
-  'where it begins.'
-
-// The four stages of Project Kaamyaab. Title sits on the card; the lead + body
-// read below it, Apple-style.
-const DEFAULT_STAGES = [
-  {
-    title: 'Mobilisation',
-    lead: 'Finding them first.',
-    body: 'We reach young mothers from lower socio-economic backgrounds in the communities around our centres and welcome them into the programme.',
-    image:
-      'https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=1200&q=80&auto=format&fit=crop',
-  },
-  {
-    title: 'Skilling',
-    lead: 'A skill for life.',
-    body: 'Hands-on vocational training that builds real, job-ready skills — along with the confidence to actually use them.',
-    image:
-      'https://images.unsplash.com/photo-1509099836639-18ba1795216d?w=1200&q=80&auto=format&fit=crop',
-  },
-  {
-    title: 'Placement',
-    lead: 'Into the workforce.',
-    body: 'We connect graduates with employers and support them into their first roles, turning training into real income.',
-    image:
-      'https://images.unsplash.com/photo-1497486751825-1233686d5d80?w=1200&q=80&auto=format&fit=crop',
-  },
-  {
-    title: 'Aftercare',
-    lead: 'We don’t stop there.',
-    body: 'Ongoing mentoring, plus day-care for their children at Turbhe and Bhayandar, so mothers can stay in work and keep growing.',
-    image:
-      'https://images.unsplash.com/photo-1544027993-37dbfe43562a?w=1200&q=80&auto=format&fit=crop',
-  },
-]
-
-// Five-year milestone numbers (Sanity `impactStats` overrides these).
-const DEFAULT_IMPACT_HEADING = 'Five years of Project Kaamyaab'
-const DEFAULT_IMPACT_INTRO =
-  'Half a decade of skilling, placing and supporting new mothers — and the ' +
-  'children who grow up alongside the programme.'
-const DEFAULT_IMPACT_STATS = [
-  { value: '5', label: 'Years of impact' },
-  { value: '1,655', label: 'Women trained' },
-  { value: '1,299', label: 'Placed into work' },
-  { value: '220+', label: 'Children in childcare' },
-]
-
 // Bold every occurrence of "Project Kaamyaab" in the difference paragraph.
 function renderWithBrand(text: string) {
   return text.split(/(Project Kaamyaab)/g).map((part, i) =>
@@ -148,56 +83,37 @@ function renderWithBrand(text: string) {
 export default function PhilanthropyClient({ cms }: { cms?: PhilanthropyView }) {
   const reduce = useReducedMotion()
 
-  // ── Merge Sanity content over code defaults ──
-  const heroLine1 = cms?.heroLine1 ?? 'Changing Lives,'
-  const heroLine2 = cms?.heroLine2 ?? 'Building Futures'
-  const heroImage = cms?.heroImage ?? HERO_IMAGE
+  // ── All content comes from Sanity (Philanthropy document) ──
+  const heroLine1 = cms?.heroLine1 ?? ''
+  const heroLine2 = cms?.heroLine2 ?? ''
+  const heroImage = cms?.heroImage ?? ''
   const heroImageLqip = cms?.heroImageLqip
 
-  const diffLine1 = cms?.differenceHeadingLine1 ?? 'Making a'
-  const diffLine2 = cms?.differenceHeadingLine2 ?? 'difference'
-  const diffBody = cms?.differenceBody ?? DEFAULT_DIFFERENCE_BODY
-  const diffImage = cms?.differenceImage ?? DIFFERENCE_IMAGE
+  const diffLine1 = cms?.differenceHeadingLine1 ?? ''
+  const diffLine2 = cms?.differenceHeadingLine2 ?? ''
+  const diffBody = cms?.differenceBody ?? ''
+  const diffImage = cms?.differenceImage ?? ''
   const diffImageLqip = cms?.differenceImageLqip
 
-  const programsHeading = cms?.programsHeading ?? 'Programs'
-  const programsIntro = cms?.programsIntro ?? DEFAULT_PROGRAMS_INTRO
+  const programsHeading = cms?.programsHeading ?? ''
+  const programsIntro = cms?.programsIntro ?? ''
   const programsHeadingRef = useFitText(280)
 
-  const impactLogo = cms?.impactLogo ?? '/project-kaamyaab.png'
+  const impactLogo = cms?.impactLogo ?? ''
   const impactLogoLqip = cms?.impactLogoLqip
-  const impactHeading = cms?.impactHeading ?? DEFAULT_IMPACT_HEADING
-  const impactIntro = cms?.impactIntro ?? DEFAULT_IMPACT_INTRO
-  const impactStats =
-    cms?.impactStats && cms.impactStats.length > 0
-      ? cms.impactStats.map((s) => ({ value: s.value ?? '', label: s.label ?? '' }))
-      : DEFAULT_IMPACT_STATS
+  const impactHeading = cms?.impactHeading ?? ''
+  const impactIntro = cms?.impactIntro ?? ''
+  const impactStats = (cms?.impactStats ?? []).map((s) => ({
+    value: s.value ?? '',
+    label: s.label ?? '',
+  }))
 
-  // Build the four cards. Prefer Sanity stages; fall back to code defaults.
-  const defaultImageFor = (title?: string): CardImage => {
-    const d = DEFAULT_STAGES.find(
-      (s) => s.title.toLowerCase() === (title ?? '').toLowerCase()
-    )
-    return { url: d?.image ?? DEFAULT_STAGES[0].image }
-  }
-
-  const stages =
-    cms?.stages && cms.stages.length > 0
-      ? cms.stages.map((s) => ({
-          title: s.title ?? '',
-          lead: s.lead ?? '',
-          body: s.body ?? '',
-          images:
-            s.images && s.images.length > 0
-              ? (s.images as CardImage[])
-              : [defaultImageFor(s.title)],
-        }))
-      : DEFAULT_STAGES.map((s) => ({
-          title: s.title,
-          lead: s.lead,
-          body: s.body,
-          images: [{ url: s.image }] as CardImage[],
-        }))
+  const stages = (cms?.stages ?? []).map((s) => ({
+    title: s.title ?? '',
+    lead: s.lead ?? '',
+    body: s.body ?? '',
+    images: (s.images ?? []) as CardImage[],
+  }))
 
   const heroLines = [heroLine1, heroLine2]
 

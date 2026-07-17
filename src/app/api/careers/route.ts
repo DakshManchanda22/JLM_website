@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
+import { fetchCareersRecipients } from '@/sanity/queries'
 
 export const runtime = 'nodejs'
 
@@ -115,14 +116,21 @@ export async function POST(req: Request) {
     </div>
   </div>`
 
-  const hrEmail = process.env.HR_EMAIL || 'hr@jlmorison.com'
+  // Recipients are managed in Sanity (Careers → "Send applications to"). Fall
+  // back to the HR_EMAIL env var, then a default, so applications are never lost
+  // if the CMS field is empty or unreachable.
+  const sanityRecipients = await fetchCareersRecipients().catch(() => [])
+  const toEmails =
+    sanityRecipients.length > 0
+      ? sanityRecipients
+      : [process.env.HR_EMAIL || 'hr@jlmorison.com']
   const fromEmail = process.env.RESEND_FROM_EMAIL || 'careers@jlmorison.com'
 
   try {
     const resend = new Resend(process.env.RESEND_API_KEY)
     const { error } = await resend.emails.send({
       from: `JL Morison Careers <${fromEmail}>`,
-      to: [hrEmail],
+      to: toEmails,
       replyTo: values.email,
       subject: `New application — ${values.name} (${values.function})`,
       html,

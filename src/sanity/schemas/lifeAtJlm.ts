@@ -18,7 +18,6 @@ export default defineType({
     { name: 'people', title: '1 · People' },
     { name: 'arent', title: '2 · Employee testimonials' },
     { name: 'workplace', title: '3 · Workplace' },
-    { name: 'together', title: '4 · Together' },
   ],
   fields: [
     /* ───── Intro curtain photos ───── */
@@ -124,6 +123,13 @@ export default defineType({
     }),
 
     /* ───── 1 · People ───── */
+    defineField({
+      name: 'introStatement',
+      title: 'Intro statement (large paragraph under the hero)',
+      group: 'people',
+      type: 'text',
+      rows: 6,
+    }),
     defineField({ name: 'peopleLabel', title: 'Label (e.g. "/1 People")', group: 'people', type: 'string' }),
     defineField({ name: 'peopleHeadline', title: 'Headline', group: 'people', type: 'text', rows: 3 }),
     defineField({ name: 'peopleTagline', title: 'Italic tagline below headline', group: 'people', type: 'string' }),
@@ -185,33 +191,6 @@ export default defineType({
       initialValue: 2,
       validation: (Rule) => Rule.min(0.5).max(5),
     }),
-
-    /* ───── 4 · Together ───── */
-    defineField({ name: 'togetherLabel', title: 'Label', group: 'together', type: 'string' }),
-    defineField({ name: 'togetherHeadline', title: 'Headline', group: 'together', type: 'text', rows: 3 }),
-    defineField({ name: 'togetherTagline', title: 'Italic tagline', group: 'together', type: 'string' }),
-    defineField({ name: 'togetherBody', title: 'Body paragraph', group: 'together', type: 'text', rows: 5 }),
-    defineField({
-      name: 'togetherBrands',
-      title: 'Brand cards at the bottom',
-      group: 'together',
-      type: 'array',
-      of: [
-        defineArrayMember({
-          type: 'object',
-          name: 'togetherBrand',
-          fields: [
-            defineField({ name: 'name', title: 'Brand name', type: 'string' }),
-            defineField({ name: 'tag', title: 'Italic tagline', type: 'string' }),
-          ],
-          preview: { select: { title: 'name', subtitle: 'tag' } },
-        }),
-      ],
-    }),
-    defineField({ name: 'togetherClosingMark', title: 'Closing mark (e.g. "end <life at jlm>")', group: 'together', type: 'string' }),
-    defineField({ name: 'togetherClosingLine', title: 'Closing italic line', group: 'together', type: 'string' }),
-    defineField({ name: 'togetherCtaLabel', title: 'CTA button label (e.g. "Get in touch")', group: 'together', type: 'string' }),
-    defineField({ name: 'togetherCtaHref', title: 'CTA button link', group: 'together', type: 'string' }),
   ],
   preview: { prepare: () => ({ title: 'Life at JL Morison' }) },
 })
