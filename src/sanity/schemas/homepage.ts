@@ -411,9 +411,11 @@ export default defineType({
             defineField({
               name: 'imageIntervalSeconds',
               title: 'Seconds each image shows',
-              description: 'How long each photo stays before fading to the next (default 5).',
+              description:
+                'How many seconds each photo stays before the deck shuffles to the next ' +
+                '(default 3). Lower = faster.',
               type: 'number',
-              initialValue: 5,
+              initialValue: 3,
               validation: (Rule) => Rule.min(1).max(30),
             }),
             defineField({

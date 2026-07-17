@@ -20,6 +20,33 @@ function Logo({ className }: { className?: string }) {
   )
 }
 
+/* Circular outlined arrow button (an up-arrow rotated 90° to point right, or
+   -90° to point left / back) — used on the mobile menu rows. */
+function CircleArrow({ dir = 'right' }: { dir?: 'right' | 'left' }) {
+  return (
+    <span
+      aria-hidden
+      className="inline-flex shrink-0 items-center justify-center rounded-full text-white"
+      style={{ width: 46, height: 46, border: '1.5px solid #ffffff' }}
+    >
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        style={{ transform: `rotate(${dir === 'right' ? 90 : -90}deg)` }}
+      >
+        <path d="M12 19V5" />
+        <path d="M6 11l6-6 6 6" />
+      </svg>
+    </span>
+  )
+}
+
 const DROPDOWNS: Record<string, string[]> = {
   'Our People': ['Our Story', 'Leadership Team', 'Life at JLM'],
   'Our Brands': ['Morisons Baby Dreams', 'Bigen', 'Emoform'],
@@ -27,7 +54,7 @@ const DROPDOWNS: Record<string, string[]> = {
 
 // Order shown in the right-aligned desktop cluster (all right-aligned via ml-auto).
 // ESG and Philanthropy are two separate top-level links (no combined dropdown).
-const NAV_ITEMS = ['Our Brands', 'Our People', 'ESG', 'Philanthropy']
+const NAV_ITEMS = ['Our Brands', 'Our People', 'ESG', 'Philanthropy', 'Investor Relations']
 const ALL_MOBILE = [...NAV_ITEMS, 'Contact Us']
 
 const slug = (s: string) => s.toLowerCase().replace(/\s+/g, '-')
@@ -58,9 +85,11 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', onMouseDown)
   }, [])
 
-  /* Lock body scroll while mobile overlay is open */
+  /* Lock body scroll while mobile overlay is open; reset the drill-down to the
+     top level whenever the menu closes. */
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? 'hidden' : ''
+    if (!mobileOpen) setMobileExpanded(null)
     return () => {
       document.body.style.overflow = ''
     }
@@ -196,74 +225,88 @@ export default function Navbar() {
               </button>
             </div>
 
-            <nav className="flex-1 flex flex-col items-center justify-center gap-7 px-8">
-              {ALL_MOBILE.map((label, i) => {
-                const subs = DROPDOWNS[label]
-                const isExpanded = mobileExpanded === label
-                const isPill = label === 'Contact Us'
-                return (
-                  <motion.div
-                    key={label}
-                    initial={{ opacity: 0, y: 18 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.08 + i * 0.06, duration: 0.35 }}
-                    className="text-center"
+            <div className="relative flex-1 overflow-hidden border-t border-white/15">
+              <AnimatePresence initial={false} mode="wait">
+                {mobileExpanded === null ? (
+                  <motion.nav
+                    key="main"
+                    initial={{ opacity: 0, x: -24 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -24 }}
+                    transition={{ duration: 0.28, ease: EASE }}
+                    className="absolute inset-0 overflow-y-auto px-6 py-3"
                   >
-                    {subs ? (
-                      <button
-                        onClick={() =>
-                          setMobileExpanded((p) =>
-                            p === label ? null : label
-                          )
-                        }
-                        className="text-white text-[clamp(2rem,8vw,2.75rem)] font-light tracking-wide leading-tight py-1"
-                      >
-                        {label}
-                      </button>
-                    ) : isPill ? (
-                      <Link
-                        href="/contact-us"
-                        onClick={() => setMobileOpen(false)}
-                        className="inline-block rounded-full border border-white bg-transparent text-white px-6 py-2.5 text-lg font-normal"
-                      >
-                        {label}
-                      </Link>
-                    ) : (
-                      <Link
-                        href={linkHref(label)}
-                        onClick={() => setMobileOpen(false)}
-                        className="text-white text-[clamp(2rem,8vw,2.75rem)] font-light tracking-wide leading-tight py-1"
-                      >
-                        {label}
-                      </Link>
-                    )}
-
-                    <AnimatePresence>
-                      {subs && isExpanded && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.3, ease: EASE }}
-                          className="overflow-hidden mt-4 flex flex-col items-center gap-4"
-                        >
-                          {subs.map((sub) => (
-                            <Link
-                              key={sub}
-                              href={`/${slug(sub)}`}
-                              onClick={() => setMobileOpen(false)}
-                              className="text-white/70 text-lg tracking-wide"
+                    {ALL_MOBILE.map((label) => {
+                      const subs = DROPDOWNS[label]
+                      const href = label === 'Contact Us' ? '/contact-us' : linkHref(label)
+                      const row = (
+                        <div className="flex w-full items-center justify-between py-5">
+                          <span className="text-3xl font-normal tracking-tight text-white">
+                            {label}
+                          </span>
+                          <CircleArrow dir="right" />
+                        </div>
+                      )
+                      return (
+                        <div key={label} className="border-b border-white/15">
+                          {subs ? (
+                            <button
+                              type="button"
+                              onClick={() => setMobileExpanded(label)}
+                              className="block w-full text-left"
                             >
-                              {sub}
+                              {row}
+                            </button>
+                          ) : (
+                            <Link
+                              href={href}
+                              onClick={() => setMobileOpen(false)}
+                              className="block w-full"
+                            >
+                              {row}
                             </Link>
-                          ))}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </motion.div>
-                )
-              })}
-            </nav>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </motion.nav>
+                ) : (
+                  <motion.nav
+                    key="sub"
+                    initial={{ opacity: 0, x: 28 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 28 }}
+                    transition={{ duration: 0.28, ease: EASE }}
+                    className="absolute inset-0 overflow-y-auto px-6 py-3"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setMobileExpanded(null)}
+                      aria-label="Back"
+                      className="mb-2 mt-2 block"
+                    >
+                      <CircleArrow dir="left" />
+                    </button>
+                    {(DROPDOWNS[mobileExpanded] ?? []).map((sub) => (
+                      <div key={sub} className="border-b border-white/15">
+                        <Link
+                          href={`/${slug(sub)}`}
+                          onClick={() => setMobileOpen(false)}
+                          className="block w-full"
+                        >
+                          <div className="flex w-full items-center justify-between py-5">
+                            <span className="text-3xl font-normal tracking-tight text-white">
+                              {sub}
+                            </span>
+                            <CircleArrow dir="right" />
+                          </div>
+                        </Link>
+                      </div>
+                    ))}
+                  </motion.nav>
+                )}
+              </AnimatePresence>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

@@ -667,10 +667,21 @@ function StatCard({
   const col = index % 2
   const row = Math.floor(index / 2)
   const dark = (col + row) % 2 === 0
+  const hasImage = Boolean(card.image)
+  // On an image background everything is white over a dark overlay; otherwise the
+  // original alternating dark / beige treatment is kept.
   const bg = dark ? '#141414' : BEIGE
-  const fg = dark ? '#FFFFFF' : INK
-  const soft = dark ? 'rgba(255,255,255,0.72)' : 'rgba(17,17,17,0.62)'
-  const chipBg = dark ? 'rgba(255,255,255,0.14)' : 'rgba(17,17,17,0.07)'
+  const fg = hasImage ? '#FFFFFF' : dark ? '#FFFFFF' : INK
+  const soft = hasImage
+    ? 'rgba(255,255,255,0.82)'
+    : dark
+      ? 'rgba(255,255,255,0.72)'
+      : 'rgba(17,17,17,0.62)'
+  const chipBg = hasImage
+    ? 'rgba(255,255,255,0.22)'
+    : dark
+      ? 'rgba(255,255,255,0.14)'
+      : 'rgba(17,17,17,0.07)'
 
   return (
     <motion.div
@@ -681,9 +692,30 @@ function StatCard({
       transition={{ duration: 0.7, ease: EASE, delay: (index % 2) * 0.08 }}
       onMouseEnter={() => !isTouch && setRevealed(true)}
       onMouseLeave={() => !isTouch && setRevealed(false)}
-      className="flex flex-col rounded-3xl p-7 sm:p-8"
-      style={{ backgroundColor: bg, color: fg, minHeight: 210 }}
+      className="relative flex flex-col overflow-hidden rounded-3xl p-7 sm:p-8"
+      style={{ backgroundColor: hasImage ? '#141414' : bg, color: fg, minHeight: 210 }}
     >
+      {hasImage && (
+        <>
+          <Image
+            src={card.image as string}
+            alt=""
+            fill
+            sizes="(max-width: 640px) 100vw, 550px"
+            className="object-cover"
+            {...(card.lqip ? { placeholder: 'blur' as const, blurDataURL: card.lqip } : {})}
+          />
+          <div
+            aria-hidden
+            className="absolute inset-0"
+            style={{
+              background:
+                'linear-gradient(180deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.62) 55%, rgba(0,0,0,0.78) 100%)',
+            }}
+          />
+        </>
+      )}
+      <div className="relative z-[1] flex flex-1 flex-col">
       <div className="flex items-start justify-between gap-3">
         <h3
           className={dmSans.className}
@@ -753,6 +785,7 @@ function StatCard({
           {card.body}
         </p>
       </motion.div>
+      </div>
     </motion.div>
   )
 }

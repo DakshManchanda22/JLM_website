@@ -823,6 +823,8 @@ export type PhilanthropyStatCard = {
   body?: string
   tag?: string
   icon?: string
+  image?: string
+  lqip?: string
 }
 
 export type EsgView = {
@@ -850,7 +852,7 @@ export const esgQuery = groq`*[_type == "esg"][0]{
   purposeEyebrow, purposeHeading, purposeBackgroundWord,
   purposeImages[]{ ${imageWithLqip} },
   beliefEyebrow, beliefText,
-  statCards[]{ title, value, body, tag, icon },
+  statCards[]{ title, value, body, tag, icon, image{ ${imageWithLqip} } },
   esgWord, esgIntro,
   esgGallery[]{
     ${imageWithLqip},
@@ -886,13 +888,18 @@ export async function fetchEsg(): Promise<EsgView | null> {
       .filter(Boolean),
     beliefEyebrow: raw.beliefEyebrow,
     beliefText: raw.beliefText,
-    statCards: (raw.statCards || []).map((s: any) => ({
-      title: s.title,
-      value: s.value,
-      body: s.body,
-      tag: s.tag,
-      icon: s.icon,
-    })),
+    statCards: (raw.statCards || []).map((s: any) => {
+      const im = resolveImage(s.image, 1000)
+      return {
+        title: s.title,
+        value: s.value,
+        body: s.body,
+        tag: s.tag,
+        icon: s.icon,
+        image: im?.url,
+        lqip: im?.lqip,
+      }
+    }),
     esgWord: raw.esgWord,
     esgIntro: raw.esgIntro,
     esgGallery: (raw.esgGallery || [])

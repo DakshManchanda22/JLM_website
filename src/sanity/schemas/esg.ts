@@ -124,8 +124,17 @@ export default defineType({
               },
               initialValue: 'recycle',
             }),
+            defineField({
+              name: 'image',
+              title: 'Background image',
+              description:
+                'Shown behind the card (with a dark overlay so the text stays readable). ' +
+                'Pick something related to the card, e.g. solar panels for Green Energy.',
+              type: 'image',
+              options: { hotspot: true },
+            }),
           ],
-          preview: { select: { title: 'title', subtitle: 'value' } },
+          preview: { select: { title: 'title', subtitle: 'value', media: 'image' } },
         }),
       ],
     }),
