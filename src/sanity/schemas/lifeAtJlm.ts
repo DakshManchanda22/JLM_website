@@ -15,9 +15,9 @@ export default defineType({
     { name: 'hero', title: 'Hero' },
     { name: 'anchors', title: 'Anchor menu' },
     { name: 'caption', title: 'Caption strip' },
-    { name: 'people', title: '1 · People' },
-    { name: 'arent', title: '2 · Employee testimonials' },
-    { name: 'workplace', title: '3 · Workplace' },
+    { name: 'people', title: 'Intro statement' },
+    { name: 'arent', title: 'Employee testimonials' },
+    { name: 'workplace', title: 'Workplace' },
   ],
   fields: [
     /* ───── Intro curtain photos ───── */
@@ -122,7 +122,7 @@ export default defineType({
       ],
     }),
 
-    /* ───── 1 · People ───── */
+    /* ───── Intro statement ───── */
     defineField({
       name: 'introStatement',
       title: 'Intro statement (large paragraph under the hero)',
@@ -130,13 +130,8 @@ export default defineType({
       type: 'text',
       rows: 6,
     }),
-    defineField({ name: 'peopleLabel', title: 'Label (e.g. "/1 People")', group: 'people', type: 'string' }),
-    defineField({ name: 'peopleHeadline', title: 'Headline', group: 'people', type: 'text', rows: 3 }),
-    defineField({ name: 'peopleTagline', title: 'Italic tagline below headline', group: 'people', type: 'string' }),
-    defineField({ name: 'peopleBody', title: 'Body paragraph', group: 'people', type: 'text', rows: 5 }),
 
-    /* ───── 2 · We are / We aren't ───── */
-    defineField({ name: 'arentEyebrow', title: 'Eyebrow text', group: 'arent', type: 'string' }),
+    /* ───── Employee testimonials ───── */
     defineField({ name: 'arentHeadline', title: 'Headline', group: 'arent', type: 'text', rows: 3 }),
     defineField({ name: 'arentBody', title: 'Body paragraph', group: 'arent', type: 'text', rows: 4 }),
     defineField({

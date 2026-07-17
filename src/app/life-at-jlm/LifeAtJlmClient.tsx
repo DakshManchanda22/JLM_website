@@ -23,11 +23,6 @@ export type LifeCms = {
   anchors?: { num: string; label: string; targetId: string; image: string }[]
   captionStrip?: { src: string; caption: string; aspect?: number }[]
   introStatement?: string
-  peopleLabel?: string
-  peopleHeadline?: string
-  peopleTagline?: string
-  peopleBody?: string
-  arentEyebrow?: string
   arentHeadline?: string
   arentBody?: string
   testimonials?: { quote: string; name: string; role: string }[]

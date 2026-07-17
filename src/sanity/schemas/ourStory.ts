@@ -15,7 +15,6 @@ export default defineType({
     { name: 'eras', title: 'The five eras' },
     { name: 'pillars', title: 'Guiding pillars' },
     { name: 'closing', title: 'Closing' },
-    { name: 'legacy', title: 'Legacy (old timeline — unused)' },
   ],
   fields: [
     /* ─────────── Hero ─────────── */
@@ -200,34 +199,6 @@ export default defineType({
       title: 'Tiny note beneath closing',
       group: 'closing',
       type: 'string',
-    }),
-
-    /* ─────────── Legacy timeline (kept for backwards compat) ─────────── */
-    defineField({
-      name: 'milestones',
-      title: 'Legacy milestones (no longer rendered)',
-      description:
-        'The old vertical timeline has been replaced. This field stays so any data already entered isn’t lost. Safe to leave empty.',
-      group: 'legacy',
-      type: 'array',
-      of: [
-        defineArrayMember({
-          type: 'object',
-          name: 'milestone',
-          fields: [
-            { name: 'year', type: 'string', title: 'Year' },
-            { name: 'description', type: 'text', title: 'Description' },
-            {
-              name: 'side',
-              type: 'string',
-              title: 'Side',
-              options: { list: [{ title: 'Left', value: 'left' }, { title: 'Right', value: 'right' }] },
-            },
-            { name: 'image', type: 'image', title: 'Image', options: { hotspot: true } },
-            { name: 'offsetY', type: 'number', title: 'Offset Y (px)' },
-          ],
-        }),
-      ],
     }),
   ],
   preview: { prepare: () => ({ title: 'Our Story' }) },
