@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion, useInView, useReducedMotion } from 'framer-motion'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
@@ -35,7 +35,7 @@ export type HomeFeature = {
 function FeatureImages({
   images,
   alt,
-  intervalMs = 5000,
+  intervalMs = 3000,
 }: {
   images: FeatureImage[]
   alt: string
@@ -44,16 +44,20 @@ function FeatureImages({
   const reduce = useReducedMotion()
   const n = images.length
   const [front, setFront] = useState(0)
+  const deckRef = useRef<HTMLDivElement>(null)
+  // Only shuffle while this section is actually on screen — the timer is paused
+  // before the user reaches it and the moment they scroll past.
+  const inView = useInView(deckRef, { amount: 0.5 })
 
   useEffect(() => {
-    if (n <= 1) return
+    if (n <= 1 || !inView) return
     // Bring the back card to the front each tick.
     const id = window.setTimeout(() => setFront((f) => (f - 1 + n) % n), intervalMs)
     return () => window.clearTimeout(id)
-  }, [front, n, intervalMs])
+  }, [front, n, intervalMs, inView])
 
   return (
-    <>
+    <div ref={deckRef} className="absolute inset-0">
       {images.map((im, i) => {
         const order = (i - front + n) % n // 0 = front of the deck
         const depth = Math.min(order, 3)
@@ -74,7 +78,7 @@ function FeatureImages({
                     opacity: hidden ? 0 : 1,
                   }
             }
-            transition={{ duration: reduce ? 0 : 0.7, ease: EASE }}
+            transition={{ duration: reduce ? 0 : 0.55, ease: EASE }}
             style={{ zIndex: n - order }}
           >
             <div className="relative h-full w-full overflow-hidden rounded-[28px] shadow-[0_22px_44px_-26px_rgba(17,17,17,0.55)]">
@@ -91,7 +95,7 @@ function FeatureImages({
           </motion.div>
         )
       })}
-    </>
+    </div>
   )
 }
 

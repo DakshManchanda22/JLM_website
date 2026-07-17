@@ -190,6 +190,26 @@ function HeroVideoPlayer({ video }: { video: HeroVideo }) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [muted, setMuted] = useState(true)
 
+  // iOS Safari only autoplays a video that is muted *at play time*, and React
+  // doesn't reliably set the `muted` attribute — so force it on the element and
+  // kick off playback ourselves (retrying once the metadata is ready).
+  useEffect(() => {
+    const el = videoRef.current
+    if (!el) return
+    el.muted = true
+    el.defaultMuted = true
+    const tryPlay = () => {
+      el.play().catch(() => {})
+    }
+    tryPlay()
+    el.addEventListener('loadedmetadata', tryPlay, { once: true })
+    el.addEventListener('canplay', tryPlay, { once: true })
+    return () => {
+      el.removeEventListener('loadedmetadata', tryPlay)
+      el.removeEventListener('canplay', tryPlay)
+    }
+  }, [video.videoUrl])
+
   const toggleMute = () => {
     const el = videoRef.current
     if (!el) return
