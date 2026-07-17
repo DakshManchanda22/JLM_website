@@ -9,7 +9,7 @@ import {
 /**
  * "Our Vision" statement. As the section scrolls into view, the words rise into
  * place with a soft blur and staggered timing (kinetic text reveal). Respects
- * reduced-motion via the reveal component's own handling. All content comes from
+ * reduced-motion via the reveal component's own handling. Content comes from
  * Sanity (Homepage → Vision).
  */
 export default function VisionSection({
@@ -41,15 +41,19 @@ export default function VisionSection({
     return () => io.disconnect()
   }, [text])
 
+  if (!text) return null
+
   return (
     <section ref={sectionRef} className="w-full bg-white px-4 pt-16 pb-6 md:px-8 md:pt-24 md:pb-8">
       <div className="mx-auto max-w-6xl">
-        <span
-          className="mb-5 block font-serif text-[#555555] md:mb-7"
-          style={{ fontSize: 'clamp(1.1rem, 2vw, 1.6rem)' }}
-        >
-          {label}
-        </span>
+        {label && (
+          <span
+            className="mb-5 block font-serif text-[#555555] md:mb-7"
+            style={{ fontSize: 'clamp(1.1rem, 2vw, 1.6rem)' }}
+          >
+            {label}
+          </span>
+        )}
         <p
           className="font-serif font-light leading-[1.25] tracking-tight text-[#111111]"
           style={{ fontSize: 'clamp(1.6rem, 3.4vw, 3.1rem)' }}

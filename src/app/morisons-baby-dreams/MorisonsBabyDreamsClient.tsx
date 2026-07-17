@@ -837,9 +837,13 @@ function Follow({
     <SocialStamps
       heading="Follow along"
       cards={cards}
-      ink={INK}
-      muted={MUTED}
+      paper="#111111"
+      ink="#F7F3EC"
+      muted="#B6AD9E"
+      placeholderBg="#1E1B16"
+      headingColor={INK}
       notchColor={CREAM}
+      perforated={false}
       fontClassName={nunito.className}
     />
   )

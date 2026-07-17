@@ -15,10 +15,12 @@ export default function ValuesImage({
   image,
   lqip,
   aspect = 1.05,
+  alt = 'The values that guide J.L. Morison',
 }: {
   image: string
   lqip?: string
   aspect?: number
+  alt?: string
 }) {
   return (
     <section className="w-full bg-[#FFFFFF] px-6 md:px-12 pb-16 md:pb-24">
@@ -32,7 +34,7 @@ export default function ValuesImage({
       >
         <Image
           src={image}
-          alt="The values that guide J.L. Morison"
+          alt={alt}
           fill
           sizes="(max-width: 1024px) 100vw, 1024px"
           className="object-contain"

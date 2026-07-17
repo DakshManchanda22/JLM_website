@@ -62,7 +62,6 @@ function useFitLines(lines = 2, maxPx = 84, minPx = 16) {
 export default function StatsSection({
   stats,
   heading,
-  note,
   speed,
 }: {
   stats?: Stat[]
@@ -76,9 +75,9 @@ export default function StatsSection({
   // Seconds for one full loop, sped up by the Sanity multiplier (default 2×).
   const loopDuration = 45 / (speed && speed > 0 ? speed : 2)
   const HEADING = heading ?? ''
-  const NOTE = note ?? ''
   const sectionRef = useRef<HTMLElement>(null)
-  const headingRef = useFitLines(2)
+  // Fit the heading onto a single line (shrinks the font until it stops wrapping).
+  const headingRef = useFitLines(1, 64, 14)
 
   /* Fade-up reveal of the header row (heading + note) */
   useEffect(() => {
@@ -123,24 +122,15 @@ export default function StatsSection({
       />
 
       <div className="max-w-7xl mx-auto px-6 md:px-12 pt-20 md:pt-28 pb-10 md:pb-14">
-        {/* Header row — big editorial heading left, small note right */}
-        <div className="flex items-end justify-between gap-6 flex-wrap">
-          <h2
-            ref={headingRef}
-            data-stat-reveal
-            className="font-serif font-normal tracking-tight leading-[0.95] text-[#111111] max-w-[22rem] md:max-w-[38rem] [text-wrap:balance]"
-            style={{ fontSize: 'clamp(2.5rem, 5.5vw, 5.25rem)' }}
-          >
-            {HEADING}
-          </h2>
-          <p
-            data-stat-reveal
-            className="text-[#555555] text-xs tracking-[0.3em] uppercase mb-2"
-          >
-            {NOTE}
-          </p>
-        </div>
-
+        {/* Single-line editorial heading */}
+        <h2
+          ref={headingRef}
+          data-stat-reveal
+          className="font-serif font-normal tracking-tight leading-[1.05] text-[#111111]"
+          style={{ fontSize: 'clamp(2rem, 5.5vw, 4rem)' }}
+        >
+          {HEADING}
+        </h2>
       </div>
 
       {/* Moving metric carousel — cards scroll continuously left. The list is

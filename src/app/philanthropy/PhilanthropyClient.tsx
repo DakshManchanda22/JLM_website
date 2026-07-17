@@ -101,7 +101,6 @@ export default function PhilanthropyClient({ cms }: { cms?: PhilanthropyView }) 
 
   const impactLogo = cms?.impactLogo ?? ''
   const impactLogoLqip = cms?.impactLogoLqip
-  const impactHeading = cms?.impactHeading ?? ''
   const impactIntro = cms?.impactIntro ?? ''
   const impactStats = (cms?.impactStats ?? []).map((s) => ({
     value: s.value ?? '',
@@ -332,7 +331,6 @@ export default function PhilanthropyClient({ cms }: { cms?: PhilanthropyView }) 
       <ImpactSection
         logo={impactLogo}
         logoLqip={impactLogoLqip}
-        heading={impactHeading}
         intro={impactIntro}
         stats={impactStats}
         reduce={!!reduce}
@@ -444,14 +442,12 @@ function ProgramCard({
 function ImpactSection({
   logo,
   logoLqip,
-  heading,
   intro,
   stats,
   reduce,
 }: {
   logo: string
   logoLqip?: string
-  heading: string
   intro: string
   stats: { value: string; label: string }[]
   reduce: boolean
@@ -469,13 +465,13 @@ function ImpactSection({
       style={{ backgroundColor: KB_TINT }}
     >
       <div className="mx-auto max-w-[1200px]">
-        {/* logo + headline */}
+        {/* centred logo + intro */}
         <motion.div
           initial={reduce ? false : { opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-15%' }}
           transition={{ duration: 0.8, ease: EASE }}
-          className="max-w-[760px]"
+          className="mx-auto flex max-w-[820px] flex-col items-center text-center"
         >
           <Image
             src={logo}
@@ -487,25 +483,11 @@ function ImpactSection({
             priority={false}
             {...(logoLqip ? { placeholder: 'blur' as const, blurDataURL: logoLqip } : {})}
           />
-          <h2
-            className={anton.className}
-            style={{
-              margin: '1.1em 0 0',
-              color: KB_BLUE_DEEP,
-              fontSize: 'clamp(34px, 4.6vw, 68px)',
-              lineHeight: 0.98,
-              letterSpacing: '0.005em',
-              textTransform: 'uppercase',
-              textWrap: 'balance',
-            }}
-          >
-            {heading}
-          </h2>
           {intro && (
             <p
               className={dmSans.className}
               style={{
-                margin: '0.9em 0 0',
+                margin: '1.4em auto 0',
                 maxWidth: '52ch',
                 color: '#3F4A5C',
                 fontSize: 'clamp(16px, 1.25vw, 19px)',

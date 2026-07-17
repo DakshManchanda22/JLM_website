@@ -363,7 +363,7 @@ export default function EmoformScrollytelling({ cms }: { cms?: EmoformView }) {
                   }}
                   initial={reduce ? false : { opacity: 0, y: 22 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.4 }}
+                  viewport={{ once: true, margin: '0px 0px -15% 0px', amount: 0.15 }}
                   transition={{ duration: 0.6, ease: EASE }}
                 >
                   <h3

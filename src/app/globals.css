@@ -13,11 +13,11 @@
 /* Navbar height — thinner on mobile, taller on desktop. Used by both the
    navbar itself and the page top padding so they always line up. */
 :root {
-  --nav-h: 48px;
+  --nav-h: 56px;
 }
 @media (min-width: 768px) {
   :root {
-    --nav-h: 56px;
+    --nav-h: 68px;
   }
 }
 

@@ -2,11 +2,16 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { motion, useReducedMotion } from 'framer-motion'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 gsap.registerPlugin(ScrollTrigger)
+
+const EASE = [0.16, 1, 0.3, 1] as const
+
+export type FeatureImage = { url: string; lqip?: string }
 
 export type HomeFeature = {
   eyebrow?: string
@@ -14,10 +19,80 @@ export type HomeFeature = {
   body?: string
   ctaLabel: string
   href: string
-  image: string
-  lqip?: string
+  /** Slideshow images — cross-fade when more than one. */
+  images: FeatureImage[]
+  /** Seconds each image is shown before fading to the next. */
+  intervalMs?: number
   /** When true the image sits on the right, text on the left. */
   imageRight?: boolean
+}
+
+/* A stacked deck of a feature's images. Cards sit on top of one another with a
+   slight offset; every `intervalMs` the card at the BACK animates up to the
+   FRONT, swapping the visible image. Every card stays mounted (only its
+   transform/opacity changes) so the section never blanks out. Honours
+   reduced-motion with a plain swap. With a single image it's just that image. */
+function FeatureImages({
+  images,
+  alt,
+  intervalMs = 5000,
+}: {
+  images: FeatureImage[]
+  alt: string
+  intervalMs?: number
+}) {
+  const reduce = useReducedMotion()
+  const n = images.length
+  const [front, setFront] = useState(0)
+
+  useEffect(() => {
+    if (n <= 1) return
+    // Bring the back card to the front each tick.
+    const id = window.setTimeout(() => setFront((f) => (f - 1 + n) % n), intervalMs)
+    return () => window.clearTimeout(id)
+  }, [front, n, intervalMs])
+
+  return (
+    <>
+      {images.map((im, i) => {
+        const order = (i - front + n) % n // 0 = front of the deck
+        const depth = Math.min(order, 3)
+        const hidden = order > 3
+        return (
+          <motion.div
+            key={`${im.url}-${i}`}
+            className="absolute inset-0"
+            initial={false}
+            animate={
+              reduce
+                ? { opacity: order === 0 ? 1 : 0 }
+                : {
+                    x: depth * 9,
+                    y: depth * 11,
+                    scale: 1 - depth * 0.04,
+                    rotate: order === 0 ? 0 : depth % 2 ? -2 : 2,
+                    opacity: hidden ? 0 : 1,
+                  }
+            }
+            transition={{ duration: reduce ? 0 : 0.7, ease: EASE }}
+            style={{ zIndex: n - order }}
+          >
+            <div className="relative h-full w-full overflow-hidden rounded-[28px] shadow-[0_22px_44px_-26px_rgba(17,17,17,0.55)]">
+              <Image
+                src={im.url}
+                alt={alt}
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover"
+                priority={order === 0}
+                {...(im.lqip ? { placeholder: 'blur' as const, blurDataURL: im.lqip } : {})}
+              />
+            </div>
+          </motion.div>
+        )
+      })}
+    </>
+  )
 }
 
 export default function HomeFeatures({
@@ -69,22 +144,17 @@ export default function HomeFeatures({
                 : 'md:grid-cols-[1.15fr_0.85fr]'
             }`}
           >
-            {/* Image */}
+            {/* Image card deck */}
             <div
               data-feature-reveal
-              className={`relative w-full aspect-[4/3] md:aspect-[5/4] rounded-[28px] overflow-hidden ${
+              className={`relative w-full aspect-[4/3] md:aspect-[5/4] ${
                 f.imageRight ? 'md:order-2' : 'md:order-1'
               }`}
             >
-              <Image
-                src={f.image}
+              <FeatureImages
+                images={f.images}
                 alt={f.headline}
-                fill
-                sizes="(max-width: 768px) 100vw, 50vw"
-                className="object-cover"
-                {...(f.lqip
-                  ? { placeholder: 'blur' as const, blurDataURL: f.lqip }
-                  : {})}
+                intervalMs={f.intervalMs}
               />
             </div>
 

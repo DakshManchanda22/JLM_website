@@ -40,20 +40,6 @@ const ENV_GREEN = '#2FBF3F'
 // Warm marigold highlighter for the Social heading (sibling to ENV_GREEN).
 const SOCIAL_YELLOW = '#F4C838'
 
-type CardImage = { url: string; lqip?: string }
-
-// End positions the three collage photos spring out to (desktop + mobile).
-const COLLAGE_SPREAD = [
-  { x: '-46%', y: '-30%', rotate: -5, z: 20 },
-  { x: '48%', y: '-6%', rotate: 3, z: 10 },
-  { x: '-4%', y: '32%', rotate: -4, z: 30 },
-]
-const COLLAGE_SPREAD_MOBILE = [
-  { x: '-24%', y: '-40%', rotate: -5, z: 20 },
-  { x: '24%', y: '-12%', rotate: 5, z: 10 },
-  { x: '-2%', y: '34%', rotate: -4, z: 30 },
-]
-
 // Scales a heading's font-size so it always fits on one line.
 function useFitText(maxPx = 200) {
   const ref = useRef<HTMLHeadingElement>(null)
@@ -78,7 +64,7 @@ export default function EsgClient({ cms }: { cms?: EsgView }) {
   const reduce = useReducedMotion()
 
   const purposeHeading = cms?.purposeHeading ?? ''
-  const purposeImages = (cms?.purposeImages ?? []) as CardImage[]
+  const esgHeadingRef = useFitText(220)
 
   const beliefEyebrow = cms?.beliefEyebrow
   const beliefText = cms?.beliefText ?? ''
@@ -117,11 +103,26 @@ export default function EsgClient({ cms }: { cms?: EsgView }) {
 
   return (
     <div className={dmSans.variable}>
-      {/* ================ ESG — TITLE + 3-PHOTO COLLAGE ================ */}
-      <PurposeCollage heading={purposeHeading} images={purposeImages} reduce={!!reduce} />
+      {/* ================ ESG — TITLE ================ */}
+      <section className="overflow-hidden bg-white px-[7vw] pt-16 text-center md:pt-24">
+        <h1
+          ref={esgHeadingRef}
+          className={anton.className}
+          style={{
+            margin: '0 auto',
+            color: INK,
+            lineHeight: 0.98,
+            letterSpacing: '0.02em',
+            textTransform: 'uppercase',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {purposeHeading}
+        </h1>
+      </section>
 
-      {/* ========================= BELIEF + STAT CARDS ========================= */}
-      <section className="bg-white px-[7vw] pb-24 pt-20 text-center md:pb-32 md:pt-28">
+      {/* ========================= OUR COMMITMENT + STAT CARDS ========================= */}
+      <section className="bg-white px-[7vw] pb-24 pt-10 text-center md:pb-32 md:pt-14">
         {beliefEyebrow && (
           <motion.p
             initial={reduce ? false : { opacity: 0, y: 16 }}
@@ -250,99 +251,10 @@ export default function EsgClient({ cms }: { cms?: EsgView }) {
         )}
       </AnimatePresence>
 
-      {/* Light backing so the footer's rounded top corners read as a curve,
-          matching the footer everywhere else on the site. */}
-      <div className="bg-white">
-        <Footer />
-      </div>
+      {/* The Governance section above is dark, so the footer sits flush (no
+          rounded top) to avoid a white notch showing through the curve. */}
+      <Footer roundedTop={false} />
     </div>
-  )
-}
-
-// ─────────── ESG title + 3-photo collage (page opener) ───────────
-// Three photos start stacked and, once scrolled into view, spring out into a
-// scattered arrangement beneath a big "ESG" title. Mobile uses a tighter spread.
-function PurposeCollage({
-  heading,
-  images,
-  reduce,
-}: {
-  heading: string
-  images: CardImage[]
-  reduce: boolean
-}) {
-  const shots = images.slice(0, 3)
-  const [compact, setCompact] = useState(false)
-  const headingRef = useFitText(220)
-
-  useEffect(() => {
-    const mq = window.matchMedia('(max-width: 640px)')
-    const on = () => setCompact(mq.matches)
-    on()
-    mq.addEventListener('change', on)
-    return () => mq.removeEventListener('change', on)
-  }, [])
-
-  const spread = compact ? COLLAGE_SPREAD_MOBILE : COLLAGE_SPREAD
-
-  return (
-    <section className="overflow-hidden bg-white px-[7vw] pb-10 pt-16 md:pb-16 md:pt-24">
-      <div className="text-center">
-        <h2
-          ref={headingRef}
-          className={anton.className}
-          style={{
-            margin: '0 auto',
-            color: INK,
-            lineHeight: 0.98,
-            letterSpacing: '0.02em',
-            textTransform: 'uppercase',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {heading}
-        </h2>
-      </div>
-
-      <motion.div
-        className="relative mx-auto mt-8 aspect-square w-full max-w-[1040px] sm:aspect-[3/2] md:mt-10"
-        initial={reduce ? 'spread' : 'stack'}
-        whileInView="spread"
-        viewport={{ once: true, amount: 0.25 }}
-      >
-        {shots.map((img, i) => {
-          const end = spread[i] ?? spread[0]
-          return (
-            <div
-              key={img.url}
-              className="absolute left-1/2 top-1/2 w-[66%] max-w-[620px] sm:w-[56%]"
-              style={{ transform: 'translate(-50%, -50%)', zIndex: end.z }}
-            >
-              <motion.div
-                variants={{
-                  stack: { x: '0%', y: '0%', rotate: 0, scale: 0.9 },
-                  spread: { x: end.x, y: end.y, rotate: end.rotate, scale: 1 },
-                }}
-                transition={{ duration: 0.9, ease: EASE, delay: i * 0.12 }}
-              >
-                <div className="relative aspect-[3/2] w-full overflow-hidden rounded-sm border border-white shadow-2xl">
-                  <Image
-                    src={img.url}
-                    alt=""
-                    fill
-                    sizes="(max-width: 640px) 66vw, 44vw"
-                    style={{ objectFit: 'cover' }}
-                    {...(img.lqip
-                      ? { placeholder: 'blur' as const, blurDataURL: img.lqip }
-                      : {})}
-                  />
-                </div>
-              </motion.div>
-            </div>
-          )
-        })}
-      </motion.div>
-    </section>
   )
 }
 

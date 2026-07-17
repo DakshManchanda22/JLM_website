@@ -26,11 +26,6 @@ export type LifeCms = {
   arentHeadline?: string
   arentBody?: string
   testimonials?: { quote: string; name: string; role: string }[]
-  workplaceLabel?: string
-  workplaceHeadline?: string
-  workplaceTagline?: string
-  workplaceBody?: string
-  workplaceImages?: { src: string; cap: string; aspect?: number }[]
   carouselSpeed?: number
 }
 
@@ -413,49 +408,81 @@ function IntroParagraph() {
 }
 
 
-/* ───────────── Editorial caption-image strip ─────────────── */
+/* ───────────── Infinite photo carousel (below the intro statement) ─────────────── */
 
 function CaptionStrip() {
   const cms = useLife()
-  const ITEMS = (cms.captionStrip ?? []).map(
-    (it, i) => ({
-      src: it.src,
-      caption: it.caption,
-      // Match the frame to the photo's real proportions so nothing gets
-      // cropped — whatever aspect marketing uploads is what shows. Falls back
-      // to a portrait frame only when the ratio is unknown.
-      aspect: 'aspect' in it && it.aspect ? String(it.aspect) : '4 / 5',
-      offset: i % 2 === 0 ? 0 : 64,
-    }),
-  )
-  return (
-    <section
-      className="relative w-full px-[4vw] pt-[3vh] pb-[12vh] grid grid-cols-1 md:grid-cols-2 gap-x-[4vw] gap-y-16"
-      style={{ backgroundColor: '#FFFFFF' }}
+  const ITEMS = (cms.captionStrip ?? []).filter((it) => it.src)
+  if (ITEMS.length === 0) return null
+  const speed = cms.carouselSpeed && cms.carouselSpeed > 0 ? cms.carouselSpeed : 2
+
+  // Three rows, alternating direction, each an infinite loop. Every row shows all
+  // photos (offset per row) so every row stays full even with only a few images.
+  const rows = [
+    { dir: 'left' as const, dur: 56 / speed, offset: 0 },
+    { dir: 'right' as const, dur: 64 / speed, offset: 1 },
+    { dir: 'left' as const, dur: 60 / speed, offset: 2 },
+  ]
+
+  const card = (it: { src: string; caption?: string }) => (
+    <div
+      className="relative overflow-hidden"
+      style={{
+        // Uniform horizontal (landscape) frame for every photo; object-cover
+        // fills it regardless of the original image's proportions.
+        width: 'clamp(280px, 60vw, 400px)',
+        aspectRatio: '3 / 2',
+        borderRadius: 16,
+        backgroundColor: FAINT,
+      }}
     >
-      {ITEMS.map((it, i) => (
-        <motion.div
-          key={i}
-          initial={{ opacity: 0, y: 60 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-100px' }}
-          transition={{ duration: 1, ease: EASE, delay: i * 0.1 }}
-          style={{ marginTop: it.offset }}
-        >
+      <Image src={it.src} alt={it.caption ?? ''} fill sizes="340px" style={{ objectFit: 'cover' }} />
+      {it.caption && (
+        <>
           <div
-            className="relative overflow-hidden"
-            style={{ borderRadius: 16, aspectRatio: it.aspect, backgroundColor: FAINT }}
-          >
-            <Image src={it.src} alt={it.caption} fill sizes="(max-width: 768px) 90vw, 42vw" style={{ objectFit: 'cover' }} />
-          </div>
-          <p
-            className={`${serifClass} italic mt-4`}
-            style={{ fontSize: 20, color: MUTED, fontWeight: 400 }}
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 bottom-0"
+            style={{
+              height: '55%',
+              background: 'linear-gradient(to top, rgba(0,0,0,0.6), rgba(0,0,0,0))',
+            }}
+          />
+          <div
+            className={`${serifClass} absolute inset-x-4 bottom-3 italic text-white`}
+            style={{ fontSize: 'clamp(15px, 1.3vw, 18px)', fontWeight: 500 }}
           >
             {it.caption}
-          </p>
-        </motion.div>
-      ))}
+          </div>
+        </>
+      )}
+    </div>
+  )
+
+  return (
+    <section
+      className="relative w-full overflow-hidden pt-[3vh] pb-[12vh]"
+      style={{ backgroundColor: '#FFFFFF' }}
+    >
+      <div
+        className="flex flex-col gap-3 sm:gap-4"
+        style={{
+          WebkitMaskImage:
+            'linear-gradient(to right, transparent, black 4%, black 96%, transparent)',
+          maskImage:
+            'linear-gradient(to right, transparent, black 4%, black 96%, transparent)',
+        }}
+      >
+        {rows.map((row, r) => (
+          <Marquee
+            key={r}
+            items={ITEMS.map((_, i) => ITEMS[(i + row.offset) % ITEMS.length])}
+            direction={row.dir}
+            duration={row.dur}
+            gap={14}
+            renderItem={(it) => card(it)}
+          />
+        ))}
+      </div>
     </section>
   )
 }
@@ -584,128 +611,6 @@ function TestimonialsBlock() {
   )
 }
 
-/* ───────────────── /3 WORKPLACE block ───────────────── */
-
-function WorkplaceBlock() {
-  const cms = useLife()
-  const HEADLINE = cms.workplaceHeadline ?? ''
-  const KICKER = cms.workplaceLabel ?? ''
-  const BODY = cms.workplaceBody ?? ''
-
-  // Show every image marketing adds — the masonry just keeps growing.
-  const photos = cms.workplaceImages ?? []
-  // Sanity carousel speed multiplier (default 2× faster than the base durations).
-  const speed = cms.carouselSpeed && cms.carouselSpeed > 0 ? cms.carouselSpeed : 2
-
-  return (
-    <section
-      id="workplace"
-      className="relative w-full overflow-hidden"
-      style={{ backgroundColor: INK, padding: '16vh 0' }}
-    >
-      {/* centered header */}
-      <div className="mx-auto max-w-[940px] px-6 text-center">
-        <motion.p
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-80px' }}
-          transition={{ duration: 0.6, ease: EASE }}
-          className={dmSans.className}
-          style={{
-            color: 'rgba(255,255,255,0.5)',
-            fontSize: 13,
-            fontWeight: 500,
-            letterSpacing: '0.22em',
-            textTransform: 'uppercase',
-          }}
-        >
-          {KICKER}
-        </motion.p>
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-80px' }}
-          transition={{ duration: 0.8, ease: EASE, delay: 0.05 }}
-          className={`${serifClass} mt-5`}
-          style={{
-            fontSize: 'clamp(34px, 4.6vw, 68px)',
-            lineHeight: 1.06,
-            fontWeight: 300,
-            color: '#FFFFFF',
-            textWrap: 'balance',
-          }}
-        >
-          {HEADLINE}
-        </motion.h2>
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-80px' }}
-          transition={{ duration: 0.8, ease: EASE, delay: 0.12 }}
-          className={`${dmSans.className} mx-auto mt-6 max-w-[62ch]`}
-          style={{ color: 'rgba(255,255,255,0.66)', fontSize: 16, lineHeight: 1.7 }}
-        >
-          {BODY}
-        </motion.p>
-      </div>
-
-      {/* Three auto-scrolling rows, alternating direction (→, ←, →). Each row
-          is a full-bleed marquee that pauses on hover. */}
-      <div className="mt-10 flex flex-col gap-3 sm:mt-14 sm:gap-4">
-        {([
-          { dir: 'right', dur: 55 },
-          { dir: 'left', dur: 48 },
-          { dir: 'right', dur: 62 },
-        ] as const).map((row, r) => (
-          <Marquee
-            key={r}
-            items={photos.map((_, i) => photos[(i + r * 2) % photos.length])}
-            direction={row.dir}
-            duration={row.dur / speed}
-            gap={14}
-            renderItem={(p) => (
-              <div
-                className="relative overflow-hidden"
-                style={{
-                  width: 'clamp(200px, 56vw, 300px)',
-                  aspectRatio: '3 / 4',
-                  borderRadius: 16,
-                  backgroundColor: '#1E1E1E',
-                }}
-              >
-                <Image
-                  src={p.src}
-                  alt={p.cap ?? ''}
-                  fill
-                  sizes="300px"
-                  style={{ objectFit: 'cover' }}
-                />
-                {p.cap && (
-                  <>
-                    <div
-                      className="pointer-events-none absolute inset-x-0 bottom-0"
-                      style={{
-                        height: '55%',
-                        background: 'linear-gradient(to top, rgba(0,0,0,0.72), rgba(0,0,0,0))',
-                      }}
-                    />
-                    <div
-                      className={`${serifClass} absolute inset-x-4 bottom-4 text-white`}
-                      style={{ fontSize: 'clamp(16px, 1.4vw, 20px)', fontWeight: 500, lineHeight: 1.2 }}
-                    >
-                      {p.cap}
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
-          />
-        ))}
-      </div>
-    </section>
-  )
-}
-
 
 /* ─────────────────────────── PAGE ─────────────────────────── */
 
@@ -761,7 +666,6 @@ export default function LifeAtJlmClient({ cms = {} }: { cms?: LifeCms }) {
         <IntroParagraph />
         <CaptionStrip />
         <TestimonialsBlock />
-        <WorkplaceBlock />
         {/* Section above is black (#111111); a rounded footer top would reveal
             white notches, so sit flush for a seamless black expanse. */}
         <Footer roundedTop={false} />

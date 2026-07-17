@@ -98,7 +98,7 @@ export default function EmoformClient({ cms }: { cms?: EmoformView }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: EASE, delay: 0.1 }}
             className={`${devanagari.className} block whitespace-pre-wrap font-extrabold leading-[1.1] tracking-tight text-white`}
-            style={{ fontSize: 'clamp(2.75rem, 11vw, 13rem)' }}
+            style={{ fontSize: 'clamp(2.75rem, 11vw, 13rem)', marginTop: '0.18em' }}
           >
             {hero2Display}
           </motion.span>

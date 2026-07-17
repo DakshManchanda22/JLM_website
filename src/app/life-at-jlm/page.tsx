@@ -50,19 +50,6 @@ export default async function LifeAtJlmPage() {
         arentHeadline: data.arentHeadline,
         arentBody: data.arentBody,
         testimonials: data.testimonials?.filter((t) => t.quote && t.name),
-        workplaceLabel: data.workplaceLabel,
-        workplaceHeadline: data.workplaceHeadline,
-        workplaceTagline: data.workplaceTagline,
-        workplaceBody: data.workplaceBody,
-        workplaceImages: data.workplaceImages
-          ?.map((w) => {
-            const url = resolveImageUrl(w.image, 1400)
-            return url ? { src: url, cap: w.caption ?? '', aspect: w.aspect } : null
-          })
-          .filter(
-            (x): x is { src: string; cap: string; aspect: number | undefined } =>
-              x !== null,
-          ),
         carouselSpeed: data.carouselSpeed,
       }
     : {}

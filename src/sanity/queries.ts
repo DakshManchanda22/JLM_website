@@ -168,6 +168,8 @@ export type HomeFeatureData = {
   ctaLabel: string
   href: string
   image: any
+  images?: any[]
+  imageIntervalSeconds?: number
   imageRight?: boolean
 }
 
@@ -186,6 +188,7 @@ export type Homepage = {
   vision?: {
     label?: string
     text?: string
+    image?: any
   }
   quote?: {
     lines?: string[]
@@ -218,6 +221,10 @@ export const homepageQuery = groq`*[_type == "homepage"][0]{
   vision{
     label,
     text,
+    image{
+      ${imageWithLqip},
+      "aspect": asset->metadata.dimensions.aspectRatio,
+    },
   },
   quote{
     lines,
@@ -250,6 +257,8 @@ export const homepageQuery = groq`*[_type == "homepage"][0]{
     ctaLabel,
     href,
     imageRight,
+    imageIntervalSeconds,
+    images[]{ ${imageWithLqip} },
     image{ ${imageWithLqip} },
   },
 }`
@@ -326,11 +335,6 @@ export type LifeAtJlm = {
   arentHeadline?: string
   arentBody?: string
   testimonials?: { quote: string; name: string; role: string }[]
-  workplaceLabel?: string
-  workplaceHeadline?: string
-  workplaceTagline?: string
-  workplaceBody?: string
-  workplaceImages?: { image: any; caption: string; aspect?: number }[]
   carouselSpeed?: number
 }
 
@@ -347,8 +351,6 @@ export const lifeAtJlmQuery = groq`*[_type == "lifeAtJlm"][0]{
   introStatement,
   arentHeadline, arentBody,
   testimonials[]{ quote, name, role },
-  workplaceLabel, workplaceHeadline, workplaceTagline, workplaceBody,
-  workplaceImages[]{ image, caption, "aspect": image.asset->metadata.dimensions.aspectRatio },
   carouselSpeed,
 }`
 

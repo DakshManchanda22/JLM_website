@@ -30,7 +30,7 @@ export default function EmoformGumCare({ cms }: { cms?: EmoformView }) {
         <motion.h2
           initial={reduce ? false : { opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.5 }}
+          viewport={{ once: true, margin: '0px 0px -12% 0px', amount: 0.25 }}
           transition={{ duration: 0.7, ease: EASE }}
           className="font-black leading-[1.02] tracking-[-0.02em] text-white"
           style={{ fontSize: 'clamp(2.25rem, 5.5vw, 4rem)' }}
@@ -41,7 +41,7 @@ export default function EmoformGumCare({ cms }: { cms?: EmoformView }) {
         <motion.p
           initial={reduce ? false : { opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.5 }}
+          viewport={{ once: true, margin: '0px 0px -12% 0px', amount: 0.25 }}
           transition={{ duration: 0.7, ease: EASE, delay: 0.08 }}
           className="mt-5 max-w-[46ch] leading-relaxed text-white/85"
           style={{ fontSize: 'clamp(1.05rem, 1.6vw, 1.3rem)' }}
@@ -55,7 +55,7 @@ export default function EmoformGumCare({ cms }: { cms?: EmoformView }) {
           rel="noopener noreferrer"
           initial={reduce ? false : { opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.5 }}
+          viewport={{ once: true, margin: '0px 0px -12% 0px', amount: 0.25 }}
           transition={{ duration: 0.6, ease: EASE, delay: 0.16 }}
           whileHover={reduce ? undefined : { y: -2 }}
           className="mt-9 inline-flex items-center gap-2 rounded-full px-8 py-4 font-bold text-white shadow-[0_14px_30px_-10px_rgba(0,0,0,0.5)] transition-colors"

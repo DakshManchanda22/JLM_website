@@ -14,10 +14,9 @@ export default defineType({
     { name: 'intro', title: 'Intro curtain' },
     { name: 'hero', title: 'Hero' },
     { name: 'anchors', title: 'Anchor menu' },
-    { name: 'caption', title: 'Caption strip' },
+    { name: 'caption', title: 'Photo carousel' },
     { name: 'people', title: 'Intro statement' },
     { name: 'arent', title: 'Employee testimonials' },
-    { name: 'workplace', title: 'Workplace' },
   ],
   fields: [
     /* ───── Intro curtain photos ───── */
@@ -102,13 +101,14 @@ export default defineType({
       ],
     }),
 
-    /* ───── Caption strip ───── */
+    /* ───── Photo carousel (below the intro statement) ───── */
     defineField({
       name: 'captionStrip',
-      title: 'Editorial caption strip (2 images)',
+      title: 'Photo carousel (infinite loop below the intro statement)',
+      description: 'Add any number of photos — they scroll in an infinite loop.',
       group: 'caption',
       type: 'array',
-      validation: (Rule) => Rule.max(4),
+      validation: (Rule) => Rule.max(20),
       of: [
         defineArrayMember({
           type: 'object',
@@ -153,32 +153,10 @@ export default defineType({
       ],
     }),
 
-    /* ───── 3 · Workplace ───── */
-    defineField({ name: 'workplaceLabel', title: 'Label', group: 'workplace', type: 'string' }),
-    defineField({ name: 'workplaceHeadline', title: 'Headline', group: 'workplace', type: 'text', rows: 3 }),
-    defineField({ name: 'workplaceTagline', title: 'Italic tagline', group: 'workplace', type: 'string' }),
-    defineField({ name: 'workplaceBody', title: 'Body paragraph', group: 'workplace', type: 'text', rows: 5 }),
-    defineField({
-      name: 'workplaceImages',
-      title: 'Workplace photo grid (with captions)',
-      group: 'workplace',
-      type: 'array',
-      of: [
-        defineArrayMember({
-          type: 'object',
-          name: 'workplaceImage',
-          fields: [
-            defineField({ name: 'image', title: 'Image', type: 'image', options: { hotspot: true } }),
-            defineField({ name: 'caption', title: 'Caption', type: 'string' }),
-          ],
-          preview: { select: { title: 'caption', media: 'image' } },
-        }),
-      ],
-    }),
     defineField({
       name: 'carouselSpeed',
       title: 'Carousel scroll speed',
-      group: 'workplace',
+      group: 'caption',
       description:
         'How fast the auto-scrolling photo carousels move. 1 = normal, higher = faster ' +
         '(e.g. 2 = twice as fast).',
