@@ -176,7 +176,7 @@ function BrandCard({
           </motion.div>
         )}
 
-        {/* Active footer: tagline + Discover */}
+        {/* Active footer: tagline */}
         <AnimatePresence>
           {isActive && (
             <motion.div
@@ -184,14 +184,11 @@ function BrandCard({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 14 }}
               transition={{ duration: 0.4, ease: EASE }}
-              className="absolute inset-x-6 bottom-6 z-10 flex items-end justify-between gap-4 pointer-events-none"
+              className="absolute inset-x-6 bottom-6 z-10 pointer-events-none"
             >
-              <p className="text-white/85 text-[11px] md:text-xs tracking-[0.25em] uppercase max-w-[60%]">
+              <p className="text-white/85 text-[11px] md:text-xs tracking-[0.25em] uppercase max-w-[70%]">
                 {brand.tagline}
               </p>
-              <span className="text-white text-sm font-medium underline underline-offset-4">
-                Discover →
-              </span>
             </motion.div>
           )}
         </AnimatePresence>

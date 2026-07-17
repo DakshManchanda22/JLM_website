@@ -1,8 +1,8 @@
 import HeroSlideshow, { type Slide, type HeroVideo } from '@/components/HeroSlideshow'
-import VisionSection from '@/components/VisionSection'
 import BrandCards, { type Brand } from '@/components/BrandCards'
 import StatsSection, { type Stat } from '@/components/StatsSection'
 import HomeFeatures, { type HomeFeature } from '@/components/HomeFeatures'
+import VisionSection from '@/components/VisionSection'
 import ValuesImage from '@/components/ValuesImage'
 import Footer from '@/components/Footer'
 import { fetchHomepage } from '@/sanity/queries'
@@ -77,21 +77,29 @@ export default async function Home() {
   }))
 
   const features: HomeFeature[] | undefined = homepage?.features?.flatMap((f) => {
-    const r = resolveImage(f.image, 1400)
-    return r
-      ? [
-          {
-            eyebrow: f.eyebrow,
-            headline: f.headline,
-            body: f.body,
-            ctaLabel: f.ctaLabel,
-            href: f.href,
-            image: r.url,
-            lqip: r.lqip,
-            imageRight: f.imageRight,
-          },
-        ]
-      : []
+    // Prefer the rotating `images` array; fall back to the legacy single image.
+    const source =
+      f.images && f.images.length > 0 ? f.images : f.image ? [f.image] : []
+    const images = source.flatMap((im) => {
+      const r = resolveImage(im, 1400)
+      return r ? [{ url: r.url, lqip: r.lqip }] : []
+    })
+    if (images.length === 0) return []
+    return [
+      {
+        eyebrow: f.eyebrow,
+        headline: f.headline,
+        body: f.body,
+        ctaLabel: f.ctaLabel,
+        href: f.href,
+        images,
+        intervalMs:
+          f.imageIntervalSeconds && f.imageIntervalSeconds > 0
+            ? f.imageIntervalSeconds * 1000
+            : undefined,
+        imageRight: f.imageRight,
+      },
+    ]
   })
 
   return (

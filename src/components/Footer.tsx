@@ -37,11 +37,15 @@ type SocialKey = 'linkedin' | 'instagram' | 'facebook' | 'youtube' | 'twitter'
 const SOCIAL_ICONS: Record<SocialKey, { name: string; icon: React.ReactNode }> = {
   linkedin: {
     name: 'LinkedIn',
+    // Full official LinkedIn logo (brand blue), shown at a larger size than the
+    // other monochrome social marks.
     icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
-        <rect x="2" y="9" width="4" height="12" />
-        <circle cx="4" cy="4" r="2" />
+      <svg width="40" height="40" viewBox="0 0 24 24" aria-hidden="true">
+        <rect width="24" height="24" rx="4.2" fill="#0A66C2" />
+        <path
+          fill="#fff"
+          d="M7.06 9.4H4.5V19.5h2.56V9.4Zm.17-2.9a1.48 1.48 0 1 0-2.96 0 1.48 1.48 0 0 0 2.96 0ZM19.5 19.5h-2.56v-4.93c0-1.18-.02-2.69-1.64-2.69-1.64 0-1.9 1.28-1.9 2.6v5.02H10.85V9.4h2.46v1.38h.03c.34-.65 1.18-1.34 2.44-1.34 2.6 0 3.08 1.71 3.08 3.94v6.12Z"
+        />
       </svg>
     ),
   },

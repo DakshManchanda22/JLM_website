@@ -165,9 +165,17 @@ export default defineType({
         defineField({
           name: 'text',
           title: 'Vision statement',
-          description: 'Reveals with a beige marker highlight as it scrolls into view.',
+          description: 'Reveals word by word as it scrolls into view.',
           type: 'text',
           rows: 3,
+        }),
+        defineField({
+          name: 'image',
+          title: 'Vision image (optional — not currently shown)',
+          description:
+            'Optional. The homepage currently shows the vision statement text above, not this image.',
+          type: 'image',
+          options: { hotspot: true },
         }),
       ],
     }),
@@ -391,11 +399,28 @@ export default defineType({
               validation: (Rule) => Rule.required(),
             }),
             defineField({
+              name: 'images',
+              title: 'Images (rotate with a fade)',
+              description:
+                'Add one or more photos. With more than one, they cross-fade from one to ' +
+                'the next automatically. Drag to reorder.',
+              type: 'array',
+              of: [defineArrayMember({ type: 'image', options: { hotspot: true } })],
+              validation: (Rule) => Rule.min(1).error('Add at least one image.'),
+            }),
+            defineField({
+              name: 'imageIntervalSeconds',
+              title: 'Seconds each image shows',
+              description: 'How long each photo stays before fading to the next (default 5).',
+              type: 'number',
+              initialValue: 5,
+              validation: (Rule) => Rule.min(1).max(30),
+            }),
+            defineField({
               name: 'image',
-              title: 'Image',
+              title: 'Image (fallback — used only if no images are added above)',
               type: 'image',
               options: { hotspot: true },
-              validation: (Rule) => Rule.required(),
             }),
             defineField({
               name: 'imageRight',

@@ -92,7 +92,7 @@ export default function EmoformFeatures({ cms }: { cms?: EmoformView }) {
           <motion.h2
             initial={reduce ? false : { opacity: 0, y: 22 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.4 }}
+            viewport={{ once: true, margin: '0px 0px -15% 0px', amount: 0.2 }}
             transition={{ duration: 0.7, ease: EASE }}
             style={{ color: NAVY }}
           >
@@ -121,7 +121,7 @@ export default function EmoformFeatures({ cms }: { cms?: EmoformView }) {
               <motion.li
                 key={b.t2}
                 variants={reduce ? undefined : item}
-                className="flex w-fit items-center gap-4 rounded-full border border-[rgba(19,48,110,0.12)] bg-white/85 p-1.5 pr-6 shadow-[0_10px_30px_-8px_rgba(19,48,110,0.18)] backdrop-blur-md md:gap-5 md:pr-8"
+                className="flex w-fit items-center gap-4 rounded-full border border-[rgba(19,48,110,0.12)] bg-white p-1.5 pr-6 shadow-[0_10px_30px_-8px_rgba(19,48,110,0.18)] md:gap-5 md:pr-8"
               >
                 <span
                   className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border md:h-16 md:w-16"
@@ -166,7 +166,7 @@ export default function EmoformFeatures({ cms }: { cms?: EmoformView }) {
       <motion.div
         initial={reduce ? false : { opacity: 0, x: 28 }}
         whileInView={{ opacity: 1, x: 0 }}
-        viewport={{ once: true, amount: 0.3 }}
+        viewport={{ once: true, amount: 0.1 }}
         transition={{ duration: 0.9, ease: EASE }}
         className="absolute inset-y-0 right-0 z-0 flex items-stretch justify-end"
       >

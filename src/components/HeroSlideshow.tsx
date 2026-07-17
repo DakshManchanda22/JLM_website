@@ -202,15 +202,32 @@ function HeroVideoPlayer({ video }: { video: HeroVideo }) {
     setMuted(next)
   }
 
+  // Open the video in the browser's native full-screen player. iOS Safari needs
+  // the video-element-specific `webkitEnterFullscreen`, which shows the native
+  // player with controls; everyone else uses the standard Fullscreen API.
+  const enterFullscreen = () => {
+    const el = videoRef.current as
+      | (HTMLVideoElement & {
+          webkitEnterFullscreen?: () => void
+          webkitRequestFullscreen?: () => void
+        })
+      | null
+    if (!el) return
+    if (el.requestFullscreen) el.requestFullscreen().catch(() => {})
+    else if (el.webkitEnterFullscreen) el.webkitEnterFullscreen()
+    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen()
+  }
+
   return (
     <section
-      className="relative w-full overflow-hidden bg-[#111111]"
-      style={{ height: '100vh' }}
+      // Mobile keeps the video horizontal (16:9) so it isn't vertically cropped;
+      // desktop fills the viewport height.
+      className="relative w-full overflow-hidden bg-[#111111] h-[56.25vw] md:h-screen"
     >
       <video
         ref={videoRef}
         className="absolute inset-0 h-full w-full object-cover"
-        style={{ objectPosition: 'center top' }}
+        style={{ objectPosition: 'center' }}
         src={video.videoUrl}
         poster={video.poster}
         autoPlay
@@ -243,6 +260,19 @@ function HeroVideoPlayer({ video }: { video: HeroVideo }) {
             <path d="M18.5 5.5a9 9 0 0 1 0 13" />
           </svg>
         )}
+      </button>
+
+      {/* Enlarge → native full-screen player */}
+      <button
+        onClick={enterFullscreen}
+        aria-label="Play video full screen"
+        title="Full screen"
+        className="absolute bottom-6 right-5 md:right-8 z-20 flex h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-black/30 backdrop-blur text-white/90 hover:bg-black/50 hover:text-white transition-colors"
+        style={{ bottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3" />
+        </svg>
       </button>
 
       {/* Headline overlay — bottom-left, huge (only if text is set) */}

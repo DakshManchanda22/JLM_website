@@ -879,9 +879,13 @@ function ProductRange({
       {/* TODO: replace the placeholder counts with real follower numbers. */}
       <SocialStamps
         heading="Join the community"
-        ink="#1d1408"
-        muted="#6b5d45"
+        paper="#111111"
+        ink="#F7F3EC"
+        muted="#B6AD9E"
+        placeholderBg="#1E1B16"
+        headingColor="#1d1408"
         notchColor="#f2ebdd"
+        perforated={false}
         fontClassName={googleSans.className}
         cards={[
           {

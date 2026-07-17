@@ -28,6 +28,10 @@ interface SocialStampsProps {
   paper?: string
   ink?: string
   muted?: string
+  /** Background of the image half (behind photos / the platform placeholder). */
+  placeholderBg?: string
+  /** Perforated "stamp" edge. Off gives a clean rounded card. Default on. */
+  perforated?: boolean
   /**
    * Colour that shows THROUGH the perforated edge — set this to the section's
    * background so the notches read as real stamp cut-outs.
@@ -106,6 +110,8 @@ function Stamp({
   ink,
   muted,
   notchColor,
+  placeholderBg,
+  perforated,
 }: {
   card: SocialStampCard
   index: number
@@ -113,6 +119,8 @@ function Stamp({
   ink: string
   muted: string
   notchColor: string
+  placeholderBg: string
+  perforated: boolean
 }) {
   const countLabel = card.platform === 'youtube' ? 'subscribers' : 'followers'
   // Alternate the layout: even cards have text on top, odd cards image on top.
@@ -149,7 +157,7 @@ function Stamp({
   )
 
   const imageHalf = (
-    <div className="relative z-[1] h-[42%] overflow-hidden" style={{ backgroundColor: '#EDE7DA' }}>
+    <div className="relative z-[1] h-[42%] overflow-hidden" style={{ backgroundColor: placeholderBg }}>
       {card.image ? (
         <Image
           src={card.image}
@@ -180,7 +188,9 @@ function Stamp({
       viewport={{ once: true, margin: '-80px' }}
       transition={{ duration: 0.45, ease: 'easeOut', delay: index * 0.1 }}
       whileHover={{ y: -8, scale: 1.02, transition: { duration: 0.25, ease: 'easeOut' } }}
-      className="group relative flex h-[400px] w-full flex-col overflow-hidden shadow-[0_16px_36px_-18px_rgba(20,16,10,0.35)] transition-shadow duration-300 hover:shadow-[0_28px_50px_-20px_rgba(20,16,10,0.5)] sm:w-[330px]"
+      className={`group relative flex h-[400px] w-full flex-col overflow-hidden shadow-[0_16px_36px_-18px_rgba(20,16,10,0.35)] transition-shadow duration-300 hover:shadow-[0_28px_50px_-20px_rgba(20,16,10,0.5)] sm:w-[330px] ${
+        perforated ? '' : 'rounded-3xl'
+      }`}
       style={{ backgroundColor: paper }}
     >
       {imageOnTop ? (
@@ -196,7 +206,9 @@ function Stamp({
       )}
 
       {/* perforated edge overlay */}
-      <span aria-hidden className="pointer-events-none absolute inset-0 z-[2]" style={perforation(notchColor)} />
+      {perforated && (
+        <span aria-hidden className="pointer-events-none absolute inset-0 z-[2]" style={perforation(notchColor)} />
+      )}
     </motion.a>
   )
 }
@@ -208,7 +220,9 @@ export default function SocialStamps({
   paper = '#F4F1E8',
   ink = '#1A1712',
   muted = '#6B6459',
+  placeholderBg = '#EDE7DA',
   notchColor = '#FFFFFF',
+  perforated = true,
   headingColor,
   fontClassName = '',
   className = '',
@@ -238,6 +252,8 @@ export default function SocialStamps({
               ink={ink}
               muted={muted}
               notchColor={notchColor}
+              placeholderBg={placeholderBg}
+              perforated={perforated}
             />
           ))}
         </div>
