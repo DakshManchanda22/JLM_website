@@ -34,9 +34,12 @@ export default function EmoformClient({ cms }: { cms?: EmoformView }) {
   const flag = cms?.heroFlag ?? 'Swiss Formula'
   const heroImg = cms?.heroImage
 
-  /* Render the second (Hindi) line exactly as authored in Sanity — whitespace
-     preserved — so spacing between the words is controlled from the CMS. */
-  const hero2Display = hero2
+  /* On desktop/landscape the second (Hindi) line keeps its authored whitespace —
+     the wide gap lets the tube rise up between the two words. On mobile portrait
+     that gap looks wrong (text sits on top of the tube), so collapse every run
+     of whitespace (incl. non-breaking spaces) down to a single space. */
+  const hero2Raw = hero2
+  const hero2Collapsed = hero2.replace(/[\s ]+/g, ' ').trim()
 
   /* Hold the slide-up until the full toothpaste image has decoded, so the
      tube is always sharp as it rises — never the blurry LQIP placeholder.
@@ -97,10 +100,12 @@ export default function EmoformClient({ cms }: { cms?: EmoformView }) {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: EASE, delay: 0.1 }}
-            className={`${devanagari.className} block whitespace-pre-wrap font-extrabold leading-[1.1] tracking-tight text-white`}
+            className={`${devanagari.className} block font-extrabold leading-[1.1] tracking-tight text-white`}
             style={{ fontSize: 'clamp(2.75rem, 11vw, 13rem)', marginTop: '0.18em' }}
           >
-            {hero2Display}
+            {/* Portrait (mobile): gap collapsed. Landscape/desktop: authored gap kept. */}
+            <span className="landscape:hidden">{hero2Collapsed}</span>
+            <span className="hidden whitespace-pre-wrap landscape:inline">{hero2Raw}</span>
           </motion.span>
         </div>
 

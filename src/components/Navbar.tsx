@@ -20,24 +20,23 @@ function Logo({ className }: { className?: string }) {
   )
 }
 
-/* Plain arrow (an up-arrow rotated 90° to point right, or -90° to point left /
-   back) — used on the mobile menu rows. */
-function CircleArrow({ dir = 'right' }: { dir?: 'right' | 'left' }) {
+/* Chevron used on the mobile accordion rows — points down, flips up when the
+   section is open. */
+function Chevron({ open }: { open: boolean }) {
   return (
     <span aria-hidden className="inline-flex shrink-0 items-center justify-center text-white">
       <svg
-        width="27"
-        height="27"
+        width="22"
+        height="22"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
-        style={{ transform: `rotate(${dir === 'right' ? 90 : -90}deg)` }}
+        style={{ transform: `rotate(${open ? 180 : 0}deg)`, transition: 'transform 0.3s' }}
       >
-        <path d="M12 19V5" />
-        <path d="M6 11l6-6 6 6" />
+        <path d="M6 9l6 6 6-6" />
       </svg>
     </span>
   )
@@ -205,7 +204,13 @@ export default function Navbar() {
           >
             <div className="flex items-center justify-between h-[var(--nav-h)] px-5 border-b border-white/10">
               <div className="w-6" />
-              <Logo className="h-9 md:h-12 w-auto" />
+              <Link
+                href="/"
+                onClick={() => setMobileOpen(false)}
+                aria-label="JL Morison home"
+              >
+                <Logo className="h-9 md:h-12 w-auto" />
+              </Link>
               <button
                 onClick={() => setMobileOpen(false)}
                 aria-label="Close menu"
@@ -221,88 +226,67 @@ export default function Navbar() {
               </button>
             </div>
 
-            <div className="relative flex-1 overflow-hidden border-t border-white/15">
-              <AnimatePresence initial={false} mode="wait">
-                {mobileExpanded === null ? (
-                  <motion.nav
-                    key="main"
-                    initial={{ opacity: 0, x: -24 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -24 }}
-                    transition={{ duration: 0.28, ease: EASE }}
-                    className="absolute inset-0 overflow-y-auto px-6 py-3"
-                  >
-                    {ALL_MOBILE.map((label) => {
-                      const subs = DROPDOWNS[label]
-                      const href = label === 'Contact Us' ? '/contact-us' : linkHref(label)
-                      const row = (
-                        <div className="flex w-full items-center justify-between py-5">
-                          <span className="text-3xl font-normal tracking-tight text-white">
+            <nav className="relative flex-1 overflow-y-auto border-t border-white/15 px-6 py-3">
+              {ALL_MOBILE.map((label) => {
+                const subs = DROPDOWNS[label]
+                const href = label === 'Contact Us' ? '/contact-us' : linkHref(label)
+                const isOpen = mobileExpanded === label
+                return (
+                  <div key={label} className="border-b border-white/15">
+                    {subs ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => setMobileExpanded(isOpen ? null : label)}
+                          aria-expanded={isOpen}
+                          className="flex w-full items-center justify-between py-4 text-left"
+                        >
+                          <span className="text-2xl font-normal tracking-tight text-white">
                             {label}
                           </span>
-                          <CircleArrow dir="right" />
-                        </div>
-                      )
-                      return (
-                        <div key={label} className="border-b border-white/15">
-                          {subs ? (
-                            <button
-                              type="button"
-                              onClick={() => setMobileExpanded(label)}
-                              className="block w-full text-left"
+                          <Chevron open={isOpen} />
+                        </button>
+                        <AnimatePresence initial={false}>
+                          {isOpen && (
+                            <motion.div
+                              key="sub"
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.3, ease: EASE }}
+                              className="overflow-hidden"
                             >
-                              {row}
-                            </button>
-                          ) : (
-                            <Link
-                              href={href}
-                              onClick={() => setMobileOpen(false)}
-                              className="block w-full"
-                            >
-                              {row}
-                            </Link>
+                              <div className="flex flex-col pb-3 pl-3">
+                                {subs.map((sub) => (
+                                  <Link
+                                    key={sub}
+                                    href={`/${slug(sub)}`}
+                                    onClick={() => setMobileOpen(false)}
+                                    className="py-2.5 text-lg font-light text-white/80 hover:text-white"
+                                  >
+                                    {sub}
+                                  </Link>
+                                ))}
+                              </div>
+                            </motion.div>
                           )}
-                        </div>
-                      )
-                    })}
-                  </motion.nav>
-                ) : (
-                  <motion.nav
-                    key="sub"
-                    initial={{ opacity: 0, x: 28 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 28 }}
-                    transition={{ duration: 0.28, ease: EASE }}
-                    className="absolute inset-0 overflow-y-auto px-6 py-3"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setMobileExpanded(null)}
-                      aria-label="Back"
-                      className="mb-2 mt-2 block"
-                    >
-                      <CircleArrow dir="left" />
-                    </button>
-                    {(DROPDOWNS[mobileExpanded] ?? []).map((sub) => (
-                      <div key={sub} className="border-b border-white/15">
-                        <Link
-                          href={`/${slug(sub)}`}
-                          onClick={() => setMobileOpen(false)}
-                          className="block w-full"
-                        >
-                          <div className="flex w-full items-center justify-between py-5">
-                            <span className="text-3xl font-normal tracking-tight text-white">
-                              {sub}
-                            </span>
-                            <CircleArrow dir="right" />
-                          </div>
-                        </Link>
-                      </div>
-                    ))}
-                  </motion.nav>
-                )}
-              </AnimatePresence>
-            </div>
+                        </AnimatePresence>
+                      </>
+                    ) : (
+                      <Link
+                        href={href}
+                        onClick={() => setMobileOpen(false)}
+                        className="flex w-full items-center py-4"
+                      >
+                        <span className="text-2xl font-normal tracking-tight text-white">
+                          {label}
+                        </span>
+                      </Link>
+                    )}
+                  </div>
+                )
+              })}
+            </nav>
           </motion.div>
         )}
       </AnimatePresence>

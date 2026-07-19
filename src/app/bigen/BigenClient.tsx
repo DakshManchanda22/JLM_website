@@ -278,22 +278,43 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
                 className="mt-6 leading-[0.95]"
                 style={{ fontFamily: 'var(--font-google-sans)' }}
               >
-                <span className="block text-[clamp(2.25rem,4.8vw,4rem)] font-bold text-[#f6efe0]">
-                  {cms.heroHeadline1 || D.heroHeadline1}
+                {/* Mobile: "Specially formulated" on one line, "for men" below —
+                    each line sized by vw to fill the width and stay large. */}
+                <span className="lg:hidden">
+                  <span className="block whitespace-nowrap text-[7.4vw] font-bold text-[#f6efe0]">
+                    {cms.heroHeadline1 || D.heroHeadline1}{' '}
+                    {cms.heroHeadline2 || D.heroHeadline2}
+                  </span>
+                  <span
+                    className="block whitespace-nowrap text-[7.4vw] font-bold bg-clip-text text-transparent"
+                    style={{
+                      backgroundImage:
+                        'linear-gradient(95deg, #f5e487 0%, #d8b04a 60%, #c79a3a 100%)',
+                    }}
+                  >
+                    {D.heroHeadline3}
+                  </span>
                 </span>
-                <span className="block text-[clamp(2.25rem,4.8vw,4rem)] font-bold text-[#f6efe0]">
-                  {cms.heroHeadline2 || D.heroHeadline2}
-                </span>
-                <span
-                  className="block text-[clamp(2.25rem,4.8vw,4rem)] font-bold bg-clip-text text-transparent"
-                  style={{
-                    backgroundImage:
-                      'linear-gradient(95deg, #f5e487 0%, #d8b04a 60%, #c79a3a 100%)',
-                  }}
-                >
-                  {/* Fixed to "for men" in code — the Sanity value is stale and the
-                      API token is read-only. Update Sanity, then restore cms.heroHeadline3. */}
-                  {D.heroHeadline3}
+
+                {/* Desktop: original three-line stack. */}
+                <span className="hidden lg:block">
+                  <span className="block text-[clamp(2.25rem,4.8vw,4rem)] font-bold text-[#f6efe0]">
+                    {cms.heroHeadline1 || D.heroHeadline1}
+                  </span>
+                  <span className="block text-[clamp(2.25rem,4.8vw,4rem)] font-bold text-[#f6efe0]">
+                    {cms.heroHeadline2 || D.heroHeadline2}
+                  </span>
+                  <span
+                    className="block text-[clamp(2.25rem,4.8vw,4rem)] font-bold bg-clip-text text-transparent"
+                    style={{
+                      backgroundImage:
+                        'linear-gradient(95deg, #f5e487 0%, #d8b04a 60%, #c79a3a 100%)',
+                    }}
+                  >
+                    {/* Fixed to "for men" in code — the Sanity value is stale and the
+                        API token is read-only. Update Sanity, then restore cms.heroHeadline3. */}
+                    {D.heroHeadline3}
+                  </span>
                 </span>
               </motion.h1>
 
@@ -315,7 +336,7 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
                 <span
                   className="font-extrabold uppercase leading-[0.95] tracking-tight bg-clip-text text-transparent"
                   style={{
-                    fontSize: 'clamp(2.4rem, 7.6vw, 5rem)',
+                    fontSize: 'clamp(3rem, 9.5vw, 5.5rem)',
                     backgroundImage:
                       'linear-gradient(180deg, #fff6cf 0%, #f7e489 22%, #e6c25a 46%, #cf9f37 64%, #a9781f 84%, #f0d885 100%)',
                   }}
@@ -325,7 +346,7 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
                 <span
                   className="font-extrabold uppercase leading-[0.8] tracking-[-0.02em] bg-clip-text text-transparent"
                   style={{
-                    fontSize: 'clamp(6rem, 20vw, 12.5rem)',
+                    fontSize: 'clamp(7.5rem, 24vw, 13.5rem)',
                     backgroundImage:
                       'linear-gradient(180deg, #fff6cf 0%, #f7e489 22%, #e6c25a 46%, #cf9f37 64%, #a9781f 84%, #f0d885 100%)',
                     filter: 'drop-shadow(0 6px 30px rgba(240,200,90,0.35))',
@@ -885,7 +906,6 @@ function ProductRange({
         placeholderBg="#1E1B16"
         headingColor="#1d1408"
         notchColor="#f2ebdd"
-        perforated={false}
         fontClassName={googleSans.className}
         cards={[
           {

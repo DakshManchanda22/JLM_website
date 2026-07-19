@@ -76,8 +76,10 @@ export default function StatsSection({
   const loopDuration = 45 / (speed && speed > 0 ? speed : 2)
   const HEADING = heading ?? ''
   const sectionRef = useRef<HTMLElement>(null)
-  // Fit the heading onto a single line (shrinks the font until it stops wrapping).
-  const headingRef = useFitLines(1, 64, 14)
+  // Fit the heading into at most two lines, capped at 48px (3rem) so it matches
+  // the other homepage headings. On desktop it stays one line; on mobile it wraps
+  // to two lines at a comfortably large size instead of shrinking to a tiny font.
+  const headingRef = useFitLines(2, 48, 22)
 
   /* Fade-up reveal of the header row (heading + note) */
   useEffect(() => {
