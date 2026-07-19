@@ -424,14 +424,14 @@ export default function EmoformScrollytelling({ cms }: { cms?: EmoformView }) {
                   {s.rda && <RdaGauge reduce={reduce} />}
 
                   {s.features && (
-                    <div className="mt-8 flex flex-wrap gap-8 sm:gap-10">
+                    <div className="mt-8 flex justify-between gap-2 sm:flex-wrap sm:justify-start sm:gap-10">
                       {FEATURES.map((f, fi) => (
                         <div
                           key={fi}
-                          className="flex flex-col items-center gap-3 text-center"
+                          className="flex w-[30%] flex-col items-center gap-3 text-center sm:w-auto"
                         >
                           <span
-                            className="flex h-16 w-16 items-center justify-center rounded-full border md:h-[72px] md:w-[72px]"
+                            className="flex h-14 w-14 items-center justify-center rounded-full border sm:h-16 sm:w-16 md:h-[72px] md:w-[72px]"
                             style={{
                               borderColor: 'rgba(19,48,110,0.28)',
                               color: NAVY,
@@ -444,14 +444,14 @@ export default function EmoformScrollytelling({ cms }: { cms?: EmoformView }) {
                               strokeWidth={1.6}
                               strokeLinecap="round"
                               strokeLinejoin="round"
-                              className="h-8 w-8"
+                              className="h-7 w-7 sm:h-8 sm:w-8"
                             >
                               {f.icon}
                             </svg>
                           </span>
                           <span
                             className="font-bold"
-                            style={{ color: NAVY, fontSize: '0.95rem' }}
+                            style={{ color: NAVY, fontSize: 'clamp(0.78rem, 3.2vw, 0.95rem)' }}
                           >
                             {cms?.steps?.[i]?.points?.[fi] ?? f.label}
                           </span>

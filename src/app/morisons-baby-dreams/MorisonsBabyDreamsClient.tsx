@@ -563,29 +563,49 @@ function BabyVideo({
     if (!wrap || !frame) return
     const scroller = document.getElementById('page-scroller')
 
+    // On mobile a full-bleed 100svh expand leaves a tall horizontal video
+    // stranded with big empty margins. There we keep the video as a contained
+    // 16:9 card and just do a soft scale/fade-in; the full-bleed scrub expand is
+    // desktop-only.
+    const isMobile = window.matchMedia('(max-width: 767px)').matches
+
     const ctx = gsap.context(() => {
-      gsap.fromTo(
-        frame,
-        { scale: 0.62, borderRadius: 44 },
-        {
-          scale: 1,
-          borderRadius: 0,
-          ease: 'none',
+      if (isMobile) {
+        gsap.from(frame, {
+          scale: 0.92,
+          opacity: 0,
+          duration: 0.8,
+          ease: 'power3.out',
           scrollTrigger: {
-            trigger: wrap,
+            trigger: frame,
             scroller: scroller ?? undefined,
-            /* Drive the expand from the section's ENTRANCE: it starts growing as
-               the frame rises into view from the bottom and reaches full-bleed
-               right as it settles at the top (pin point) — so the effect reads
-               as part of the scroll, not a separate event once you arrive.
-               The remaining sticky range then holds it full-screen briefly. */
-            start: 'top 75%',
-            end: 'top top',
-            scrub: true,
-            invalidateOnRefresh: true,
+            start: 'top 85%',
           },
-        },
-      )
+        })
+      } else {
+        gsap.fromTo(
+          frame,
+          { scale: 0.62, borderRadius: 44 },
+          {
+            scale: 1,
+            borderRadius: 0,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: wrap,
+              scroller: scroller ?? undefined,
+              /* Drive the expand from the section's ENTRANCE: it starts growing as
+                 the frame rises into view from the bottom and reaches full-bleed
+                 right as it settles at the top (pin point) — so the effect reads
+                 as part of the scroll, not a separate event once you arrive.
+                 The remaining sticky range then holds it full-screen briefly. */
+              start: 'top 75%',
+              end: 'top top',
+              scrub: true,
+              invalidateOnRefresh: true,
+            },
+          },
+        )
+      }
     }, wrap)
     return () => ctx.revert()
   }, [reduce])
@@ -632,13 +652,16 @@ function BabyVideo({
           </div>
         </div>
       ) : (
-        /* The wrapper reserves the scroll distance; the sticky frame expands
-           within it from card to full-bleed. */
-        <div ref={scrubRef} className="relative mt-10" style={{ height: '140vh' }}>
-          <div className="sticky top-0 flex h-[100svh] w-full items-center justify-center overflow-hidden">
+        /* Mobile: a contained 16:9 card (soft scale-in). Desktop: the wrapper
+           reserves scroll distance and the sticky frame expands to full-bleed. */
+        <div
+          ref={scrubRef}
+          className="relative mt-10 px-6 pb-12 md:px-0 md:pb-0 md:h-[140vh]"
+        >
+          <div className="md:sticky md:top-0 md:flex md:h-[100svh] md:w-full md:items-center md:justify-center md:overflow-hidden">
             <div
               ref={frameRef}
-              className="relative h-[100svh] w-full overflow-hidden bg-[#e8ddce] will-change-transform"
+              className="relative mx-auto aspect-video w-full max-w-[1400px] overflow-hidden rounded-[28px] bg-[#e8ddce] will-change-transform md:mx-0 md:aspect-auto md:h-[100svh] md:max-w-none md:rounded-none"
               onMouseEnter={() => setShowControls(true)}
               onMouseLeave={() => setShowControls(false)}
             >
@@ -843,7 +866,6 @@ function Follow({
       placeholderBg="#1E1B16"
       headingColor={INK}
       notchColor={CREAM}
-      perforated={false}
       fontClassName={nunito.className}
     />
   )

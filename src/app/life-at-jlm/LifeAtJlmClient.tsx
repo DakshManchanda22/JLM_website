@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
 import Image from 'next/image'
 import { motion, useReducedMotion } from 'framer-motion'
 import { Cormorant_Garamond, DM_Sans } from 'next/font/google'
@@ -497,6 +497,80 @@ const CARD_STYLES = [
   { bg: '#2A2A2A', fg: '#FFFFFF', sub: 'rgba(255,255,255,0.62)', border: '1px solid rgba(255,255,255,0.08)' },
 ] as const
 
+/* A single testimonial card. The card, the quote area and the name/role block
+   are a FIXED size and position on every card — only the quote's font size
+   changes: it shrinks until the quote fits its (fixed) area, so the name and
+   role always sit at exactly the same spot regardless of quote length. */
+function QuoteCard({
+  t,
+  s,
+}: {
+  t: { quote: string; name: string; role: string }
+  s: (typeof CARD_STYLES)[number]
+}) {
+  const boxRef = useRef<HTMLDivElement>(null)
+  const quoteRef = useRef<HTMLQuoteElement>(null)
+
+  useEffect(() => {
+    const box = boxRef.current
+    const q = quoteRef.current
+    if (!box || !q) return
+
+    const fit = () => {
+      let size = 27
+      q.style.fontSize = `${size}px`
+      // Shrink (never grow past 27) until the quote fits the fixed quote box.
+      while (q.scrollHeight > box.clientHeight && size > 12) {
+        size -= 0.5
+        q.style.fontSize = `${size}px`
+      }
+    }
+
+    fit()
+    const ro = new ResizeObserver(fit)
+    ro.observe(box)
+    return () => ro.disconnect()
+  }, [t.quote])
+
+  return (
+    <figure
+      className="flex flex-col overflow-hidden"
+      style={{
+        width: 'min(86vw, 410px)',
+        height: 440,
+        backgroundColor: s.bg,
+        color: s.fg,
+        border: s.border,
+        borderRadius: 20,
+        padding: '32px 30px',
+      }}
+    >
+      <div ref={boxRef} className="min-h-0 flex-1 overflow-hidden">
+        <blockquote
+          ref={quoteRef}
+          className={dmSans.className}
+          style={{ fontSize: 27, lineHeight: 1.42, fontWeight: 400 }}
+        >
+          “{t.quote}”
+        </blockquote>
+      </div>
+      <figcaption className="mt-6 shrink-0">
+        <div
+          className={dmSans.className}
+          style={{ fontSize: 24, fontWeight: 600, letterSpacing: '-0.01em' }}
+        >
+          {t.name}
+        </div>
+        {t.role && (
+          <div className={`${dmSans.className} mt-1`} style={{ fontSize: 14, color: s.sub }}>
+            {t.role}
+          </div>
+        )}
+      </figcaption>
+    </figure>
+  )
+}
+
 function TestimonialsBlock() {
   const cms = useLife()
   const reduce = useReducedMotion()
@@ -564,48 +638,9 @@ function TestimonialsBlock() {
         duration={Math.max(28, ITEMS.length * 9) / speed}
         gap={20}
         className="mt-[8vh]"
-        renderItem={(t, i) => {
-          const s = CARD_STYLES[i % CARD_STYLES.length]
-          // Longer quotes step the font down so every card stays the same size,
-          // but the floor stays large enough to fill the card comfortably.
-          const len = t.quote.length
-          const qFont =
-            len > 260 ? 20 : len > 210 ? 21.5 : len > 160 ? 23 : len > 110 ? 25 : 27
-          return (
-            <figure
-              className="flex flex-col justify-between overflow-hidden"
-              style={{
-                width: 'min(86vw, 410px)',
-                height: 440,
-                backgroundColor: s.bg,
-                color: s.fg,
-                border: s.border,
-                borderRadius: 20,
-                padding: '32px 30px',
-              }}
-            >
-              <blockquote
-                className={dmSans.className}
-                style={{ fontSize: qFont, lineHeight: 1.42, fontWeight: 400 }}
-              >
-                “{t.quote}”
-              </blockquote>
-              <figcaption className="mt-8">
-                <div
-                  className={dmSans.className}
-                  style={{ fontSize: 24, fontWeight: 600, letterSpacing: '-0.01em' }}
-                >
-                  {t.name}
-                </div>
-                {t.role && (
-                  <div className={`${dmSans.className} mt-1`} style={{ fontSize: 14, color: s.sub }}>
-                    {t.role}
-                  </div>
-                )}
-              </figcaption>
-            </figure>
-          )
-        }}
+        renderItem={(t, i) => (
+          <QuoteCard t={t} s={CARD_STYLES[i % CARD_STYLES.length]} />
+        )}
       />
     </section>
   )
