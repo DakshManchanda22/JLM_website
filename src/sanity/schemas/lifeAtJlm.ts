@@ -108,7 +108,6 @@ export default defineType({
       description: 'Add any number of photos — they scroll in an infinite loop.',
       group: 'caption',
       type: 'array',
-      validation: (Rule) => Rule.max(20),
       of: [
         defineArrayMember({
           type: 'object',

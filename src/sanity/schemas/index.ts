@@ -9,6 +9,7 @@ import contactUs from './contactUs'
 import emoform from './emoform'
 import esg from './esg'
 import homepage from './homepage'
+import investorRelations from './investorRelations'
 import leader from './leader'
 import lifeAtJlm from './lifeAtJlm'
 import ourStory from './ourStory'
@@ -33,5 +34,6 @@ export const schemaTypes: SchemaTypeDefinition[] = [
   esg,
   careers,
   contactUs,
+  investorRelations,
   siteSettings,
 ]

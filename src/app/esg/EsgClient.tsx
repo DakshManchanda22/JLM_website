@@ -341,8 +341,10 @@ function CarouselGallery({
       aria-label="View image full screen"
       className="group relative block cursor-zoom-in overflow-hidden rounded-2xl bg-[#E8E0D5] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
       style={{
+        // Uniform landscape frame for every photo so the rows read evenly.
+        // object-cover fills it, so vertical/portrait images simply zoom in.
         height: 'clamp(150px, 20vw, 232px)',
-        aspectRatio: `${img.w} / ${img.h}`,
+        aspectRatio: '3 / 2',
       }}
     >
       <Image

@@ -190,6 +190,16 @@ function HeroVideoPlayer({ video }: { video: HeroVideo }) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [muted, setMuted] = useState(true)
 
+  // On touch devices we drop the custom controls and let the browser's native
+  // video player take over (tap to reveal its controls) — same as the Bigen
+  // page. This is also the reliable way to start playback when a phone blocks
+  // muted autoplay (e.g. iOS Low Power / Data Saver).
+  const [isTouch, setIsTouch] = useState(false)
+  const [showControls, setShowControls] = useState(false)
+  useEffect(() => {
+    setIsTouch(window.matchMedia('(hover: none)').matches)
+  }, [])
+
   // iOS Safari only autoplays a video that is muted *at play time*, and React
   // doesn't reliably set the `muted` attribute — so force it on the element and
   // kick off playback ourselves (retrying once the metadata is ready).
@@ -240,9 +250,9 @@ function HeroVideoPlayer({ video }: { video: HeroVideo }) {
 
   return (
     <section
-      // Mobile keeps the video horizontal (16:9) so it isn't vertically cropped;
-      // desktop fills the viewport height.
-      className="relative w-full overflow-hidden bg-[#111111] h-[56.25vw] md:h-screen"
+      // Mobile keeps the horizontal (16:9) frame; desktop uses a taller frame
+      // than the viewport so the video isn't cropped top/bottom by object-cover.
+      className="relative w-full overflow-hidden bg-[#111111] h-[56.25vw] md:h-[115vh]"
     >
       <video
         ref={videoRef}
@@ -255,10 +265,14 @@ function HeroVideoPlayer({ video }: { video: HeroVideo }) {
         loop
         playsInline
         preload="auto"
+        // Touch devices: a tap brings up the browser's native player controls.
+        controls={isTouch && showControls}
+        onClick={isTouch ? () => setShowControls(true) : undefined}
       />
 
-      {/* Bottom-weighted dark gradient for headline legibility */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent" />
+      {/* Bottom-weighted dark gradient for headline legibility. pointer-events-none
+          so taps fall through to the video (to reveal native controls on mobile). */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent" />
 
       {/* Mute / unmute toggle */}
       <button
@@ -287,7 +301,7 @@ function HeroVideoPlayer({ video }: { video: HeroVideo }) {
         onClick={enterFullscreen}
         aria-label="Play video full screen"
         title="Full screen"
-        className="absolute bottom-6 right-5 md:right-8 z-20 flex h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-black/30 backdrop-blur text-white/90 hover:bg-black/50 hover:text-white transition-colors"
+        className="absolute bottom-6 right-5 md:right-8 z-20 hidden h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-black/30 backdrop-blur text-white/90 hover:bg-black/50 hover:text-white transition-colors md:flex"
         style={{ bottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
@@ -301,7 +315,7 @@ function HeroVideoPlayer({ video }: { video: HeroVideo }) {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.65, ease: EASE }}
-          className="absolute bottom-16 left-6 md:left-12 right-6 md:right-32 z-10"
+          className="pointer-events-none absolute bottom-16 left-6 md:left-12 right-6 md:right-32 z-10"
         >
           {video.tagline && (
             <p className="text-white/70 text-xs tracking-[0.3em] uppercase mb-3 md:mb-5">

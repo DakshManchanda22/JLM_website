@@ -330,7 +330,7 @@ export type LifeAtJlm = {
   heroCaptionSmall?: string
   heroCaptionLarge?: string
   anchors?: { num: string; label: string; targetId: string; image: any }[]
-  captionStrip?: { image: any; caption: string; aspect?: number }[]
+  captionStrip?: { image: any; caption?: string; aspect?: number }[]
   introStatement?: string
   arentHeadline?: string
   arentBody?: string
@@ -659,6 +659,7 @@ export type BabyDreams = {
   rangeIntro?: string
   blogsHeadline?: string
   blogsIntro?: string
+  blogsCarouselSpeed?: number
   instagramUrl?: string
   facebookUrl?: string
   youtubeUrl?: string
@@ -675,7 +676,7 @@ export const babyDreamsQuery = groq`*[_type == "babyDreams"][0]{
   videoHeadline, videoUrl,
   videoPoster{ ${imageWithLqip} },
   rangeHeadline, rangeIntro,
-  blogsHeadline, blogsIntro,
+  blogsHeadline, blogsIntro, blogsCarouselSpeed,
   instagramUrl, facebookUrl, youtubeUrl,
   ${socialCardProjection('instagram')},
   ${socialCardProjection('facebook')},
@@ -715,6 +716,7 @@ export async function fetchBabyDreams(): Promise<BabyDreams | null> {
     rangeIntro: raw.rangeIntro,
     blogsHeadline: raw.blogsHeadline,
     blogsIntro: raw.blogsIntro,
+    blogsCarouselSpeed: raw.blogsCarouselSpeed,
     instagramUrl: raw.instagramUrl,
     facebookUrl: raw.facebookUrl,
     youtubeUrl: raw.youtubeUrl,
@@ -1050,4 +1052,105 @@ export async function fetchContactRecipients(): Promise<string[]> {
     groq`*[_type == "contactUs"][0].recipientEmails`,
   )
   return (emails || []).map((e) => e.trim()).filter(Boolean)
+}
+
+/* ── Investor Relations ──────────────────────────────────────────────── */
+export type IRDoc = { label?: string; href?: string }
+export type IRColumn = { heading?: string; links: IRDoc[] }
+export type IRContact = { heading?: string; body?: string }
+export type IRProcedureItem = { text?: string; url?: string }
+
+export type InvestorRelations = {
+  termsHeading?: string
+  termsDocs?: IRDoc[]
+  csrHeading?: string
+  csrMembers?: { name?: string; designation?: string }[]
+  policiesHeading?: string
+  policiesDocs?: IRDoc[]
+  noticeHeading?: string
+  noticeHeadings?: string[]
+  noticeRows?: { cells: IRDoc[] }[]
+  investorsHeading?: string
+  investorsIntro?: string
+  investorsContacts?: IRContact[]
+  investorsDocs?: IRDoc[]
+  campaignHeading?: string
+  campaignDocs?: IRDoc[]
+  multipleMailingHeading?: string
+  multipleMailingBody?: string
+  iepfHeading?: string
+  iepfContactHeading?: string
+  iepfContact?: string
+  iepfSharesHeading?: string
+  iepfSharesColumns?: IRColumn[]
+  iepfDividendHeading?: string
+  iepfDividendColumns?: IRColumn[]
+  iepfProcedureHeading?: string
+  iepfProcedureItems?: IRProcedureItem[]
+}
+
+const irDocFrag = `{ label, "fileUrl": file.asset->url, url }`
+const irColFrag = `{ heading, links[]${irDocFrag} }`
+
+export const investorRelationsQuery = groq`*[_type == "investorRelations"][0]{
+  termsHeading, termsDocs[]${irDocFrag},
+  csrHeading, csrMembers[]{ name, designation },
+  policiesHeading, policiesDocs[]${irDocFrag},
+  noticeHeading, noticeHeadings,
+  noticeRows[]{ cells[]${irDocFrag} },
+  investorsHeading, investorsIntro,
+  investorsContacts[]{ heading, body },
+  investorsDocs[]${irDocFrag},
+  campaignHeading, campaignDocs[]${irDocFrag},
+  multipleMailingHeading, multipleMailingBody,
+  iepfHeading, iepfContactHeading, iepfContact,
+  iepfSharesHeading, iepfSharesColumns[]${irColFrag},
+  iepfDividendHeading, iepfDividendColumns[]${irColFrag},
+  iepfProcedureHeading, iepfProcedureItems[]{ text, url },
+}`
+
+const resolveDocs = (arr: any): IRDoc[] | undefined =>
+  Array.isArray(arr)
+    ? arr.map((d: any) => ({ label: d?.label, href: d?.fileUrl || d?.url || undefined }))
+    : undefined
+
+const resolveCols = (arr: any): IRColumn[] | undefined =>
+  Array.isArray(arr)
+    ? arr.map((c: any) => ({ heading: c?.heading, links: resolveDocs(c?.links) || [] }))
+    : undefined
+
+export async function fetchInvestorRelations(): Promise<InvestorRelations | null> {
+  if (!client) return null
+  const raw: any = await client.fetch(investorRelationsQuery)
+  if (!raw) return null
+  return {
+    termsHeading: raw.termsHeading,
+    termsDocs: resolveDocs(raw.termsDocs),
+    csrHeading: raw.csrHeading,
+    csrMembers: raw.csrMembers,
+    policiesHeading: raw.policiesHeading,
+    policiesDocs: resolveDocs(raw.policiesDocs),
+    noticeHeading: raw.noticeHeading,
+    noticeHeadings: raw.noticeHeadings,
+    noticeRows: Array.isArray(raw.noticeRows)
+      ? raw.noticeRows.map((r: any) => ({ cells: resolveDocs(r?.cells) || [] }))
+      : undefined,
+    investorsHeading: raw.investorsHeading,
+    investorsIntro: raw.investorsIntro,
+    investorsContacts: raw.investorsContacts,
+    investorsDocs: resolveDocs(raw.investorsDocs),
+    campaignHeading: raw.campaignHeading,
+    campaignDocs: resolveDocs(raw.campaignDocs),
+    multipleMailingHeading: raw.multipleMailingHeading,
+    multipleMailingBody: raw.multipleMailingBody,
+    iepfHeading: raw.iepfHeading,
+    iepfContactHeading: raw.iepfContactHeading,
+    iepfContact: raw.iepfContact,
+    iepfSharesHeading: raw.iepfSharesHeading,
+    iepfSharesColumns: resolveCols(raw.iepfSharesColumns),
+    iepfDividendHeading: raw.iepfDividendHeading,
+    iepfDividendColumns: resolveCols(raw.iepfDividendColumns),
+    iepfProcedureHeading: raw.iepfProcedureHeading,
+    iepfProcedureItems: raw.iepfProcedureItems,
+  }
 }

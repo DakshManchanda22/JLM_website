@@ -175,6 +175,17 @@ export default defineType({
       type: 'text',
       rows: 2,
     }),
+    defineField({
+      name: 'blogsCarouselSpeed',
+      title: 'Blogs — carousel speed',
+      group: 'blogs',
+      description:
+        'How fast the doctor-blog cards scroll. 1 = normal, higher = faster ' +
+        '(e.g. 2 is twice as fast). Default is 2.',
+      type: 'number',
+      initialValue: 2,
+      validation: (Rule) => Rule.min(0.5).max(6),
+    }),
 
     /* ───────────── Social links ───────────── */
     defineField({

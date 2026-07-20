@@ -21,7 +21,7 @@ export type LifeCms = {
   heroCaptionSmall?: string
   heroCaptionLarge?: string
   anchors?: { num: string; label: string; targetId: string; image: string }[]
-  captionStrip?: { src: string; caption: string; aspect?: number }[]
+  captionStrip?: { src: string; caption?: string; aspect?: number }[]
   introStatement?: string
   arentHeadline?: string
   arentBody?: string
@@ -416,12 +416,18 @@ function CaptionStrip() {
   if (ITEMS.length === 0) return null
   const speed = cms.carouselSpeed && cms.carouselSpeed > 0 ? cms.carouselSpeed : 2
 
+  // Scale the loop duration by the number of photos so the *pixel* speed stays
+  // constant no matter how many are added (otherwise more photos = faster). The
+  // Sanity `carouselSpeed` is the live multiplier — higher = faster, lower =
+  // slower. ~14s per photo at speed 1 keeps it calm.
+  const rowDur = (mult: number) => (ITEMS.length * 14 * mult) / speed
+
   // Three rows, alternating direction, each an infinite loop. Every row shows all
   // photos (offset per row) so every row stays full even with only a few images.
   const rows = [
-    { dir: 'left' as const, dur: 56 / speed, offset: 0 },
-    { dir: 'right' as const, dur: 64 / speed, offset: 1 },
-    { dir: 'left' as const, dur: 60 / speed, offset: 2 },
+    { dir: 'left' as const, dur: rowDur(1.0), offset: 0 },
+    { dir: 'right' as const, dur: rowDur(1.14), offset: 1 },
+    { dir: 'left' as const, dur: rowDur(1.07), offset: 2 },
   ]
 
   const card = (it: { src: string; caption?: string }) => (

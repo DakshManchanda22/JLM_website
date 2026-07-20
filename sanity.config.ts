@@ -74,6 +74,15 @@ export default defineConfig({
                           .schemaType('contactUs')
                           .documentId('contactUs'),
                       ),
+                    S.listItem()
+                      .title('Investor Relations')
+                      .id('investorRelations')
+                      .child(
+                        S.editor()
+                          .id('investorRelations')
+                          .schemaType('investorRelations')
+                          .documentId('investorRelations'),
+                      ),
                   ]),
               ),
 
