@@ -38,7 +38,6 @@ const BEIGE = '#E8E0D5'
 const KB_BLUE = '#2450A4' // royal cobalt of the Devanagari wordmark
 const KB_BLUE_DEEP = '#183A7C'
 const KB_YELLOW = '#F5B21B' // marigold of the woman figure
-const KB_TINT = '#F4F7FC' // faintest blue wash for section backgrounds
 const EASE = [0.16, 1, 0.3, 1] as const
 
 // Scales a heading's font-size so it always fits on one line regardless of text length.
