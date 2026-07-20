@@ -537,10 +537,35 @@ function BabyVideo({
   const scrubRef = useRef<HTMLDivElement>(null)
   const frameRef = useRef<HTMLDivElement>(null)
 
-  /* Autoplay muted when scrolled into view; pause when it leaves. */
+  // The video's true aspect ratio (read from metadata) so the contained mode
+  // frame hugs the video exactly — no cream bars, no cropping.
+  const [aspect, setAspect] = useState('16 / 9')
+
+  // Full-bleed expand only where a 16:9 video roughly fills the screen (wide
+  // desktops). On squarer/narrower viewports (iPad, portrait, small windows)
+  // we render a full-width band at the video's own ratio instead, so the sides
+  // are never cropped AND there are no top/bottom cream bars.
+  const [fullBleed, setFullBleed] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 768px) and (min-aspect-ratio: 3/2)')
+    const update = () => setFullBleed(mq.matches)
+    update()
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [])
+
+  /* Autoplay muted when scrolled into view; pause when it leaves. Also read the
+     video's real aspect ratio so the contained frame can hug it exactly. */
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
+    const readAspect = () => {
+      if (video.videoWidth && video.videoHeight) {
+        setAspect(`${video.videoWidth} / ${video.videoHeight}`)
+      }
+    }
+    readAspect()
+    video.addEventListener('loadedmetadata', readAspect, { once: true })
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) video.play().catch(() => {})
@@ -549,7 +574,10 @@ function BabyVideo({
       { threshold: 0.3 },
     )
     observer.observe(video)
-    return () => observer.disconnect()
+    return () => {
+      observer.disconnect()
+      video.removeEventListener('loadedmetadata', readAspect)
+    }
   }, [videoUrl])
 
   /* Scroll-scrubbed expand: the frame is laid out full-bleed but starts scaled
@@ -564,14 +592,12 @@ function BabyVideo({
     if (!wrap || !frame) return
     const scroller = document.getElementById('page-scroller')
 
-    // On mobile a full-bleed 100svh expand leaves a tall horizontal video
-    // stranded with big empty margins. There we keep the video as a contained
-    // 16:9 card and just do a soft scale/fade-in; the full-bleed scrub expand is
-    // desktop-only.
-    const isMobile = window.matchMedia('(max-width: 767px)').matches
-
+    // Full-bleed scrub expand only when the viewport is wide enough for a 16:9
+    // video to fill it (see `fullBleed`). Otherwise — iPad, portrait, narrow
+    // windows — the frame is a full-width band at the video's own ratio, so we
+    // just do a soft scale/fade-in with no viewport-height crop or cream bars.
     const ctx = gsap.context(() => {
-      if (isMobile) {
+      if (!fullBleed) {
         gsap.from(frame, {
           scale: 0.92,
           opacity: 0,
@@ -609,7 +635,7 @@ function BabyVideo({
       }
     }, wrap)
     return () => ctx.revert()
-  }, [reduce])
+  }, [reduce, fullBleed])
 
   const videoEl = videoUrl ? (
     <video
@@ -621,11 +647,10 @@ function BabyVideo({
       playsInline
       preload="metadata"
       controls={showControls}
-      // object-contain so the whole video is always shown — its left/right (or
-      // top/bottom) never get cropped when the frame expands to fill a viewport
-      // whose shape differs from the video (iPad, tall desktop windows, etc.).
-      // The frame's cream bg fills any resulting letterbox area.
-      className="absolute inset-0 h-full w-full object-contain"
+      // Full-bleed (wide desktop): cover the viewport — negligible crop at ~16:9.
+      // Contained (iPad/narrow): the frame already matches the video's ratio, so
+      // cover fills it exactly with no crop and no cream bars.
+      className="absolute inset-0 h-full w-full object-cover"
     />
   ) : (
     <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center">
@@ -656,22 +681,33 @@ function BabyVideo({
             {videoEl}
           </div>
         </div>
-      ) : (
-        /* Mobile: a contained 16:9 card (soft scale-in). Desktop: the wrapper
-           reserves scroll distance and the sticky frame expands to full-bleed. */
-        <div
-          ref={scrubRef}
-          className="relative mt-10 px-6 pb-12 md:px-0 md:pb-0 md:h-[140vh]"
-        >
-          <div className="md:sticky md:top-0 md:flex md:h-[100svh] md:w-full md:items-center md:justify-center md:overflow-hidden">
+      ) : fullBleed ? (
+        /* Wide desktop: the wrapper reserves scroll distance and the sticky
+           frame expands to full-bleed (fills the viewport). */
+        <div ref={scrubRef} className="relative mt-10 h-[140vh]">
+          <div className="sticky top-0 flex h-[100svh] w-full items-center justify-center overflow-hidden">
             <div
               ref={frameRef}
-              className="relative mx-auto aspect-video w-full max-w-[1400px] overflow-hidden rounded-[28px] bg-[#e8ddce] will-change-transform md:mx-0 md:aspect-auto md:h-[100svh] md:max-w-none md:rounded-none"
+              className="relative h-[100svh] w-full overflow-hidden bg-[#e8ddce] will-change-transform"
               onMouseEnter={() => setShowControls(true)}
               onMouseLeave={() => setShowControls(false)}
             >
               {videoEl}
             </div>
+          </div>
+        </div>
+      ) : (
+        /* iPad / narrow / mobile: a full-width band at the video's own aspect
+           ratio (soft scale-in). No cropping, no cream bars. */
+        <div ref={scrubRef} className="relative mt-10 px-6 pb-12 md:px-12 md:pb-14">
+          <div
+            ref={frameRef}
+            className="relative mx-auto w-full max-w-[1400px] overflow-hidden rounded-[28px] bg-[#e8ddce] will-change-transform"
+            style={{ aspectRatio: aspect }}
+            onMouseEnter={() => setShowControls(true)}
+            onMouseLeave={() => setShowControls(false)}
+          >
+            {videoEl}
           </div>
         </div>
       )}
