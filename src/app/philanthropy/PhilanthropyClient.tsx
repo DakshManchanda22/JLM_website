@@ -275,6 +275,15 @@ export default function PhilanthropyClient({ cms }: { cms?: PhilanthropyView }) 
         </div>
       </section>
 
+      {/* ========================= IMPACT (5 YEARS) ========================= */}
+      <ImpactSection
+        logo={impactLogo}
+        logoLqip={impactLogoLqip}
+        intro={impactIntro}
+        stats={impactStats}
+        reduce={!!reduce}
+      />
+
       {/* ========================= PROGRAMS ========================= */}
       <section
         className="px-[5vw] py-24 md:py-32"
@@ -327,18 +336,9 @@ export default function PhilanthropyClient({ cms }: { cms?: PhilanthropyView }) 
         </div>
       </section>
 
-      {/* ========================= IMPACT (5 YEARS) ========================= */}
-      <ImpactSection
-        logo={impactLogo}
-        logoLqip={impactLogoLqip}
-        intro={impactIntro}
-        stats={impactStats}
-        reduce={!!reduce}
-      />
-
-      {/* Light backing so the footer's rounded top corners read as a curve,
-          matching the footer everywhere else on the site. */}
-      <div className="bg-white">
+      {/* Backing matches the section directly above (the blue PROGRAMS band) so
+          the footer's rounded top corners read as a curve, not white notches. */}
+      <div style={{ backgroundColor: KB_BLUE_DEEP }}>
         <Footer />
       </div>
     </div>
@@ -461,8 +461,8 @@ function ImpactSection({
   return (
     <section
       ref={sectionRef}
-      className="px-[7vw] py-20 md:py-28 lg:py-32"
-      style={{ backgroundColor: KB_TINT }}
+      className="px-[7vw] pt-4 pb-20 md:pt-6 md:pb-28 lg:pt-8 lg:pb-32"
+      style={{ backgroundColor: '#FFFFFF' }}
     >
       <div className="mx-auto max-w-[1200px]">
         {/* centred logo + intro */}
