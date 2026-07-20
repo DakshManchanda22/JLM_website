@@ -621,7 +621,11 @@ function BabyVideo({
       playsInline
       preload="metadata"
       controls={showControls}
-      className="absolute inset-0 h-full w-full object-cover"
+      // object-contain so the whole video is always shown — its left/right (or
+      // top/bottom) never get cropped when the frame expands to fill a viewport
+      // whose shape differs from the video (iPad, tall desktop windows, etc.).
+      // The frame's cream bg fills any resulting letterbox area.
+      className="absolute inset-0 h-full w-full object-contain"
     />
   ) : (
     <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center">
