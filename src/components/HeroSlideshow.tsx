@@ -190,6 +190,12 @@ function HeroVideoPlayer({ video }: { video: HeroVideo }) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [muted, setMuted] = useState(true)
 
+  // Drive the frame from the video's own aspect ratio so the whole video is
+  // always visible — no top/bottom or side cropping on any device (phone,
+  // tablet/iPad, desktop). We start at 16:9 to reserve space and avoid layout
+  // shift, then lock to the real ratio once metadata loads.
+  const [aspect, setAspect] = useState('16 / 9')
+
   // On touch devices we drop the custom controls and let the browser's native
   // video player take over (tap to reveal its controls) — same as the Bigen
   // page. This is also the reliable way to start playback when a phone blocks
@@ -211,11 +217,20 @@ function HeroVideoPlayer({ video }: { video: HeroVideo }) {
     const tryPlay = () => {
       el.play().catch(() => {})
     }
+    // Lock the frame to the video's true aspect ratio so nothing is cropped.
+    const readAspect = () => {
+      if (el.videoWidth && el.videoHeight) {
+        setAspect(`${el.videoWidth} / ${el.videoHeight}`)
+      }
+    }
     tryPlay()
+    readAspect()
     el.addEventListener('loadedmetadata', tryPlay, { once: true })
+    el.addEventListener('loadedmetadata', readAspect, { once: true })
     el.addEventListener('canplay', tryPlay, { once: true })
     return () => {
       el.removeEventListener('loadedmetadata', tryPlay)
+      el.removeEventListener('loadedmetadata', readAspect)
       el.removeEventListener('canplay', tryPlay)
     }
   }, [video.videoUrl])
@@ -250,13 +265,15 @@ function HeroVideoPlayer({ video }: { video: HeroVideo }) {
 
   return (
     <section
-      // Mobile keeps the horizontal (16:9) frame; desktop uses a taller frame
-      // than the viewport so the video isn't cropped top/bottom by object-cover.
-      className="relative w-full overflow-hidden bg-[#111111] h-[56.25vw] md:h-[115vh]"
+      // The frame takes the video's own aspect ratio, so it's full-bleed width
+      // and its height flexes with the device — the whole video is always shown
+      // (no side or top/bottom cropping) on phone, iPad or desktop alike.
+      className="relative w-full overflow-hidden bg-[#111111]"
+      style={{ aspectRatio: aspect }}
     >
       <video
         ref={videoRef}
-        className="absolute inset-0 h-full w-full object-cover"
+        className="absolute inset-0 h-full w-full object-contain"
         style={{ objectPosition: 'center' }}
         src={video.videoUrl}
         poster={video.poster}
