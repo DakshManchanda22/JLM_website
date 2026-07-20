@@ -216,6 +216,7 @@ export default function MorisonsBabyDreamsClient({
         headline={cms.blogsHeadline || D.blogsHeadline}
         intro={cms.blogsIntro || D.blogsIntro}
         blogs={blogs}
+        speed={cms.blogsCarouselSpeed}
       />
 
       {/* FOLLOW US */}
@@ -680,10 +681,13 @@ function DoctorBlogs({
   headline,
   intro,
   blogs,
+  speed,
 }: {
   headline: string
   intro: string
   blogs: BabyBlogCard[]
+  /** Scroll-speed multiplier from Sanity. 1 = normal, higher = faster. Default 2. */
+  speed?: number
 }) {
   const reduce = useReduce()
   const trackRef = useRef<HTMLDivElement>(null)
@@ -693,13 +697,17 @@ function DoctorBlogs({
 
   const looped = [...blogs, ...blogs]
 
+  // Base pixels-per-frame times the CMS speed multiplier (default 2 = brisk).
+  const factor = speed && speed > 0 ? speed : 2
+  const step = 0.8 * factor
+
   /* Continuous marquee; paused on hover, disabled under reduced motion (the
      row then stays a normal horizontal scroll). */
   useEffect(() => {
     if (reduce) return
     const tick = () => {
       if (!pausedRef.current && trackRef.current) {
-        posRef.current += 0.8
+        posRef.current += step
         const half = trackRef.current.scrollWidth / 2
         if (posRef.current >= half) posRef.current = 0
         trackRef.current.style.transform = `translateX(-${posRef.current}px)`
@@ -708,7 +716,7 @@ function DoctorBlogs({
     }
     rafRef.current = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(rafRef.current)
-  }, [reduce])
+  }, [reduce, step])
 
   return (
     <section className="overflow-hidden pt-12 pb-20 md:pt-16 md:pb-28">

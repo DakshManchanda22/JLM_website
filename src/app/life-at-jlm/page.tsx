@@ -37,13 +37,13 @@ export default async function LifeAtJlmPage() {
           ),
         captionStrip: data.captionStrip
           ?.map((c) => {
+            // A photo only needs an image to appear in the carousel; the italic
+            // caption is optional, so photos added without one still render.
             const url = resolveImageUrl(c.image, 1100)
-            return url && c.caption
-              ? { src: url, caption: c.caption, aspect: c.aspect }
-              : null
+            return url ? { src: url, caption: c.caption, aspect: c.aspect } : null
           })
           .filter(
-            (x): x is { src: string; caption: string; aspect: number | undefined } =>
+            (x): x is { src: string; caption: string | undefined; aspect: number | undefined } =>
               x !== null,
           ),
         introStatement: data.introStatement,
