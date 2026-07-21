@@ -712,7 +712,7 @@ function StatCard({
             className="absolute inset-0"
             style={{
               background:
-                'linear-gradient(180deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.62) 55%, rgba(0,0,0,0.78) 100%)',
+                'linear-gradient(180deg, rgba(0,0,0,0.30) 0%, rgba(0,0,0,0.46) 55%, rgba(0,0,0,0.64) 100%)',
             }}
           />
         </>

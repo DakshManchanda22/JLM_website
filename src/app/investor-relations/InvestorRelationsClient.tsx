@@ -203,13 +203,13 @@ const D = {
 
 type SectionKey = 'terms' | 'csr' | 'policies' | 'notice' | 'investors' | 'iepf'
 
-const NAV: { key: SectionKey; label: string }[] = [
-  { key: 'terms', label: 'TERMS OF APPOINTMENT OF INDEPENDENT DIRECTORS' },
-  { key: 'csr', label: 'CORPORATE SOCIAL RESPONSIBILITY COMMITTEE' },
-  { key: 'policies', label: 'POLICIES' },
-  { key: 'notice', label: 'NOTICE OF GENERAL MEETINGS/POSTAL BALLOT' },
-  { key: 'investors', label: 'INVESTORS INFORMATION' },
-  { key: 'iepf', label: 'IEPF' },
+const NAV: { key: SectionKey; label: string; short: string }[] = [
+  { key: 'terms', label: 'TERMS OF APPOINTMENT OF INDEPENDENT DIRECTORS', short: 'Independent Directors' },
+  { key: 'csr', label: 'CORPORATE SOCIAL RESPONSIBILITY COMMITTEE', short: 'CSR Committee' },
+  { key: 'policies', label: 'POLICIES', short: 'Policies' },
+  { key: 'notice', label: 'NOTICE OF GENERAL MEETINGS/POSTAL BALLOT', short: 'Notices / Postal Ballot' },
+  { key: 'investors', label: 'INVESTORS INFORMATION', short: 'Investor Info' },
+  { key: 'iepf', label: 'IEPF', short: 'IEPF' },
 ]
 
 /* Prefer a non-empty CMS value, else fall back to the baked default. */
@@ -361,14 +361,14 @@ function ColumnMatrix({ columns, fit = false }: { columns: IRColumn[]; fit?: boo
   if (!cols.length) return null
   return (
     <div
-      className={`${fit ? 'overflow-hidden' : 'overflow-x-auto'} rounded-2xl`}
+      className={`overflow-x-auto rounded-2xl ${fit ? '[--ir-col-min:10rem] lg:[--ir-col-min:0px]' : ''}`}
       style={{ border: `1px solid ${BEIGE}` }}
     >
       <div
         className={fit ? 'grid' : 'flex min-w-max'}
         style={
           fit
-            ? { gridTemplateColumns: `repeat(${cols.length}, minmax(0, 1fr))` }
+            ? { gridTemplateColumns: `repeat(${cols.length}, minmax(var(--ir-col-min), 1fr))` }
             : undefined
         }
       >
@@ -425,10 +425,16 @@ function NoticeGrid({ headings, rows }: { headings: string[]; rows: { cells: IRD
     </div>
   )
   return (
-    <div className="overflow-hidden rounded-2xl" style={{ border: `1px solid ${BEIGE}` }}>
+    // Mobile: columns keep a readable min width and the table scrolls sideways
+    // (--ir-col-min = 9.5rem). Desktop (lg+): min drops to 0 so the columns share
+    // the width and fit without scrolling.
+    <div
+      className="overflow-x-auto rounded-2xl [--ir-col-min:9.5rem] lg:[--ir-col-min:0px]"
+      style={{ border: `1px solid ${BEIGE}` }}
+    >
       <div
         className="grid"
-        style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }}
+        style={{ gridTemplateColumns: `repeat(${n}, minmax(var(--ir-col-min), 1fr))` }}
       >
         {headings.map((h, i) => cell(`h${i}`, h, i, { head: true }))}
         {rows.map((r, ri) =>
@@ -627,16 +633,16 @@ export default function InvestorRelationsClient({ cms }: { cms: InvestorRelation
             <button
               key={n.key}
               onClick={() => setActive(n.key)}
-              className={`${dmSans.className} whitespace-nowrap rounded-full px-4 py-2 text-left transition-colors`}
+              className={`${dmSans.className} flex min-h-[40px] items-center whitespace-nowrap rounded-full px-4 py-2.5 text-left transition-colors`}
               style={{
                 flexShrink: 0,
-                fontSize: 12,
+                fontSize: 12.5,
                 fontWeight: 600,
                 backgroundColor: active === n.key ? INK : FAINT,
                 color: active === n.key ? '#fff' : INK,
               }}
             >
-              {n.label}
+              {n.short}
             </button>
           ))}
         </div>

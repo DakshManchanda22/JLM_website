@@ -21,6 +21,15 @@ export default defineType({
   fields: [
     /* ───── Intro curtain photos ───── */
     defineField({
+      name: 'showIntro',
+      title: 'Play intro animation',
+      group: 'intro',
+      description:
+        'When on, the page opens with the overlapping photos that fade in one by one and then wipe up like a curtain to reveal the hero. Turn OFF to show the hero and title straight away, with no intro animation.',
+      type: 'boolean',
+      initialValue: true,
+    }),
+    defineField({
       name: 'introImages',
       title: 'Intro curtain photos (max 6, shown one by one)',
       group: 'intro',

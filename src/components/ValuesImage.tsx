@@ -29,8 +29,15 @@ export default function ValuesImage({
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-80px' }}
         transition={{ duration: 0.75, ease: EASE }}
-        className="relative mx-auto w-full max-w-5xl overflow-hidden rounded-2xl"
-        style={{ aspectRatio: aspect }}
+        className="relative mx-auto overflow-hidden rounded-2xl"
+        // Size by width, but never let the height exceed the viewport — so the
+        // whole graphic is visible in a single view without scrolling. The width
+        // is the smallest of: the container, a sensible max, and the width that
+        // makes the height fit the screen (viewport height × aspect ratio).
+        style={{
+          aspectRatio: aspect,
+          width: `min(100%, 48rem, calc((100svh - 11rem) * ${aspect}))`,
+        }}
       >
         <Image
           src={image}

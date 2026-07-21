@@ -12,13 +12,16 @@ export default async function LifeAtJlmPage() {
      client fall back to its hardcoded default for that field. */
   const cms: LifeCms = data
     ? {
+        // Default ON when the flag is unset so existing content keeps the intro.
+        showIntro: data.showIntro ?? true,
         introImages: data.introImages
           ?.map((img) => {
-            const url = resolveImageUrl(img, 1600)
-            return url ? { url } : null
+            const r = resolveImage(img, 1600)
+            return r ? { url: r.url, lqip: r.lqip } : null
           })
-          .filter((x): x is { url: string } => x !== null),
-        introFinalImage: resolveImageUrl(data.introFinalImage, 1800),
+          .filter((x): x is { url: string; lqip: string | undefined } => x !== null),
+        introFinalImage: resolveImage(data.introFinalImage, 1800)?.url,
+        introFinalImageLqip: resolveImage(data.introFinalImage, 1800)?.lqip,
         heroImage: resolveImage(data.heroImage, 2400)?.url,
         heroImageLqip: resolveImage(data.heroImage, 2400)?.lqip,
         heroLine1: data.heroLine1,
@@ -39,11 +42,11 @@ export default async function LifeAtJlmPage() {
           ?.map((c) => {
             // A photo only needs an image to appear in the carousel; the italic
             // caption is optional, so photos added without one still render.
-            const url = resolveImageUrl(c.image, 1100)
-            return url ? { src: url, caption: c.caption, aspect: c.aspect } : null
+            const r = resolveImage(c.image, 1100)
+            return r ? { src: r.url, lqip: r.lqip, caption: c.caption, aspect: c.aspect } : null
           })
           .filter(
-            (x): x is { src: string; caption: string | undefined; aspect: number | undefined } =>
+            (x): x is { src: string; lqip: string | undefined; caption: string | undefined; aspect: number | undefined } =>
               x !== null,
           ),
         introStatement: data.introStatement,

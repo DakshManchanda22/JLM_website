@@ -12,8 +12,11 @@ import Footer from '@/components/Footer'
    its existing hardcoded default when a field is missing. */
 
 export type LifeCms = {
-  introImages?: { url: string }[]
+  /** Master on/off for the opening curtain animation (overlapping photos + wipe). */
+  showIntro?: boolean
+  introImages?: { url: string; lqip?: string }[]
   introFinalImage?: string
+  introFinalImageLqip?: string
   heroImage?: string
   heroImageLqip?: string
   heroLine1?: string
@@ -21,7 +24,7 @@ export type LifeCms = {
   heroCaptionSmall?: string
   heroCaptionLarge?: string
   anchors?: { num: string; label: string; targetId: string; image: string }[]
-  captionStrip?: { src: string; caption?: string; aspect?: number }[]
+  captionStrip?: { src: string; caption?: string; aspect?: number; lqip?: string }[]
   introStatement?: string
   arentHeadline?: string
   arentBody?: string
@@ -71,6 +74,7 @@ function Marquee<T>({
   duration = 45,
   gap = 18,
   className = '',
+  pauseOnHover = true,
 }: {
   items: T[]
   renderItem: (item: T, i: number) => ReactNode
@@ -78,6 +82,8 @@ function Marquee<T>({
   duration?: number
   gap?: number
   className?: string
+  /** When false the track keeps scrolling even while hovered/tapped. */
+  pauseOnHover?: boolean
 }) {
   const name = direction === 'left' ? 'marquee-left' : 'marquee-right'
   const Group = ({ hidden }: { hidden?: boolean }) => (
@@ -92,7 +98,7 @@ function Marquee<T>({
   return (
     <div className={`overflow-hidden ${className}`}>
       <div
-        className="marquee-track flex w-max"
+        className={`marquee-track flex w-max ${pauseOnHover ? '' : 'marquee-no-pause'}`}
         style={{ animationName: name, animationDuration: `${duration}s` }}
       >
         <Group />
@@ -137,10 +143,10 @@ function introTiming(count: number) {
 
 function IntroCurtain({ onDone }: { onDone: () => void }) {
   const cms = useLife()
-  const cmsSrcs = cms.introImages?.map((i) => i.url).filter(Boolean) as string[] | undefined
   /* Render exactly the photos provided — no padding, so no image repeats. */
-  const SRCS = cmsSrcs ?? []
+  const SRCS = (cms.introImages ?? []).filter((i) => i.url)
   const FINAL_SRC = cms.introFinalImage ?? ''
+  const FINAL_LQIP = cms.introFinalImageLqip
   const {
     delays: INTRO_DELAYS_MS,
     finalFadeMs: FINAL_FADE_IN_MS,
@@ -202,12 +208,13 @@ function IntroCurtain({ onDone }: { onDone: () => void }) {
             }}
           >
             <Image
-              src={src}
+              src={src.url}
               alt=""
               fill
               priority={i < 3}
               sizes="100vw"
               style={{ objectFit: 'cover' }}
+              {...(src.lqip ? { placeholder: 'blur' as const, blurDataURL: src.lqip } : {})}
             />
           </div>
           )
@@ -237,6 +244,7 @@ function IntroCurtain({ onDone }: { onDone: () => void }) {
             priority
             sizes="100vw"
             style={{ objectFit: 'cover' }}
+            {...(FINAL_LQIP ? { placeholder: 'blur' as const, blurDataURL: FINAL_LQIP } : {})}
           />
         )}
         <div className="absolute inset-0" style={{ backgroundColor: 'rgba(17,17,17,0.18)' }} />
@@ -256,7 +264,9 @@ function Hero() {
      the headline reveals shortly after load instead of waiting for the (absent)
      curtain to lift. Only the delay changes, so it's hydration-safe. */
   const [skipIntro] = useState(
-    () => typeof window !== 'undefined' && window.matchMedia('(orientation: portrait)').matches,
+    () =>
+      cms.showIntro === false ||
+      (typeof window !== 'undefined' && window.matchMedia('(orientation: portrait)').matches),
   )
   const HERO_REVEAL_DELAY = skipIntro
     ? 0.35
@@ -430,7 +440,7 @@ function CaptionStrip() {
     { dir: 'left' as const, dur: rowDur(1.07), offset: 2 },
   ]
 
-  const card = (it: { src: string; caption?: string }) => (
+  const card = (it: { src: string; caption?: string; lqip?: string }) => (
     <div
       className="relative overflow-hidden"
       style={{
@@ -442,7 +452,14 @@ function CaptionStrip() {
         backgroundColor: FAINT,
       }}
     >
-      <Image src={it.src} alt={it.caption ?? ''} fill sizes="340px" style={{ objectFit: 'cover' }} />
+      <Image
+        src={it.src}
+        alt={it.caption ?? ''}
+        fill
+        sizes="340px"
+        style={{ objectFit: 'cover' }}
+        {...(it.lqip ? { placeholder: 'blur' as const, blurDataURL: it.lqip } : {})}
+      />
       {it.caption && (
         <>
           <div
@@ -485,6 +502,7 @@ function CaptionStrip() {
             direction={row.dir}
             duration={row.dur}
             gap={14}
+            pauseOnHover={false}
             renderItem={(it) => card(it)}
           />
         ))}
@@ -656,7 +674,10 @@ function TestimonialsBlock() {
 /* ─────────────────────────── PAGE ─────────────────────────── */
 
 export default function LifeAtJlmClient({ cms = {} }: { cms?: LifeCms }) {
-  const [introDone, setIntroDone] = useState(false)
+  /* Marketing can switch the opening curtain animation off in Sanity. When off
+     the hero + title show straight away (introDone starts true → no curtain). */
+  const introEnabled = cms.showIntro !== false
+  const [introDone, setIntroDone] = useState(!introEnabled)
 
   /* On portrait viewports (taller than wide — phones held upright) skip the
      collage intro curtain entirely; only the hero text animation plays. */

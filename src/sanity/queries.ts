@@ -113,6 +113,7 @@ export async function fetchPostSlugs(): Promise<string[]> {
 export type FooterLinkData = { label: string; href: string; external?: boolean }
 
 export type SiteSettings = {
+  logoUrl?: string
   footerCompanyLinks?: FooterLinkData[]
   footerAddress?: string[]
   footerSocial?: {
@@ -127,6 +128,7 @@ export type SiteSettings = {
 }
 
 export const siteSettingsQuery = groq`*[_type == "siteSettings"][0]{
+  "logoUrl": logo.asset->url,
   footerCompanyLinks[]{ label, href, external },
   footerAddress,
   footerSocial{ linkedin, instagram, facebook, youtube, twitter },
@@ -322,6 +324,7 @@ export async function fetchLeaderSlugs(): Promise<string[]> {
 /* ───────────────────────── Life at JL Morison ───────────────────────── */
 
 export type LifeAtJlm = {
+  showIntro?: boolean
   introImages?: any[]
   introFinalImage?: any
   heroImage?: any
@@ -330,7 +333,7 @@ export type LifeAtJlm = {
   heroCaptionSmall?: string
   heroCaptionLarge?: string
   anchors?: { num: string; label: string; targetId: string; image: any }[]
-  captionStrip?: { image: any; caption?: string; aspect?: number }[]
+  captionStrip?: { image: any; caption?: string; aspect?: number; lqip?: string }[]
   introStatement?: string
   arentHeadline?: string
   arentBody?: string
@@ -339,15 +342,16 @@ export type LifeAtJlm = {
 }
 
 export const lifeAtJlmQuery = groq`*[_type == "lifeAtJlm"][0]{
-  introImages,
-  introFinalImage,
+  showIntro,
+  introImages[]{ ${imageWithLqip} },
+  introFinalImage{ ${imageWithLqip} },
   heroImage{ ${imageWithLqip} },
   heroLine1,
   heroLine2,
   heroCaptionSmall,
   heroCaptionLarge,
   anchors[]{ num, label, targetId, image },
-  captionStrip[]{ image, caption, "aspect": image.asset->metadata.dimensions.aspectRatio },
+  captionStrip[]{ image{ ${imageWithLqip} }, caption, "aspect": image.asset->metadata.dimensions.aspectRatio },
   introStatement,
   arentHeadline, arentBody,
   testimonials[]{ quote, name, role },

@@ -9,8 +9,21 @@ export default defineType({
   name: 'siteSettings',
   title: 'Footer & site settings',
   type: 'document',
-  groups: [{ name: 'footer', title: 'Footer' }],
+  groups: [
+    { name: 'brand', title: 'Brand' },
+    { name: 'footer', title: 'Footer' },
+  ],
   fields: [
+    /* ─────────────── Brand: logo ─────────────── */
+    defineField({
+      name: 'logo',
+      title: 'Site logo (shown in the navbar)',
+      description:
+        'The JL Morison logo used across the whole site. A light/white wordmark reads best on the dark navbar. SVG preferred.',
+      type: 'image',
+      group: 'brand',
+    }),
+
     /* ─────────────── Footer: Company column ─────────────── */
     defineField({
       name: 'footerCompanyLinks',

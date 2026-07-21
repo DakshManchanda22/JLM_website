@@ -88,7 +88,7 @@ export default function EmoformFeatures({ cms }: { cms?: EmoformView }) {
     <section className={`${inter.className} relative overflow-hidden bg-white`}>
       <div className="relative z-10 mx-auto max-w-7xl px-6 md:px-12">
         {/* ── Heading + benefits ── */}
-        <div className="max-w-[58%] py-16 md:py-20 lg:max-w-[54%]">
+        <div className="max-w-[58%] py-10 md:py-12 lg:max-w-[54%]">
           <motion.h2
             initial={reduce ? false : { opacity: 0, y: 22 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -98,13 +98,13 @@ export default function EmoformFeatures({ cms }: { cms?: EmoformView }) {
           >
             <span
               className="block font-black leading-[0.9] tracking-[-0.02em]"
-              style={{ fontSize: 'clamp(3.25rem, 7.5vw, 5.5rem)' }}
+              style={{ fontSize: 'clamp(2.75rem, 6.5vw, 4.75rem)' }}
             >
               {titleTop}
             </span>
             <span
               className="mt-1 block font-extrabold leading-[1] tracking-[-0.02em]"
-              style={{ fontSize: 'clamp(1.75rem, 4vw, 3rem)' }}
+              style={{ fontSize: 'clamp(1.5rem, 3.4vw, 2.5rem)' }}
             >
               {titleBottom}
             </span>
@@ -115,7 +115,7 @@ export default function EmoformFeatures({ cms }: { cms?: EmoformView }) {
             initial={reduce ? false : 'hidden'}
             whileInView="show"
             viewport={{ once: true, amount: 0.25 }}
-            className="mt-10 space-y-5 md:mt-12 md:space-y-6"
+            className="mt-6 space-y-3.5 md:mt-8 md:space-y-4"
           >
             {BENEFITS.map((b, i) => (
               <motion.li
@@ -124,7 +124,7 @@ export default function EmoformFeatures({ cms }: { cms?: EmoformView }) {
                 className="flex w-fit items-center gap-4 rounded-full border border-[rgba(19,48,110,0.12)] bg-white p-1.5 pr-6 shadow-[0_10px_30px_-8px_rgba(19,48,110,0.18)] md:gap-5 md:pr-8"
               >
                 <span
-                  className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border md:h-16 md:w-16"
+                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border md:h-14 md:w-14"
                   style={{ borderColor: 'rgba(19,48,110,0.3)', color: NAVY }}
                 >
                   <svg
@@ -134,7 +134,7 @@ export default function EmoformFeatures({ cms }: { cms?: EmoformView }) {
                     strokeWidth={STROKE}
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="h-7 w-7 md:h-8 md:w-8"
+                    className="h-6 w-6 md:h-7 md:w-7"
                   >
                     <path d={TOOTH} />
                     {b.accent}
@@ -144,7 +144,7 @@ export default function EmoformFeatures({ cms }: { cms?: EmoformView }) {
                   className="font-extrabold leading-[1.05] tracking-[-0.01em]"
                   style={{
                     color: NAVY,
-                    fontSize: 'clamp(1.3rem, 2.6vw, 2rem)',
+                    fontSize: 'clamp(1.15rem, 2.3vw, 1.7rem)',
                   }}
                 >
                   {cms?.features?.[i] ?? (
