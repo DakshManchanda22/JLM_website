@@ -3,20 +3,21 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
+import { useSiteSettings } from '@/components/SiteSettingsProvider'
 
 const MotionLink = motion(Link)
 
+// Sanity-hosted logo. Marketing can swap it via Site Settings → Brand; this
+// hard-coded Sanity CDN URL is the fallback so the navbar never breaks even if
+// the settings fetch is empty (and so no local /public asset is needed).
+const LOGO_FALLBACK =
+  'https://cdn.sanity.io/images/vfv5lxgr/production/789b561991b501203119084ca41e902d11598dc7-391x132.svg'
+
 function Logo({ className }: { className?: string }) {
-  // Brand logo lives in /public. The "-light" variant recolours the near-black
-  // wordmark to white so it reads on the dark navbar; the emblem stays colourful.
+  const src = useSiteSettings()?.logoUrl || LOGO_FALLBACK
   return (
     // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src="/jlm-logo-light.svg"
-      alt="JL Morison"
-      draggable={false}
-      className={className}
-    />
+    <img src={src} alt="JL Morison" draggable={false} className={className} />
   )
 }
 
@@ -44,7 +45,7 @@ function Chevron({ open }: { open: boolean }) {
 
 const DROPDOWNS: Record<string, string[]> = {
   'Our People': ['Our Story', 'Leadership Team', 'Life at JLM'],
-  'Our Brands': ['Morisons Baby Dreams', 'Bigen', 'Emoform'],
+  'Our Brands': ['Morisons', 'Morisons Baby Dreams', 'Bigen', 'Emoform'],
 }
 
 // Order shown in the right-aligned desktop cluster (all right-aligned via ml-auto).
@@ -96,16 +97,9 @@ export default function Navbar() {
         <div ref={navRef} onMouseLeave={() => setActiveDropdown(null)}>
           {/* TOP BAR */}
           <div className="relative flex items-center h-[var(--nav-h)] px-5 md:px-8">
-            {/* Hamburger — mobile */}
-            <button
-              onClick={() => setMobileOpen(true)}
-              aria-label="Open menu"
-              className="md:hidden flex flex-col gap-[5px] p-1"
-            >
-              <span className="block w-5 h-px bg-white" />
-              <span className="block w-5 h-px bg-white" />
-              <span className="block w-5 h-px bg-white" />
-            </button>
+            {/* The hamburger ↔ cross toggle is rendered as a fixed element below
+                (outside the nav) so it can layer above the full-screen overlay and
+                animate in place, staying pinned to this same top-left spot. */}
 
             {/* LOGO — centred on mobile, left-aligned on desktop */}
             <Link
@@ -192,6 +186,31 @@ export default function Navbar() {
         </div>
       </nav>
 
+      {/* Hamburger ↔ cross toggle — fixed at the top-left (the hamburger's exact
+          spot) and above the overlay (z-[110] > overlay z-[100]) so the three
+          bars morph into an X right where they were, and the X closes the menu. */}
+      <button
+        onClick={() => setMobileOpen((o) => !o)}
+        aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+        aria-expanded={mobileOpen}
+        className="md:hidden fixed left-5 top-0 z-[110] flex h-[var(--nav-h)] items-center p-1 pr-4"
+      >
+        <span className="relative flex h-[13px] w-5 flex-col justify-between">
+          <span
+            className="block h-px w-full origin-center bg-white transition-transform duration-300 ease-out"
+            style={{ transform: mobileOpen ? 'translateY(6px) rotate(45deg)' : 'none' }}
+          />
+          <span
+            className="block h-px w-full bg-white transition-opacity duration-200 ease-out"
+            style={{ opacity: mobileOpen ? 0 : 1 }}
+          />
+          <span
+            className="block h-px w-full origin-center bg-white transition-transform duration-300 ease-out"
+            style={{ transform: mobileOpen ? 'translateY(-6px) rotate(-45deg)' : 'none' }}
+          />
+        </span>
+      </button>
+
       {/* MOBILE FULL-SCREEN OVERLAY */}
       <AnimatePresence>
         {mobileOpen && (
@@ -202,28 +221,16 @@ export default function Navbar() {
             transition={{ duration: 0.4, ease: EASE }}
             className="fixed inset-0 z-[100] bg-[#111111] flex flex-col"
           >
-            <div className="flex items-center justify-between h-[var(--nav-h)] px-5 border-b border-white/10">
-              <div className="w-6" />
+            {/* Logo centred; closing is handled by the morphing toggle (top-left). */}
+            <div className="relative flex items-center h-[var(--nav-h)] px-5 border-b border-white/10">
               <Link
                 href="/"
                 onClick={() => setMobileOpen(false)}
                 aria-label="JL Morison home"
+                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
               >
                 <Logo className="h-9 md:h-12 w-auto" />
               </Link>
-              <button
-                onClick={() => setMobileOpen(false)}
-                aria-label="Close menu"
-              >
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                  <path
-                    d="M1.5 1.5L16.5 16.5M16.5 1.5L1.5 16.5"
-                    stroke="#ffffff"
-                    strokeWidth="1.4"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </button>
             </div>
 
             <nav className="relative flex-1 overflow-y-auto border-t border-white/15 px-6 py-3">

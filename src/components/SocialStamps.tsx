@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import { motion } from 'framer-motion'
 import type { CSSProperties } from 'react'
 
@@ -65,7 +64,7 @@ function perforation(notch: string): CSSProperties {
 function PlatformLogo({ platform }: { platform: SocialPlatform }) {
   if (platform === 'instagram') {
     return (
-      <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true">
+      <svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true">
         <defs>
           <linearGradient id="ig-grad" x1="0" y1="1" x2="1" y2="0">
             <stop offset="0" stopColor="#FEDA75" />
@@ -84,7 +83,7 @@ function PlatformLogo({ platform }: { platform: SocialPlatform }) {
   }
   if (platform === 'facebook') {
     return (
-      <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true">
+      <svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true">
         <rect x="2" y="2" width="20" height="20" rx="6" fill="#1877F2" />
         <path
           d="M14.6 12.7h1.9l.3-2.4h-2.2V8.8c0-.7.2-1.2 1.2-1.2h1.1V5.5c-.2 0-.9-.1-1.7-.1-1.7 0-2.9 1-2.9 2.9v1.9H9.8v2.4h1.8V19h3z"
@@ -95,7 +94,7 @@ function PlatformLogo({ platform }: { platform: SocialPlatform }) {
   }
   // youtube
   return (
-    <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true">
+    <svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true">
       <rect x="1.5" y="4.5" width="21" height="15" rx="4.6" fill="#FF0000" />
       <path d="M10 9.2v5.6l4.8-2.8z" fill="#fff" />
     </svg>
@@ -110,7 +109,6 @@ function Stamp({
   ink,
   muted,
   notchColor,
-  placeholderBg,
   perforated,
 }: {
   card: SocialStampCard
@@ -119,12 +117,9 @@ function Stamp({
   ink: string
   muted: string
   notchColor: string
-  placeholderBg: string
   perforated: boolean
 }) {
   const countLabel = card.platform === 'youtube' ? 'subscribers' : 'followers'
-  // Alternate the layout: even cards have text on top, odd cards image on top.
-  const imageOnTop = index % 2 === 1
 
   const textHalf = (
     <div className="relative z-[1] flex flex-1 flex-col justify-between p-6">
@@ -156,27 +151,6 @@ function Stamp({
     </div>
   )
 
-  const imageHalf = (
-    <div className="relative z-[1] h-[42%] overflow-hidden" style={{ backgroundColor: placeholderBg }}>
-      {card.image ? (
-        <Image
-          src={card.image}
-          alt={card.imageAlt || card.heading}
-          fill
-          sizes="(max-width: 640px) 100vw, 330px"
-          className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
-          {...(card.lqip ? { placeholder: 'blur' as const, blurDataURL: card.lqip } : {})}
-        />
-      ) : (
-        <div className="flex h-full w-full items-center justify-center">
-          <span className="text-[11px] uppercase tracking-[0.2em]" style={{ color: muted, opacity: 0.55 }}>
-            {card.platform}
-          </span>
-        </div>
-      )}
-    </div>
-  )
-
   return (
     <motion.a
       href={card.href}
@@ -188,22 +162,12 @@ function Stamp({
       viewport={{ once: true, margin: '-80px' }}
       transition={{ duration: 0.45, ease: 'easeOut', delay: index * 0.1 }}
       whileHover={{ y: -8, scale: 1.02, transition: { duration: 0.25, ease: 'easeOut' } }}
-      className={`group relative flex h-[400px] w-full flex-col overflow-hidden shadow-[0_16px_36px_-18px_rgba(20,16,10,0.35)] transition-shadow duration-300 hover:shadow-[0_28px_50px_-20px_rgba(20,16,10,0.5)] sm:w-[330px] ${
+      className={`group relative flex min-h-[250px] w-full flex-col overflow-hidden shadow-[0_16px_36px_-18px_rgba(20,16,10,0.35)] transition-shadow duration-300 hover:shadow-[0_28px_50px_-20px_rgba(20,16,10,0.5)] sm:w-[330px] ${
         perforated ? '' : 'rounded-3xl'
       }`}
       style={{ backgroundColor: paper }}
     >
-      {imageOnTop ? (
-        <>
-          {imageHalf}
-          {textHalf}
-        </>
-      ) : (
-        <>
-          {textHalf}
-          {imageHalf}
-        </>
-      )}
+      {textHalf}
 
       {/* perforated edge overlay */}
       {perforated && (
@@ -220,7 +184,6 @@ export default function SocialStamps({
   paper = '#F4F1E8',
   ink = '#1A1712',
   muted = '#6B6459',
-  placeholderBg = '#EDE7DA',
   notchColor = '#FFFFFF',
   perforated = true,
   headingColor,
@@ -242,7 +205,7 @@ export default function SocialStamps({
         </motion.h2>
 
         {/* flex + justify-center keeps any number of cards centred */}
-        <div className="mx-auto mt-12 flex max-w-md flex-wrap justify-center gap-7 sm:max-w-none lg:gap-8">
+        <div className="mx-auto mt-12 flex max-w-md flex-wrap items-stretch justify-center gap-7 sm:max-w-none lg:gap-8">
           {cards.map((card, i) => (
             <Stamp
               key={card.platform}
@@ -252,7 +215,6 @@ export default function SocialStamps({
               ink={ink}
               muted={muted}
               notchColor={notchColor}
-              placeholderBg={placeholderBg}
               perforated={perforated}
             />
           ))}

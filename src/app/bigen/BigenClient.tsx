@@ -254,7 +254,7 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
         />
 
         <div className="relative mx-auto max-w-[1400px] px-6 md:px-12 lg:px-16">
-          <div className="grid lg:grid-cols-2 items-center gap-10 min-h-[48vh] lg:min-h-[54vh] pt-8 pb-[7vh] lg:py-10">
+          <div className="grid lg:grid-cols-2 items-center gap-10 min-h-[48vh] lg:min-h-[54vh] pt-8 pb-0 lg:py-10">
             {/* ── LEFT: copy ── */}
             <div className="relative z-10 max-w-xl">
               {/* Bigen logo */}
@@ -381,7 +381,7 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
       </section>
 
       {/* VIDEO */}
-      <section className="relative bg-[#0c0703] px-6 py-20 md:py-28">
+      <section className="relative bg-[#0c0703] px-6 pt-10 pb-20 md:pt-14 md:pb-28">
         <motion.h2
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -532,7 +532,7 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-80px' }}
           transition={{ duration: 0.8, ease: EASE }}
-          className="relative overflow-hidden rounded-[32px] px-8 py-14 md:px-16 md:py-20"
+          className="relative overflow-hidden rounded-[32px] px-8 pt-14 pb-0 md:px-16 md:pt-20 lg:pb-20"
           style={{
             background:
               'radial-gradient(120% 120% at 82% 50%, #4a3414 0%, #2a1c0b 46%, #160e06 100%)',
@@ -584,7 +584,7 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
             </div>
 
             {/* RIGHT: product shot with glow */}
-            <div className="relative flex min-h-[360px] items-center justify-center lg:min-h-[480px]">
+            <div className="relative flex min-h-0 items-center justify-center lg:min-h-[480px]">
               <div
                 className="pointer-events-none absolute left-1/2 top-1/2 aspect-square w-[80%] max-w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full"
                 style={{
@@ -907,6 +907,7 @@ function ProductRange({
         headingColor="#1d1408"
         notchColor="#f2ebdd"
         fontClassName={googleSans.className}
+        className="pb-6 md:pb-10"
         cards={[
           {
             platform: 'instagram',

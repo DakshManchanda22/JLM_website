@@ -169,14 +169,6 @@ export default defineType({
           type: 'text',
           rows: 3,
         }),
-        defineField({
-          name: 'image',
-          title: 'Vision image (optional — not currently shown)',
-          description:
-            'Optional. The homepage currently shows the vision statement text above, not this image.',
-          type: 'image',
-          options: { hotspot: true },
-        }),
       ],
     }),
 

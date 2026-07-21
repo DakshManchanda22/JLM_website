@@ -120,7 +120,7 @@ export default function PhilanthropyClient({ cms }: { cms?: PhilanthropyView }) 
       {/* ============================= HERO ============================= */}
       <section
         className="relative w-full overflow-hidden"
-        style={{ minHeight: '100svh', backgroundColor: INK }}
+        style={{ height: '100svh', backgroundColor: INK }}
       >
         {/* background photo */}
         <motion.div
@@ -153,7 +153,7 @@ export default function PhilanthropyClient({ cms }: { cms?: PhilanthropyView }) 
         />
 
         {/* content */}
-        <div className="relative z-10 flex min-h-[100svh] flex-col justify-start px-[7vw] pt-[15vh] pb-[12vh]">
+        <div className="relative z-10 flex h-full flex-col justify-start px-[7vw] pt-[15vh] pb-[10vh]">
           <h1
             className={caveatBrush.className}
             style={{

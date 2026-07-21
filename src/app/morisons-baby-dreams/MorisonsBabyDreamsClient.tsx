@@ -559,6 +559,11 @@ function BabyVideo({
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
+    // React doesn't reliably reflect the `muted` prop onto the DOM property, and
+    // browsers only permit *muted* autoplay — so force it on the element itself,
+    // otherwise play() is rejected as blocked unmuted autoplay.
+    video.muted = true
+    video.defaultMuted = true
     const readAspect = () => {
       if (video.videoWidth && video.videoHeight) {
         setAspect(`${video.videoWidth} / ${video.videoHeight}`)
@@ -566,17 +571,24 @@ function BabyVideo({
     }
     readAspect()
     video.addEventListener('loadedmetadata', readAspect, { once: true })
+    const tryPlay = () => {
+      video.muted = true
+      video.play().catch(() => {})
+    }
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) video.play().catch(() => {})
+        if (entry.isIntersecting) tryPlay()
         else video.pause()
       },
       { threshold: 0.3 },
     )
     observer.observe(video)
+    // Kick playback off once the video is ready in case it's already on screen.
+    video.addEventListener('canplay', tryPlay, { once: true })
     return () => {
       observer.disconnect()
       video.removeEventListener('loadedmetadata', readAspect)
+      video.removeEventListener('canplay', tryPlay)
     }
   }, [videoUrl])
 
@@ -642,6 +654,7 @@ function BabyVideo({
       ref={videoRef}
       src={videoUrl}
       poster={poster}
+      autoPlay
       muted
       loop
       playsInline

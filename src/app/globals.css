@@ -97,7 +97,7 @@ body::-webkit-scrollbar {
   animation-iteration-count: infinite;
   will-change: transform;
 }
-.marquee-track:hover {
+.marquee-track:not(.marquee-no-pause):hover {
   animation-play-state: paused;
 }
 @media (prefers-reduced-motion: reduce) {

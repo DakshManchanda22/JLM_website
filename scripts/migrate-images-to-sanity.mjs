@@ -53,7 +53,7 @@ const BRANDS = [
     name: 'Morisons Baby Dreams',
     shortName: 'Baby Dreams',
     tagline: 'Care your baby deserves.',
-    href: '/brands/morisons-baby-dreams',
+    href: '/morisons-baby-dreams',
     file: 'morisons-baby-dreams-homepage.jpg',
   },
   {

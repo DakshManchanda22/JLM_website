@@ -426,13 +426,13 @@ function Values({ cms }: { cms: OurStoryCms }) {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-60px' }}
           transition={{ duration: 0.6, ease: EASE }}
-          className="flex flex-wrap justify-center md:justify-between"
+          className="flex flex-col items-center landscape:flex-row landscape:flex-wrap landscape:justify-center md:landscape:justify-between"
           style={{ borderTop: `1px solid ${HAIRLINE}`, borderBottom: `1px solid ${HAIRLINE}` }}
         >
           {values.map((p, i) => (
             <div
               key={`${p.name}-${i}`}
-              className={`${dmSans.className} flex items-center gap-2.5 border-l-0 px-5 py-6 md:border-l md:border-[#E6E2D9] md:py-7 md:first:border-l-0`}
+              className={`${dmSans.className} flex items-center gap-2.5 border-l-0 px-5 py-6 md:landscape:border-l md:landscape:border-[#E6E2D9] md:landscape:py-7 md:landscape:first:border-l-0`}
               style={{ fontSize: 13.5, fontWeight: 500, letterSpacing: '0.01em', color: INK }}
             >
               <span aria-hidden className="shrink-0" style={{ width: 18, height: 18, color: INK }}>

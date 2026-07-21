@@ -34,6 +34,16 @@ export default async function Home() {
         }
       : undefined
 
+  // Canonical routes for the known brands. Sanity content historically seeded
+  // some hrefs with a `/brands/…` prefix that doesn't exist as a route, so we
+  // normalise by brand name here to guarantee the cards link to the real page.
+  const CANONICAL_HREF: Record<string, string> = {
+    'Morisons Baby Dreams': '/morisons-baby-dreams',
+    Emoform: '/emoform',
+    Bigen: '/bigen',
+    Morisons: '/morisons',
+  }
+
   const sanityBrands: Brand[] =
     homepage?.brands?.flatMap((b) => {
       const r = resolveImage(b.image, 1600)
@@ -43,7 +53,7 @@ export default async function Home() {
               name: b.name,
               shortName: b.shortName ?? b.name,
               tagline: b.tagline,
-              href: b.href,
+              href: CANONICAL_HREF[b.name.trim()] ?? b.href,
               image: r.url,
               lqip: r.lqip,
             },
