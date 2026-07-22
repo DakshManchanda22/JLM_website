@@ -96,6 +96,12 @@ export default function PhilanthropyClient({ cms }: { cms?: PhilanthropyView }) 
 
   const heroLines = [heroLine1, heroLine2]
 
+  // The closing hero sits at the bottom of the page, so its reveal should play
+  // when the user actually scrolls to it — not on mount. Drive it off an
+  // in-view boolean (the same reliable pattern the Impact stats use).
+  const heroRef = useRef<HTMLElement>(null)
+  const heroInView = useInView(heroRef, { once: true, amount: 0.35 })
+
   return (
     <div className={`${caveatBrush.variable} ${dmSans.variable}`}>
       {/* ========================= IMPACT (5 YEARS) ========================= */}
@@ -161,13 +167,14 @@ export default function PhilanthropyClient({ cms }: { cms?: PhilanthropyView }) 
 
       {/* ===== HERO — "Changing Lives, Building Futures" closing section ===== */}
       <section
+        ref={heroRef}
         className="relative w-full overflow-hidden"
         style={{ height: 'calc(100svh - var(--nav-h))', backgroundColor: INK }}
       >
         {/* background photo */}
         <motion.div
           initial={reduce ? false : { scale: 1.08 }}
-          animate={{ scale: 1 }}
+          animate={reduce || heroInView ? { scale: 1 } : { scale: 1.08 }}
           transition={{ duration: 1.8, ease: EASE }}
           className="absolute inset-0"
         >
@@ -215,8 +222,12 @@ export default function PhilanthropyClient({ cms }: { cms?: PhilanthropyView }) 
                 <motion.span
                   className="relative inline-block"
                   initial={reduce ? false : { clipPath: 'inset(0 100% 0 0)' }}
-                  animate={{ clipPath: 'inset(0 0 0 0)' }}
-                  transition={{ duration: 0.7, ease: EASE, delay: 0.35 + i * 0.5 }}
+                  animate={
+                    reduce || heroInView
+                      ? { clipPath: 'inset(0 0 0 0)' }
+                      : { clipPath: 'inset(0 100% 0 0)' }
+                  }
+                  transition={{ duration: 0.7, ease: EASE, delay: 0.15 + i * 0.5 }}
                 >
                   <span
                     aria-hidden
