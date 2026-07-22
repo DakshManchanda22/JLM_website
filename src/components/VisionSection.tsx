@@ -45,22 +45,23 @@ export default function VisionSection({
 
   return (
     <section ref={sectionRef} className="w-full bg-white px-4 pt-16 pb-6 md:px-8 md:pt-24 md:pb-8">
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-6xl text-center">
         {label && (
           <span
-            className="mb-5 block font-serif text-[#555555] md:mb-7"
-            style={{ fontSize: 'clamp(1.1rem, 2vw, 1.6rem)' }}
+            className="mb-6 block font-serif font-light leading-[1.05] tracking-tight text-[#111111] md:mb-8"
+            style={{ fontSize: 'clamp(2rem, 4.5vw, 4.25rem)' }}
           >
             {label}
           </span>
         )}
         <p
-          className="font-serif font-light leading-[1.25] tracking-tight text-[#111111]"
-          style={{ fontSize: 'clamp(1.6rem, 3.4vw, 3.1rem)' }}
+          className="mx-auto max-w-4xl font-serif font-light leading-[1.3] tracking-tight text-[#111111]"
+          style={{ fontSize: 'clamp(1.15rem, 2.4vw, 2rem)' }}
         >
           <KineticTextReveal
             ref={revealRef}
             text={text}
+            className="w-full justify-center"
             autoPlay={false}
             splitBy="words"
             direction="up"

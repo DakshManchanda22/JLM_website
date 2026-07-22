@@ -12,6 +12,7 @@ import homepage from './homepage'
 import investorRelations from './investorRelations'
 import leader from './leader'
 import lifeAtJlm from './lifeAtJlm'
+import morisons from './morisons'
 import ourStory from './ourStory'
 import philanthropy from './philanthropy'
 import post from './post'
@@ -30,6 +31,7 @@ export const schemaTypes: SchemaTypeDefinition[] = [
   babyDreams,
   bigen,
   emoform,
+  morisons,
   philanthropy,
   esg,
   careers,

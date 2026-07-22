@@ -402,15 +402,15 @@ function SectionHead({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.5 }}
       transition={{ duration: 0.7, ease: EASE }}
-      className={center ? 'mx-auto max-w-2xl text-center' : 'max-w-2xl'}
+      className={center ? 'mx-auto max-w-2xl text-center xl:max-w-none' : 'max-w-2xl xl:max-w-none'}
     >
       <h2
-        className="text-balance leading-[1.08]"
+        className="text-balance leading-[1.08] xl:whitespace-nowrap"
         style={{
           fontFamily: 'var(--font-nunito)',
           fontWeight: 800,
           letterSpacing: '-0.02em',
-          fontSize: 'clamp(2rem, 4.4vw, 3.25rem)',
+          fontSize: 'clamp(2rem, 4.4vw, 2.9rem)',
           color: onDark ? '#FBF6EF' : INK,
         }}
       >
@@ -418,8 +418,8 @@ function SectionHead({
       </h2>
       {intro && (
         <p
-          className={`mt-4 text-[15px] leading-relaxed md:text-lg ${center ? 'mx-auto' : ''}`}
-          style={{ color: onDark ? 'rgba(251,246,239,0.82)' : MUTED, maxWidth: '52ch' }}
+          className={`mt-4 max-w-[52ch] text-[15px] leading-relaxed md:text-lg xl:max-w-none xl:whitespace-nowrap ${center ? 'mx-auto' : ''}`}
+          style={{ color: onDark ? 'rgba(251,246,239,0.82)' : MUTED }}
         >
           {intro}
         </p>
@@ -660,10 +660,12 @@ function BabyVideo({
       playsInline
       preload="metadata"
       controls={showControls}
-      // Full-bleed (wide desktop): cover the viewport — negligible crop at ~16:9.
+      // Full-bleed (wide desktop): cover the viewport. When the viewport is taller
+      // than 16:9 the cover-crop is taken from top+bottom, so bias the framing to
+      // the top (`object-top`) to keep heads / on-screen text from being clipped.
       // Contained (iPad/narrow): the frame already matches the video's ratio, so
       // cover fills it exactly with no crop and no cream bars.
-      className="absolute inset-0 h-full w-full object-cover"
+      className={`absolute inset-0 h-full w-full object-cover ${fullBleed ? 'object-top' : ''}`}
     />
   ) : (
     <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center">
@@ -772,7 +774,7 @@ function DoctorBlogs({
   }, [reduce, step])
 
   return (
-    <section className="overflow-hidden pt-12 pb-20 md:pt-16 md:pb-28">
+    <section className="overflow-hidden pt-12 pb-6 md:pt-16 md:pb-10">
       <div className="mx-auto mb-12 flex max-w-[1400px] flex-wrap items-end justify-between gap-6 px-6 md:mb-16 md:px-12">
         <SectionHead headline={headline} intro={intro} />
         <Link
@@ -928,6 +930,7 @@ function Follow({
       headingColor={INK}
       notchColor={CREAM}
       fontClassName={nunito.className}
+      className="pt-2 pb-12 md:pt-6 md:pb-16"
     />
   )
 }

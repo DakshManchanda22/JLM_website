@@ -1,11 +1,21 @@
 import Image from 'next/image'
 
 /* The Morisons house page is intentionally a single full-screen poster.
-   The image is hosted on Sanity's CDN (uploaded from the original poster). */
-const POSTER =
+   The poster (and its SEO) is managed in Sanity — this URL is only the
+   fallback used before/if Sanity is filled in. */
+const DEFAULT_POSTER =
   'https://cdn.sanity.io/images/vfv5lxgr/production/de03e11f40386a7916c3252827544f3b13009864-1672x941.png'
 
-export default function MorisonsClient() {
+export default function MorisonsClient({
+  poster,
+  posterLqip,
+  posterAlt,
+}: {
+  poster?: string
+  posterLqip?: string
+  posterAlt?: string
+}) {
+  const src = poster || DEFAULT_POSTER
   return (
     <section
       className="relative w-full overflow-hidden"
@@ -19,12 +29,13 @@ export default function MorisonsClient() {
       }}
     >
       <Image
-        src={POSTER}
-        alt="Morisons — Sensitive Care for your teeth"
+        src={src}
+        alt={posterAlt || 'Morisons — Sensitive Care for your teeth'}
         fill
         priority
         sizes="100vw"
         className="object-cover"
+        {...(posterLqip ? { placeholder: 'blur' as const, blurDataURL: posterLqip } : {})}
       />
     </section>
   )

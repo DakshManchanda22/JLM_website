@@ -134,10 +134,16 @@ export default function Footer({ roundedTop = true }: { roundedTop?: boolean }) 
   const settings = useSiteSettings()
 
   /* Prefer Sanity content; fall back to the code defaults when unset. */
-  const companyLinks =
+  const companyLinks = (
     settings?.footerCompanyLinks && settings.footerCompanyLinks.length > 0
       ? settings.footerCompanyLinks
       : DEFAULT_COMPANY_LINKS
+  ).map((link) =>
+    /* The Privacy Policy PDF is uploaded (or linked) in Sanity site settings. */
+    link.label === 'Privacy Policy' && settings?.privacyPolicyUrl
+      ? { ...link, href: settings.privacyPolicyUrl, external: true }
+      : link,
+  )
   const address =
     settings?.footerAddress && settings.footerAddress.length > 0
       ? settings.footerAddress

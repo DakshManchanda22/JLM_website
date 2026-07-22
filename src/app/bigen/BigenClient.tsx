@@ -823,13 +823,13 @@ function ProductRange({
   return (
     <div className="mt-24 md:mt-32">
       {/* heading */}
-      <div className="mx-auto max-w-3xl text-center">
+      <div className="mx-auto max-w-3xl text-center xl:max-w-none">
         <motion.h2
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-80px' }}
           transition={{ duration: 0.7, ease: EASE }}
-          className="text-[clamp(2.25rem,5vw,4rem)] font-semibold leading-[1.05] text-[#1d1408]"
+          className="text-[clamp(2.25rem,5vw,3.5rem)] font-semibold leading-[1.05] text-[#1d1408] xl:whitespace-nowrap"
           style={{ fontFamily: 'var(--font-google-sans)' }}
         >
           <RichText value={headline} fallback={D.rangeHeadline} />
@@ -907,7 +907,7 @@ function ProductRange({
         headingColor="#1d1408"
         notchColor="#f2ebdd"
         fontClassName={googleSans.className}
-        className="pb-6 md:pb-10"
+        className="pb-0 md:pb-2"
         cards={[
           {
             platform: 'instagram',

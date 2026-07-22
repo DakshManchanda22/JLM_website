@@ -346,7 +346,11 @@ export default function EmoformScrollytelling({ cms }: { cms?: EmoformView }) {
             {steps.map((s, i) => (
               <div
                 key={i}
-                className="flex min-h-[85vh] flex-col justify-center py-14 lg:justify-start lg:pt-[15vh]"
+                className={`flex flex-col justify-center py-14 lg:justify-start lg:pt-[15vh] ${
+                  i === steps.length - 1
+                    ? 'min-h-[70vh] lg:min-h-[62vh] lg:pb-[8vh]'
+                    : 'min-h-[85vh]'
+                }`}
               >
                 {/* Mobile panel sits above its text (no pinning on small screens) */}
                 <div className="relative mb-7 aspect-[4/3] overflow-hidden rounded-2xl lg:hidden">

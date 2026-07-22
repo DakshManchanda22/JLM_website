@@ -151,7 +151,7 @@ export default function HomeFeatures({
             {/* Image card deck */}
             <div
               data-feature-reveal
-              className={`relative w-full aspect-[4/3] md:aspect-[5/4] ${
+              className={`relative w-full aspect-[4/3] md:aspect-[5/4] md:w-[94%] md:mx-auto ${
                 f.imageRight ? 'md:order-2' : 'md:order-1'
               }`}
             >

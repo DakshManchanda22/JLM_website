@@ -123,11 +123,10 @@ const FALLBACK_TEAM: LocalLeader[] = [
   },
 ]
 
-/** Resolve a leader from Sanity first, fall back to the hardcoded list. */
+/** Resolve a leader from Sanity first, fall back to the hardcoded bios.
+    Photos come only from Sanity — the fallback keeps the written bio but no
+    stock image (a neutral placeholder is shown instead). */
 async function resolveLeader(slug: string): Promise<LocalLeader | null> {
-  const PHOTO_PLACEHOLDER =
-    'https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=900&h=1200&fit=crop&auto=format'
-
   const sanityLeader = await fetchLeader(slug)
   if (sanityLeader) {
     const r = resolveImage(sanityLeader.image, 900)
@@ -135,14 +134,15 @@ async function resolveLeader(slug: string): Promise<LocalLeader | null> {
       name: sanityLeader.name,
       title: sanityLeader.title,
       quote: sanityLeader.quote ?? '',
-      image: r?.url ?? PHOTO_PLACEHOLDER,
+      image: r?.url ?? '',
       lqip: r?.lqip,
       linkedin: sanityLeader.linkedin ?? '',
       email: sanityLeader.email ?? '',
       bio: sanityLeader.bio ?? [],
     }
   }
-  return FALLBACK_TEAM.find((l) => slugify(l.name) === slug) ?? null
+  const fallback = FALLBACK_TEAM.find((l) => slugify(l.name) === slug)
+  return fallback ? { ...fallback, image: '' } : null
 }
 
 export async function generateStaticParams() {
@@ -194,21 +194,31 @@ export default async function LeaderProfilePage({
           {/* Photo + social icons */}
           <div className="flex-shrink-0 w-full md:w-[300px] lg:w-[360px]">
             <div
-              className="rounded-2xl overflow-hidden"
+              className="rounded-2xl overflow-hidden bg-[#E8E0D5]"
               style={{ aspectRatio: '3/4' }}
             >
               <div className="relative w-full h-full">
-                <Image
-                  src={leader.image}
-                  alt={leader.name}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 360px"
-                  className="object-cover object-top"
-                  priority
-                  {...(leader.lqip
-                    ? { placeholder: 'blur' as const, blurDataURL: leader.lqip }
-                    : {})}
-                />
+                {leader.image ? (
+                  <Image
+                    src={leader.image}
+                    alt={leader.name}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 360px"
+                    className="object-cover object-top"
+                    priority
+                    {...(leader.lqip
+                      ? { placeholder: 'blur' as const, blurDataURL: leader.lqip }
+                      : {})}
+                  />
+                ) : (
+                  /* No Sanity photo yet — neutral beige placeholder, never a stock photo */
+                  <div className="absolute inset-0 flex items-center justify-center text-[#8a7f6d]">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
+                      <circle cx="12" cy="8" r="4" />
+                      <path d="M4 20c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5" />
+                    </svg>
+                  </div>
+                )}
               </div>
             </div>
 

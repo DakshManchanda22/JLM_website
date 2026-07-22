@@ -128,7 +128,7 @@ export default function StatsSection({
         <h2
           ref={headingRef}
           data-stat-reveal
-          className="font-serif font-normal tracking-tight leading-[1.05] text-[#111111]"
+          className="font-serif font-normal tracking-tight leading-[1.05] text-[#111111] text-center"
           style={{ fontSize: 'clamp(2rem, 5.5vw, 4rem)' }}
         >
           {HEADING}

@@ -102,6 +102,24 @@ export default defineType({
       group: 'footer',
     }),
 
+    /* ─────────────── Footer: Privacy Policy PDF ─────────────── */
+    defineField({
+      name: 'privacyPolicyFile',
+      title: 'Footer — Privacy Policy PDF (upload)',
+      description:
+        'Upload the Privacy Policy PDF. The “Privacy Policy” link in the footer opens this. If empty, the URL below is used.',
+      type: 'file',
+      options: { accept: 'application/pdf' },
+      group: 'footer',
+    }),
+    defineField({
+      name: 'privacyPolicyUrl',
+      title: 'Footer — or Privacy Policy URL',
+      description: 'Used only if no PDF is uploaded above.',
+      type: 'url',
+      group: 'footer',
+    }),
+
     /* ─────────────── Footer: bottom bar ─────────────── */
     defineField({
       name: 'footerCopyright',
