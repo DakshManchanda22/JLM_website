@@ -1,4 +1,5 @@
 import { defineType, defineField, defineArrayMember } from 'sanity'
+import { seoFields } from './seoFields'
 
 /**
  * "Life at JL Morison" — singleton document.
@@ -16,6 +17,7 @@ export default defineType({
     { name: 'caption', title: 'Photo carousel' },
     { name: 'people', title: 'Intro statement' },
     { name: 'arent', title: 'Employee testimonials' },
+    { name: 'seo', title: 'SEO' },
   ],
   fields: [
     /* ───── Intro curtain photos ───── */
@@ -144,6 +146,7 @@ export default defineType({
       initialValue: 2,
       validation: (Rule) => Rule.min(0.5).max(5),
     }),
+    ...seoFields('seo'),
   ],
   preview: { prepare: () => ({ title: 'Life at JL Morison' }) },
 })

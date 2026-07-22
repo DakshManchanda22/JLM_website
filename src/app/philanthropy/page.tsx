@@ -1,14 +1,21 @@
 import type { Metadata } from 'next'
 import PhilanthropyClient from './PhilanthropyClient'
+import BreadcrumbSchema from '@/components/seo/BreadcrumbSchema'
 import { fetchPhilanthropy } from '@/sanity/queries'
-
-export const metadata: Metadata = {
-  title: 'Philanthropy | JL Morison',
-  description:
-    'Building goodness beyond the shelf. Through Project Kaamyaab, JL Morison skills underprivileged new mothers to rejoin the workforce.',
-}
+import { buildMetadata, fetchPageSeo } from '@/sanity/seo'
 
 export const revalidate = 60
+
+export async function generateMetadata(): Promise<Metadata> {
+  return buildMetadata({
+    seo: await fetchPageSeo('philanthropy'),
+    title: 'Philanthropy | JL Morison',
+    description:
+      'Building goodness beyond the shelf. Through Project Kaamyaab, JL Morison ' +
+      'skills underprivileged new mothers to rejoin the workforce.',
+    path: '/philanthropy',
+  })
+}
 
 export default async function PhilanthropyPage() {
   const cms = await fetchPhilanthropy()
@@ -19,5 +26,15 @@ export default async function PhilanthropyPage() {
     ? { videoUrl: cms.videoUrl, poster: cms.videoPoster, posterLqip: cms.videoPosterLqip }
     : undefined
 
-  return <PhilanthropyClient cms={cms ?? undefined} video={video} />
+  return (
+    <>
+      <BreadcrumbSchema
+        items={[
+          { name: 'Home', url: '/' },
+          { name: 'Philanthropy', url: '/philanthropy' },
+        ]}
+      />
+      <PhilanthropyClient cms={cms ?? undefined} video={video} />
+    </>
+  )
 }

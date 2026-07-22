@@ -4,11 +4,24 @@ import HomeFeatures, { type HomeFeature } from '@/components/HomeFeatures'
 import VisionSection from '@/components/VisionSection'
 import ValuesImage from '@/components/ValuesImage'
 import Footer from '@/components/Footer'
+import type { Metadata } from 'next'
 import { fetchHomepage } from '@/sanity/queries'
 import { resolveImage } from '@/sanity/resolveImage'
+import { buildMetadata, fetchPageSeo } from '@/sanity/seo'
 
 // Revalidate every 60s so Sanity edits surface without redeploys
 export const revalidate = 60
+
+export async function generateMetadata(): Promise<Metadata> {
+  return buildMetadata({
+    seo: await fetchPageSeo('homepage'),
+    title: 'JL Morison | Trusted FMCG Brands Since 1920 | India',
+    description:
+      'Morisons Baby Dreams, Emoform & Bigen — three trusted brands built by ' +
+      'JL Morison over 100 years for Indian families.',
+    path: '',
+  })
+}
 
 export default async function Home() {
   const homepage = await fetchHomepage()

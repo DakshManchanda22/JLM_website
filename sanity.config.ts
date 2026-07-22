@@ -102,17 +102,13 @@ export default defineConfig({
                           .schemaType('ourStory')
                           .documentId('ourStory'),
                       ),
+                    // One place for the whole team: drag to reorder, click a
+                    // person to edit their details, or "Add item" to create a
+                    // new leader. (Replaces the old split of a separate list +
+                    // order document.)
                     S.listItem()
                       .title('Leadership Team')
-                      .id('leaderList')
-                      .child(
-                        S.documentTypeList('leader')
-                          .title('Leadership Team')
-                          .defaultOrdering([{ field: 'order', direction: 'asc' }]),
-                      ),
-                    S.listItem()
-                      .title('Leadership order')
-                      .id('leadershipOrder')
+                      .id('leadershipTeam')
                       .child(
                         S.editor()
                           .id('leadershipTeam')

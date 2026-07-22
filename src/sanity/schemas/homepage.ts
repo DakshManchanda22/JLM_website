@@ -1,4 +1,5 @@
 import { defineType, defineField, defineArrayMember } from 'sanity'
+import { seoFields } from './seoFields'
 
 /**
  * Homepage singleton — every editable string and image on the home page lives
@@ -18,6 +19,7 @@ export default defineType({
     { name: 'values', title: 'Values image' },
     { name: 'features', title: 'Feature sections' },
     { name: 'quote', title: 'Quote' },
+    { name: 'seo', title: 'SEO' },
   ],
   fields: [
     /* ─────────────── Our Vision ─────────────── */
@@ -291,6 +293,9 @@ export default defineType({
         }),
       ],
     }),
+
+    /* ─────────────── SEO ─────────────── */
+    ...seoFields('seo'),
   ],
   preview: {
     prepare: () => ({ title: 'Homepage' }),

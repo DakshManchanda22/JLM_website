@@ -1,15 +1,23 @@
 import type { Metadata } from 'next'
 import MorisonsBabyDreamsClient, { type BabyBlogCard } from './MorisonsBabyDreamsClient'
+import BreadcrumbSchema from '@/components/seo/BreadcrumbSchema'
 import { fetchBabyDreams, fetchPosts, type PostListItem } from '@/sanity/queries'
 import { resolveImage, resolveImageUrl } from '@/sanity/resolveImage'
-
-export const metadata: Metadata = {
-  title: 'Morisons Baby Dreams | JL Morison',
-  description:
-    'Gentle, thoughtfully made baby care from Morisons Baby Dreams: diapers and wipes, personal and oral care, feeding, and everything mum and baby need for the everyday.',
-}
+import { buildMetadata, fetchPageSeo } from '@/sanity/seo'
 
 export const revalidate = 60
+
+export async function generateMetadata(): Promise<Metadata> {
+  return buildMetadata({
+    seo: await fetchPageSeo('babyDreams'),
+    title: 'Morisons Baby Dreams | JL Morison',
+    description:
+      'Gentle, thoughtfully made baby care from Morisons Baby Dreams: diapers and ' +
+      'wipes, personal and oral care, feeding, and everything mum and baby need for ' +
+      'the everyday.',
+    path: '/morisons-baby-dreams',
+  })
+}
 
 /* Prefer posts by doctors for the "written by doctors" section; if there aren't
    enough, fall back to the most recent posts. */
@@ -42,5 +50,15 @@ export default async function MorisonsBabyDreamsPage() {
   const doctors = (rawPosts ?? []).filter(looksLikeDoctor).map(toBlogCard)
   const blogPosts = (doctors.length >= 3 ? doctors : mapped).slice(0, 8)
 
-  return <MorisonsBabyDreamsClient cms={cms ?? {}} blogPosts={blogPosts} />
+  return (
+    <>
+      <BreadcrumbSchema
+        items={[
+          { name: 'Home', url: '/' },
+          { name: 'Morisons Baby Dreams', url: '/morisons-baby-dreams' },
+        ]}
+      />
+      <MorisonsBabyDreamsClient cms={cms ?? {}} blogPosts={blogPosts} />
+    </>
+  )
 }

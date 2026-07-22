@@ -28,7 +28,8 @@ function BrandCard({
   brand: Brand
   index: number
   isActive: boolean
-  /** Touch / mobile: cards render as a simple static stack (no hover-expand). */
+  /** Touch / mobile: cards keep an equal share (no hover-expand), but the card
+      scrolled to the centre of the screen "lights up" — its image brightens. */
   viewportMode: boolean
   setRef: (el: HTMLDivElement | null) => void
   onEnter: () => void
@@ -62,11 +63,22 @@ function BrandCard({
             : {})}
         />
 
+        {/* Dark wash — touch devices only. The card centred on screen brightens
+            (0.55 → 0.22); the rest stay dimmed. On desktop (a real cursor) the
+            image stays clear with no fade. */}
+        {viewportMode && (
+          <motion.div
+            className="absolute inset-0 bg-black"
+            animate={{ opacity: isActive ? 0.22 : 0.55 }}
+            transition={{ duration: 0.45, ease: 'easeOut' }}
+          />
+        )}
+
         {/* Localised bottom scrim so the brand name stays legible over any image
             without darkening the whole photo. */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/55 to-transparent" />
 
-        {/* Brand name — always visible, no scaling. */}
+        {/* Brand name — always visible (never replaced by the tagline), no scaling. */}
         <div className="absolute inset-x-6 bottom-6 pointer-events-none">
           <p
             className="text-white/90 font-black uppercase leading-[0.95] tracking-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.4)]"
@@ -95,8 +107,8 @@ export default function BrandCards({
   const [viewportMode, setViewportMode] = useState(false)
   const cardRefs = useRef<(HTMLDivElement | null)[]>([])
 
-  /* Touch devices have no hover. Detect them and switch to the simple static
-     stack (no hover-expand). */
+  /* Touch devices have no hover. Detect them and switch to viewport mode, where
+     the card centred on screen is the active ("lit up") one. */
   useEffect(() => {
     const mq = window.matchMedia('(hover: none)')
     const apply = () => setViewportMode(mq.matches)
@@ -104,6 +116,32 @@ export default function BrandCards({
     mq.addEventListener('change', apply)
     return () => mq.removeEventListener('change', apply)
   }, [])
+
+  /* In viewport mode, light up whichever card crosses the centre of the screen
+     so its image brightens as you scroll. The brand name stays put — only the
+     image wash animates. */
+  useEffect(() => {
+    if (!viewportMode) {
+      setActiveIndex(null)
+      return
+    }
+    const els = cardRefs.current.filter(Boolean) as HTMLDivElement[]
+    if (!els.length) return
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const idx = Number((entry.target as HTMLElement).dataset.index)
+            if (!Number.isNaN(idx)) setActiveIndex(idx)
+          }
+        })
+      },
+      // Fire when a card's centre band crosses the viewport centre.
+      { rootMargin: '-45% 0px -45% 0px', threshold: 0 },
+    )
+    els.forEach((el) => observer.observe(el))
+    return () => observer.disconnect()
+  }, [viewportMode, BRANDS.length])
 
   return (
     <section className="bg-[#111111] pt-8 pb-20 md:pt-10 md:pb-28 px-6 md:px-10">

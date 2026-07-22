@@ -1,8 +1,22 @@
+import type { Metadata } from 'next'
 import LifeAtJlmClient, { type LifeCms } from './LifeAtJlmClient'
+import BreadcrumbSchema from '@/components/seo/BreadcrumbSchema'
 import { fetchLifeAtJlm } from '@/sanity/queries'
 import { resolveImage } from '@/sanity/resolveImage'
+import { buildMetadata, fetchPageSeo } from '@/sanity/seo'
 
 export const revalidate = 60
+
+export async function generateMetadata(): Promise<Metadata> {
+  return buildMetadata({
+    seo: await fetchPageSeo('lifeAtJlm'),
+    title: 'Life at JLM | JL Morison',
+    description:
+      'Life at JL Morison — the people, culture and everyday moments behind a ' +
+      'century of building goodness.',
+    path: '/life-at-jlm',
+  })
+}
 
 export default async function LifeAtJlmPage() {
   const data = await fetchLifeAtJlm()
@@ -47,5 +61,15 @@ export default async function LifeAtJlmPage() {
       }
     : {}
 
-  return <LifeAtJlmClient cms={cms} />
+  return (
+    <>
+      <BreadcrumbSchema
+        items={[
+          { name: 'Home', url: '/' },
+          { name: 'Life at JLM', url: '/life-at-jlm' },
+        ]}
+      />
+      <LifeAtJlmClient cms={cms} />
+    </>
+  )
 }

@@ -1,4 +1,5 @@
 import { defineType, defineField } from 'sanity'
+import { seoFields } from './seoFields'
 
 /**
  * Morisons (house brand) page — singleton document.
@@ -33,28 +34,7 @@ export default defineType({
     }),
 
     /* ───────────── SEO ───────────── */
-    defineField({
-      name: 'seoTitle',
-      title: 'SEO title',
-      description: 'Meta title shown on Google / browser tab.',
-      type: 'string',
-      group: 'seo',
-    }),
-    defineField({
-      name: 'seoDescription',
-      title: 'SEO description',
-      description: 'Meta description shown on Google.',
-      type: 'text',
-      rows: 3,
-      group: 'seo',
-    }),
-    defineField({
-      name: 'ogImage',
-      title: 'Social share image (OG)',
-      description: 'Shown when the page is shared on WhatsApp / LinkedIn.',
-      type: 'image',
-      group: 'seo',
-    }),
+    ...seoFields('seo'),
   ],
   preview: {
     prepare: () => ({ title: 'Morisons' }),

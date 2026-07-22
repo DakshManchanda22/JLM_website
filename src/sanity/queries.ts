@@ -93,9 +93,11 @@ export type Post = PostListItem & {
     role?: string
     slug?: string
   }
+  _updatedAt?: string
   seoTitle?: string
   seoDescription?: string
   ogImage?: { asset: { _ref: string } }
+  ogImageAlt?: string
 }
 
 const postProjection = groq`
@@ -123,13 +125,28 @@ export const postListQuery = groq`*[_type == "post" && defined(slug.current)] | 
 
 export const postBySlugQuery = groq`*[_type == "post" && slug.current == $slug][0] {
   ${postProjection},
+  _updatedAt,
   body,
   seoTitle,
   seoDescription,
-  ogImage
+  ogImage,
+  ogImageAlt
 }`
 
 export const postSlugsQuery = groq`*[_type == "post" && defined(slug.current)][].slug.current`
+
+/** Slug + last-modified for each post — used by the dynamic sitemap. */
+export const postSitemapQuery = groq`*[_type == "post" && defined(slug.current)]{
+  "slug": slug.current,
+  _updatedAt
+}`
+
+export async function fetchPostsForSitemap(): Promise<
+  { slug: string; _updatedAt: string }[]
+> {
+  if (!client) return []
+  return client.fetch(postSitemapQuery)
+}
 
 export async function fetchPosts(): Promise<PostListItem[]> {
   if (!client) return []

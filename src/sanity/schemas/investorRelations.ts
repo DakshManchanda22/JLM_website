@@ -1,4 +1,5 @@
 import { defineArrayMember, defineField, defineType } from 'sanity'
+import { seoFields } from './seoFields'
 
 /* A single PDF link: marketing can either upload a PDF file OR paste a URL.
    Whichever is filled is used (the uploaded file wins when both are set). */
@@ -65,6 +66,7 @@ export default defineType({
     { name: 'notice', title: 'Notice of Meetings / Postal Ballot' },
     { name: 'investors', title: 'Investors Information' },
     { name: 'iepf', title: 'IEPF' },
+    { name: 'seo', title: 'SEO' },
   ],
   fields: [
     /* ─────────── 1. Terms of Appointment of Independent Directors ─────────── */
@@ -313,6 +315,7 @@ export default defineType({
         }),
       ],
     }),
+    ...seoFields('seo'),
   ],
   preview: { prepare: () => ({ title: 'Investor Relations' }) },
 })

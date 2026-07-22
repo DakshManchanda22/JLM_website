@@ -2,8 +2,10 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
+import BreadcrumbSchema from '@/components/seo/BreadcrumbSchema'
 import { fetchLeader, fetchLeaderSlugs } from '@/sanity/queries'
 import { resolveImage } from '@/sanity/resolveImage'
+import { SITE_URL } from '@/sanity/seo'
 
 export const revalidate = 60
 
@@ -161,8 +163,9 @@ export async function generateMetadata({
   const leader = await resolveLeader(slug)
   if (!leader) return {}
   return {
-    title: `${leader.name} — JL Morison (India) Ltd.`,
+    title: { absolute: `${leader.name} — JL Morison (India) Ltd.` },
     description: leader.bio[0],
+    alternates: { canonical: `${SITE_URL}/leadership-team/${slug}` },
   }
 }
 
@@ -177,6 +180,13 @@ export default async function LeaderProfilePage({
 
   return (
     <div style={{ backgroundColor: '#111111', minHeight: '100%' }}>
+      <BreadcrumbSchema
+        items={[
+          { name: 'Home', url: '/' },
+          { name: 'Leadership Team', url: '/leadership-team' },
+          { name: leader.name, url: `/leadership-team/${slug}` },
+        ]}
+      />
       <div className="px-6 md:px-12 lg:px-16 pt-12 pb-24">
 
         {/* Back link */}

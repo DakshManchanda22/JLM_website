@@ -1,6 +1,7 @@
 import { defineType, defineField, defineArrayMember } from 'sanity'
 import { socialCardFields } from './socialCard'
 import { factoryFields } from './factory'
+import { seoFields } from './seoFields'
 
 /* Shared pastel tint options for the product-category tiles. */
 const TINTS = [
@@ -28,6 +29,7 @@ export default defineType({
     { name: 'factory', title: 'Factory' },
     { name: 'blogs', title: 'Doctor blogs' },
     { name: 'social', title: 'Social links' },
+    { name: 'seo', title: 'SEO' },
   ],
   fields: [
     /* ───────────── Banner carousel ───────────── */
@@ -220,6 +222,7 @@ export default defineType({
     ...socialCardFields('instagram', 'Instagram'),
     ...socialCardFields('facebook', 'Facebook'),
     ...socialCardFields('youtube', 'YouTube'),
+    ...seoFields('seo'),
   ],
   preview: {
     prepare: () => ({ title: 'Morisons Baby Dreams' }),
