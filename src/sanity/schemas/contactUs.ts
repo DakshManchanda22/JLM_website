@@ -1,4 +1,5 @@
 import { defineType, defineField, defineArrayMember } from 'sanity'
+import { seoFields } from './seoFields'
 
 /**
  * Contact Us page — singleton document.
@@ -16,6 +17,7 @@ export default defineType({
     { name: 'form', title: 'Form messages' },
     { name: 'wheel', title: 'Photo wheel' },
     { name: 'delivery', title: 'Where enquiries go' },
+    { name: 'seo', title: 'SEO' },
   ],
   fields: [
     /* ───────────── Heading ───────────── */
@@ -141,6 +143,7 @@ export default defineType({
             return bad ? `"${bad}" is not a valid email address.` : true
           }),
     }),
+    ...seoFields('seo'),
   ],
   preview: { prepare: () => ({ title: 'Contact Us' }) },
 })

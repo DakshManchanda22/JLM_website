@@ -1,4 +1,5 @@
 import { defineType, defineField } from 'sanity'
+import { seoFields } from './seoFields'
 
 /**
  * Careers page — singleton document.
@@ -14,6 +15,7 @@ export default defineType({
     { name: 'hero', title: 'Hero' },
     { name: 'form', title: 'Form messages' },
     { name: 'delivery', title: 'Where applications go' },
+    { name: 'seo', title: 'SEO' },
   ],
   fields: [
     /* ───────────── Hero ───────────── */
@@ -93,6 +95,7 @@ export default defineType({
             return bad ? `"${bad}" is not a valid email address.` : true
           }),
     }),
+    ...seoFields('seo'),
   ],
   preview: { prepare: () => ({ title: 'Careers' }) },
 })

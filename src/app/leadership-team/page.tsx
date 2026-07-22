@@ -1,14 +1,20 @@
 import type { Metadata } from 'next'
 import LeadershipGrid, { type Leader } from '@/components/LeadershipGrid'
+import BreadcrumbSchema from '@/components/seo/BreadcrumbSchema'
 import { fetchLeaders } from '@/sanity/queries'
 import { resolveImage } from '@/sanity/resolveImage'
+import { buildMetadata, fetchPageSeo } from '@/sanity/seo'
 
 export const revalidate = 60
 
-export const metadata: Metadata = {
-  title: 'Leadership Team — JL Morison (India) Ltd.',
-  description:
-    "Meet the people leading JL Morison's mission to build goodness for every Indian family.",
+export async function generateMetadata(): Promise<Metadata> {
+  return buildMetadata({
+    seo: await fetchPageSeo('leadershipTeam'),
+    title: 'Leadership Team | JL Morison',
+    description:
+      "Meet the people leading JL Morison's mission to build goodness for every Indian family.",
+    path: '/leadership-team',
+  })
 }
 
 export default async function LeadershipTeamPage() {
@@ -29,6 +35,12 @@ export default async function LeadershipTeamPage() {
 
   return (
     <div style={{ backgroundColor: '#FFFFFF', minHeight: '100%' }}>
+      <BreadcrumbSchema
+        items={[
+          { name: 'Home', url: '/' },
+          { name: 'Leadership Team', url: '/leadership-team' },
+        ]}
+      />
       <LeadershipGrid team={team} />
     </div>
   )

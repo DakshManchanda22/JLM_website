@@ -1,25 +1,27 @@
 import { defineType, defineField, defineArrayMember } from 'sanity'
+import { seoFields } from './seoFields'
 
 /**
- * Leadership order — singleton document.
- * Holds a drag-to-reorder list of leadership team members. The website shows the
- * leaders in exactly this order. Anyone not added to the list simply appears
- * after those that are (kept in their old number order as a fallback), so adding
- * a new person never breaks the page — you just drag them into place here.
+ * Leadership Team — singleton document.
+ * The single place to manage the whole team: a drag-to-reorder list of members.
+ * The website shows the leaders in exactly this order. Click a person to edit
+ * their photo, bio and details; "Add item" creates a new leader. Anyone not
+ * added here still appears after those that are (kept in their old number order
+ * as a fallback), so nothing ever silently disappears from the page.
  */
 export default defineType({
   name: 'leadershipTeam',
-  title: 'Leadership order',
+  title: 'Leadership Team',
   type: 'document',
   fields: [
     defineField({
       name: 'members',
-      title: 'Team order',
+      title: 'The team',
       description:
-        'Drag the cards up or down to change the order they appear in on the ' +
-        'website. Add a person with “Add item”, or remove them from the list ' +
-        '(removing here does NOT delete the person — edit them under “Leadership ' +
-        'Team”).',
+        'Drag the cards up or down to set the order they appear in on the ' +
+        'website. Click a person to edit their photo, bio and details. Use ' +
+        '“Add item” to add a new leader (or an existing one). Removing a card ' +
+        'here does NOT delete that person — it only takes them off the page.',
       type: 'array',
       of: [
         defineArrayMember({
@@ -28,8 +30,9 @@ export default defineType({
         }),
       ],
     }),
+    ...seoFields(),
   ],
   preview: {
-    prepare: () => ({ title: 'Leadership order' }),
+    prepare: () => ({ title: 'Leadership Team' }),
   },
 })

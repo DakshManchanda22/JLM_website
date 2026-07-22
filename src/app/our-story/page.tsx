@@ -1,8 +1,22 @@
+import type { Metadata } from 'next'
 import OurStoryClient, { type Era, type OurStoryCms } from './OurStoryClient'
+import BreadcrumbSchema from '@/components/seo/BreadcrumbSchema'
 import { fetchOurStory } from '@/sanity/queries'
 import { resolveImage } from '@/sanity/resolveImage'
+import { buildMetadata, fetchPageSeo } from '@/sanity/seo'
 
 export const revalidate = 60
+
+export async function generateMetadata(): Promise<Metadata> {
+  return buildMetadata({
+    seo: await fetchPageSeo('ourStory'),
+    title: 'Our Story | JL Morison',
+    description:
+      'A hundred years of building goodness — the JL Morison story, from a 1920 ' +
+      'trading house to a homegrown Indian FMCG company.',
+    path: '/our-story',
+  })
+}
 
 export default async function OurStoryPage() {
   const data = await fetchOurStory()
@@ -43,5 +57,15 @@ export default async function OurStoryPage() {
     signatureNote: data?.signatureNote,
   }
 
-  return <OurStoryClient cms={cms} />
+  return (
+    <>
+      <BreadcrumbSchema
+        items={[
+          { name: 'Home', url: '/' },
+          { name: 'Our Story', url: '/our-story' },
+        ]}
+      />
+      <OurStoryClient cms={cms} />
+    </>
+  )
 }

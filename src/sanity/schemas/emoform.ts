@@ -1,6 +1,7 @@
 import { defineType, defineField, defineArrayMember } from 'sanity'
 import { socialCardFields } from './socialCard'
 import { factoryFields } from './factory'
+import { seoFields } from './seoFields'
 
 /**
  * Emoform brand page — every headline, label, caption, link and image on the
@@ -19,6 +20,7 @@ export default defineType({
     { name: 'factory', title: 'Factory' },
     { name: 'cta', title: 'Closing CTA' },
     { name: 'social', title: 'Social links' },
+    { name: 'seo', title: 'SEO' },
   ],
   fields: [
     /* ─────────────── Hero ─────────────── */
@@ -165,6 +167,7 @@ export default defineType({
     }),
     ...socialCardFields('instagram', 'Instagram'),
     ...socialCardFields('facebook', 'Facebook'),
+    ...seoFields('seo'),
   ],
   preview: { prepare: () => ({ title: 'Emoform' }) },
 })

@@ -1,4 +1,5 @@
 import { defineType, defineField, defineArrayMember } from 'sanity'
+import { seoFields } from './seoFields'
 
 /**
  * "Our Story" — singleton.
@@ -15,6 +16,7 @@ export default defineType({
     { name: 'eras', title: 'The five eras' },
     { name: 'pillars', title: 'Guiding pillars' },
     { name: 'closing', title: 'Closing' },
+    { name: 'seo', title: 'SEO' },
   ],
   fields: [
     /* ─────────── Hero ─────────── */
@@ -240,6 +242,7 @@ export default defineType({
       type: 'string',
       initialValue: 'Since 1920',
     }),
+    ...seoFields('seo'),
   ],
   preview: { prepare: () => ({ title: 'Our Story' }) },
 })

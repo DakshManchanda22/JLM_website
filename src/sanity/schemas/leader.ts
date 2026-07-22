@@ -34,7 +34,7 @@ export default defineType({
       title: 'Fallback order (lowest first)',
       description:
         'Only used as a fallback. The real order is set by dragging cards under ' +
-        '“Our People → Leadership order”. This number decides the position for ' +
+        '“Our People → Leadership Team”. This number decides the position for ' +
         'anyone not placed in that list. 1 = first.',
       type: 'number',
       validation: (Rule) => Rule.min(0),

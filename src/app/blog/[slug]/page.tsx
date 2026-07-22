@@ -7,10 +7,13 @@ import { Cormorant_Garamond, DM_Sans } from 'next/font/google'
 import AuthorCard from '@/components/blog/AuthorCard'
 import PortableBody from '@/components/blog/PortableBody'
 import Footer from '@/components/Footer'
+import BreadcrumbSchema from '@/components/seo/BreadcrumbSchema'
+import JsonLd from '@/components/seo/JsonLd'
 import { fetchPost, fetchPostSlugs } from '@/sanity/queries'
 import { demoPostBySlug, demoPostSlugs } from '@/sanity/demoContent'
 import { isSanityConfigured } from '@/sanity/env'
 import { resolveImage, resolveImageUrl } from '@/sanity/resolveImage'
+import { SITE_URL } from '@/sanity/seo'
 
 const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
@@ -38,14 +41,26 @@ export async function generateMetadata({
   if (!post) return { title: 'Post not found · JL Morison' }
 
   const ogImageUrl = resolveImageUrl(post.ogImage ?? post.coverImage, 1200)
+  const canonical = `${SITE_URL}/blog/${params.slug}`
   return {
-    title: post.seoTitle ?? `${post.title} · JL Morison`,
+    title: { absolute: post.seoTitle ?? `${post.title} · JL Morison` },
     description: post.seoDescription ?? post.excerpt,
+    alternates: { canonical },
     openGraph: {
       title: post.seoTitle ?? post.title,
       description: post.seoDescription ?? post.excerpt,
       type: 'article',
+      url: canonical,
       publishedTime: post.publishedAt,
+      modifiedTime: post._updatedAt,
+      images: ogImageUrl
+        ? [{ url: ogImageUrl, alt: post.ogImageAlt ?? post.coverImage?.alt ?? post.title }]
+        : undefined,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.seoTitle ?? post.title,
+      description: post.seoDescription ?? post.excerpt,
       images: ogImageUrl ? [ogImageUrl] : undefined,
     },
   }
@@ -68,9 +83,37 @@ export default async function BlogPostPage({ params }: { params: Params }) {
   const cover = resolveImage(post.coverImage, 1600)
   const coverUrl = cover?.url
   const avatarUrl = resolveImageUrl(post.author?.avatar, 240)
+  const articleImageUrl = resolveImageUrl(post.coverImage, 1200)
+  const canonical = `${SITE_URL}/blog/${post.slug}`
 
   return (
     <article className={`${dmSans.className} bg-white text-[#111111]`}>
+      <BreadcrumbSchema
+        items={[
+          { name: 'Home', url: '/' },
+          { name: 'Journal', url: '/blog' },
+          { name: post.title, url: `/blog/${post.slug}` },
+        ]}
+      />
+      <JsonLd
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'Article',
+          headline: post.title,
+          ...(articleImageUrl ? { image: [articleImageUrl] } : {}),
+          datePublished: post.publishedAt,
+          dateModified: post._updatedAt ?? post.publishedAt,
+          author: post.author?.name
+            ? { '@type': 'Person', name: post.author.name }
+            : { '@type': 'Organization', name: 'JL Morison' },
+          publisher: {
+            '@type': 'Organization',
+            name: 'JL Morison',
+            logo: { '@type': 'ImageObject', url: `${SITE_URL}/logo.png` },
+          },
+          mainEntityOfPage: canonical,
+        }}
+      />
       {/* ─── Header strip — date, tags ─── */}
       <header className="max-w-[760px] mx-auto px-6 pt-20 md:pt-28">
         <div className="flex flex-wrap items-center gap-3 mb-10 text-[11px] tracking-[0.22em] uppercase text-[#888888]">

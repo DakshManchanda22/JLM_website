@@ -1,4 +1,5 @@
 import { defineField, defineType } from 'sanity'
+import { seoFields } from './seoFields'
 
 export default defineType({
   name: 'post',
@@ -95,29 +96,8 @@ export default defineType({
       group: 'meta',
       initialValue: false,
     }),
-    defineField({
-      name: 'seoTitle',
-      title: 'SEO title',
-      type: 'string',
-      group: 'seo',
-      description: 'Meta title shown on Google. Falls back to article title.',
-    }),
-    defineField({
-      name: 'seoDescription',
-      title: 'SEO description',
-      type: 'text',
-      rows: 2,
-      group: 'seo',
-      description: 'Meta description shown on Google. Falls back to excerpt.',
-      validation: (Rule) => Rule.max(160),
-    }),
-    defineField({
-      name: 'ogImage',
-      title: 'Share image (OG)',
-      type: 'image',
-      group: 'seo',
-      description: 'Used when shared on WhatsApp / LinkedIn. Falls back to cover image.',
-    }),
+    // Shared SEO fields — falls back to the article title / excerpt / cover image.
+    ...seoFields('seo'),
   ],
   preview: {
     select: {

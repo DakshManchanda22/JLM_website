@@ -1,4 +1,5 @@
 import { defineType, defineField, defineArrayMember } from 'sanity'
+import { seoFields } from './seoFields'
 
 /**
  * ESG page — singleton document.
@@ -17,6 +18,7 @@ export default defineType({
     { name: 'environment', title: 'Environment' },
     { name: 'social', title: 'Social gallery' },
     { name: 'policies', title: 'Governance & documents' },
+    { name: 'seo', title: 'SEO' },
   ],
   fields: [
     /* ───────────── ESG title + collage ───────────── */
@@ -268,6 +270,7 @@ export default defineType({
         }),
       ],
     }),
+    ...seoFields('seo'),
   ],
   preview: {
     prepare: () => ({ title: 'ESG' }),
