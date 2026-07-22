@@ -125,6 +125,8 @@ export type SiteSettings = {
   }
   footerFollowText?: string
   footerCopyright?: string
+  /** Uploaded PDF wins; otherwise the pasted URL. Drives the footer link. */
+  privacyPolicyUrl?: string
 }
 
 export const siteSettingsQuery = groq`*[_type == "siteSettings"][0]{
@@ -134,6 +136,7 @@ export const siteSettingsQuery = groq`*[_type == "siteSettings"][0]{
   footerSocial{ linkedin, instagram, facebook, youtube, twitter },
   footerFollowText,
   footerCopyright,
+  "privacyPolicyUrl": coalesce(privacyPolicyFile.asset->url, privacyPolicyUrl),
 }`
 
 export async function fetchSiteSettings(): Promise<SiteSettings | null> {
@@ -874,7 +877,7 @@ export const esgQuery = groq`*[_type == "esg"][0]{
   carouselSpeed,
   policiesHeading, policiesIntro,
   policiesImage{ ${imageWithLqip} },
-  policyDocuments[]{ title, url },
+  policyDocuments[]{ title, "fileUrl": file.asset->url, url },
 }`
 
 export async function fetchEsg(): Promise<EsgView | null> {
@@ -929,8 +932,44 @@ export async function fetchEsg(): Promise<EsgView | null> {
     policiesImage: resolveImage(raw.policiesImage, 1400)?.url,
     policiesImageLqip: resolveImage(raw.policiesImage, 1400)?.lqip,
     policyDocuments: (raw.policyDocuments || [])
-      .map((d: any) => ({ title: d.title, url: d.url }))
+      // An uploaded PDF file wins; otherwise fall back to a pasted URL.
+      .map((d: any) => ({ title: d.title, url: d.fileUrl || d.url }))
       .filter((d: any) => d.title && d.url),
+  }
+}
+
+/* ─────────────────────────── Morisons (house brand) ─────────────────────────── */
+
+export type MorisonsView = {
+  poster?: string
+  posterLqip?: string
+  posterAlt?: string
+  seoTitle?: string
+  seoDescription?: string
+  ogImage?: string
+}
+
+export const morisonsQuery = groq`*[_type == "morisons"][0]{
+  poster{ ${imageWithLqip} },
+  posterAlt,
+  seoTitle, seoDescription,
+  ogImage{ ${imageWithLqip} },
+}`
+
+export async function fetchMorisons(): Promise<MorisonsView | null> {
+  if (!client) return null
+  const raw: any = await client.fetch(morisonsQuery)
+  if (!raw) return null
+
+  const p = resolveImage(raw.poster, 2400)
+  const og = resolveImage(raw.ogImage, 1200)
+  return {
+    poster: p?.url,
+    posterLqip: p?.lqip,
+    posterAlt: raw.posterAlt,
+    seoTitle: raw.seoTitle,
+    seoDescription: raw.seoDescription,
+    ogImage: og?.url,
   }
 }
 

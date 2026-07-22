@@ -26,7 +26,7 @@ export default function EmoformGumCare({ cms }: { cms?: EmoformView }) {
           'linear-gradient(180deg, #2f539f 0%, #1c3a78 55%, #13285a 100%)',
       }}
     >
-      <div className="mx-auto flex max-w-3xl flex-col items-center px-6 pt-24 pb-14 text-center md:pt-32 md:pb-16">
+      <div className="mx-auto flex max-w-3xl flex-col items-center px-6 pt-14 pb-14 text-center md:pt-20 md:pb-16">
         <motion.h2
           initial={reduce ? false : { opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}

@@ -221,14 +221,27 @@ export default defineType({
       name: 'policyDocuments',
       title: 'Governance — document links',
       group: 'policies',
-      description: 'Each row links to a PDF that opens in a new tab.',
+      description:
+        'Each row links to a PDF that opens in a new tab. Upload the PDF file, ' +
+        'or paste a URL (the uploaded file is used when both are set).',
       type: 'array',
       of: [
         defineArrayMember({
           type: 'object',
           fields: [
             defineField({ name: 'title', title: 'Document name', type: 'string' }),
-            defineField({ name: 'url', title: 'PDF URL', type: 'url' }),
+            defineField({
+              name: 'file',
+              title: 'PDF file (upload)',
+              type: 'file',
+              options: { accept: 'application/pdf' },
+            }),
+            defineField({
+              name: 'url',
+              title: 'or PDF URL',
+              type: 'url',
+              description: 'Used only if no file is uploaded above.',
+            }),
           ],
           preview: { select: { title: 'title', subtitle: 'url' } },
         }),

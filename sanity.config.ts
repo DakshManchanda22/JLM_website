@@ -155,6 +155,15 @@ export default defineConfig({
                           .schemaType('emoform')
                           .documentId('emoform'),
                       ),
+                    S.listItem()
+                      .title('Morisons')
+                      .id('morisons')
+                      .child(
+                        S.editor()
+                          .id('morisons')
+                          .schemaType('morisons')
+                          .documentId('morisons'),
+                      ),
                   ]),
               ),
 

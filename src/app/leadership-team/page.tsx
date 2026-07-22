@@ -14,24 +14,18 @@ export const metadata: Metadata = {
 export default async function LeadershipTeamPage() {
   const leaders = await fetchLeaders()
 
-  /* Neutral placeholder for leaders whose photo isn't uploaded yet —
-     a single muted headshot until a real one is added in Studio. */
-  const PHOTO_PLACEHOLDER =
-    'https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=900&h=1200&fit=crop&auto=format'
-
-  const team: Leader[] | undefined =
-    leaders.length > 0
-      ? leaders.map((l) => {
-          const r = resolveImage(l.image, 900)
-          return {
-            name: l.name,
-            title: l.title,
-            image: r?.url ?? PHOTO_PLACEHOLDER,
-            lqip: r?.lqip,
-            slug: l.slug,
-          }
-        })
-      : undefined
+  /* Photos come only from Sanity. Leaders without an uploaded photo fall back
+     to a neutral placeholder rendered by LeadershipGrid (never a stock photo). */
+  const team: Leader[] = leaders.map((l) => {
+    const r = resolveImage(l.image, 900)
+    return {
+      name: l.name,
+      title: l.title,
+      image: r?.url ?? '',
+      lqip: r?.lqip,
+      slug: l.slug,
+    }
+  })
 
   return (
     <div style={{ backgroundColor: '#FFFFFF', minHeight: '100%' }}>

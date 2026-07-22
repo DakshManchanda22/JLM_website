@@ -45,7 +45,7 @@ function Chevron({ open }: { open: boolean }) {
 
 const DROPDOWNS: Record<string, string[]> = {
   'Our People': ['Our Story', 'Leadership Team', 'Life at JLM'],
-  'Our Brands': ['Morisons', 'Morisons Baby Dreams', 'Bigen', 'Emoform'],
+  'Our Brands': ['Morisons Baby Dreams', 'Bigen', 'Emoform', 'Morisons'],
 }
 
 // Order shown in the right-aligned desktop cluster (all right-aligned via ml-auto).

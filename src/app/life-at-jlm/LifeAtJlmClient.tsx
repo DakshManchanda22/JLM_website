@@ -281,7 +281,7 @@ function Hero() {
 
   return (
     <section
-      className="relative w-full min-h-[82svh] md:min-h-[92vh]"
+      className="relative w-full min-h-[88svh] md:min-h-[92vh]"
       style={{
         backgroundColor: FAINT,
         overflow: 'hidden',
@@ -542,9 +542,10 @@ function QuoteCard({
     if (!box || !q) return
 
     const fit = () => {
-      let size = 27
+      // Cap scales with card width so quotes read smaller on narrow phones.
+      let size = Math.min(27, Math.max(20, box.clientWidth * 0.078))
       q.style.fontSize = `${size}px`
-      // Shrink (never grow past 27) until the quote fits the fixed quote box.
+      // Shrink until the quote fits the fixed quote box.
       while (q.scrollHeight > box.clientHeight && size > 12) {
         size -= 0.5
         q.style.fontSize = `${size}px`
@@ -561,13 +562,13 @@ function QuoteCard({
     <figure
       className="flex flex-col overflow-hidden"
       style={{
-        width: 'min(86vw, 410px)',
-        height: 440,
+        width: 'min(80vw, 380px)',
+        height: 'clamp(376px, 95vw, 440px)',
         backgroundColor: s.bg,
         color: s.fg,
         border: s.border,
         borderRadius: 20,
-        padding: '32px 30px',
+        padding: 'clamp(24px, 6vw, 32px) clamp(22px, 5.5vw, 30px)',
       }}
     >
       <div ref={boxRef} className="min-h-0 flex-1 overflow-hidden">
@@ -582,7 +583,7 @@ function QuoteCard({
       <figcaption className="mt-6 shrink-0">
         <div
           className={dmSans.className}
-          style={{ fontSize: 24, fontWeight: 600, letterSpacing: '-0.01em' }}
+          style={{ fontSize: 'clamp(19px, 4.8vw, 24px)', fontWeight: 600, letterSpacing: '-0.01em' }}
         >
           {t.name}
         </div>

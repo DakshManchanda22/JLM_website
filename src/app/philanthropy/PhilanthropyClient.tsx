@@ -66,19 +66,6 @@ function useFitText(maxPx = 200) {
 
 type CardImage = { url: string; lqip?: string }
 
-// Bold every occurrence of "Project Kaamyaab" in the difference paragraph.
-function renderWithBrand(text: string) {
-  return text.split(/(Project Kaamyaab)/g).map((part, i) =>
-    part === 'Project Kaamyaab' ? (
-      <strong key={i} style={{ fontWeight: 600, color: KB_BLUE }}>
-        {part}
-      </strong>
-    ) : (
-      <span key={i}>{part}</span>
-    )
-  )
-}
-
 export default function PhilanthropyClient({ cms }: { cms?: PhilanthropyView }) {
   const reduce = useReducedMotion()
 
@@ -87,12 +74,6 @@ export default function PhilanthropyClient({ cms }: { cms?: PhilanthropyView }) 
   const heroLine2 = cms?.heroLine2 ?? ''
   const heroImage = cms?.heroImage ?? ''
   const heroImageLqip = cms?.heroImageLqip
-
-  const diffLine1 = cms?.differenceHeadingLine1 ?? ''
-  const diffLine2 = cms?.differenceHeadingLine2 ?? ''
-  const diffBody = cms?.differenceBody ?? ''
-  const diffImage = cms?.differenceImage ?? ''
-  const diffImageLqip = cms?.differenceImageLqip
 
   const programsHeading = cms?.programsHeading ?? ''
   const programsIntro = cms?.programsIntro ?? ''
@@ -117,7 +98,68 @@ export default function PhilanthropyClient({ cms }: { cms?: PhilanthropyView }) 
 
   return (
     <div className={`${caveatBrush.variable} ${dmSans.variable}`}>
-      {/* ============================= HERO ============================= */}
+      {/* ========================= IMPACT (5 YEARS) ========================= */}
+      <ImpactSection
+        logo={impactLogo}
+        logoLqip={impactLogoLqip}
+        intro={impactIntro}
+        stats={impactStats}
+        reduce={!!reduce}
+      />
+
+      {/* ========================= PROGRAMS ========================= */}
+      <section
+        className="px-[5vw] py-24 md:py-32"
+        style={{ backgroundColor: KB_BLUE_DEEP, color: '#FFFFFF' }}
+      >
+        {/* centred header block */}
+        <div className="mx-auto max-w-[1180px] text-center">
+          <motion.h2
+            ref={programsHeadingRef}
+            initial={reduce ? false : { opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-15%' }}
+            transition={{ duration: 0.9, ease: EASE, delay: 0.06 }}
+            className={anton.className}
+            style={{
+              margin: 0,
+              color: '#FFFFFF',
+              lineHeight: 0.95,
+              letterSpacing: '0.01em',
+              textTransform: 'uppercase',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {programsHeading}
+          </motion.h2>
+
+          <motion.p
+            initial={reduce ? false : { opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-15%' }}
+            transition={{ duration: 0.9, ease: EASE, delay: 0.12 }}
+            className={dmSans.className}
+            style={{
+              margin: '1.6em auto 0',
+              maxWidth: '58ch',
+              color: 'rgba(255,255,255,0.82)',
+              fontSize: 'clamp(15px, 1.2vw, 19px)',
+              lineHeight: 1.7,
+            }}
+          >
+            {programsIntro}
+          </motion.p>
+        </div>
+
+        {/* cards */}
+        <div className="mx-auto mt-16 grid max-w-[1500px] grid-cols-1 gap-x-5 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 md:mt-20">
+          {stages.map((s, i) => (
+            <ProgramCard key={`${s.title}-${i}`} stage={s} index={i} reduce={!!reduce} />
+          ))}
+        </div>
+      </section>
+
+      {/* ===== HERO — "Changing Lives, Building Futures" closing section ===== */}
       <section
         className="relative w-full overflow-hidden"
         style={{ height: 'calc(100svh - var(--nav-h))', backgroundColor: INK }}
@@ -135,7 +177,6 @@ export default function PhilanthropyClient({ cms }: { cms?: PhilanthropyView }) 
             fill
             sizes="100vw"
             style={{ objectFit: 'cover' }}
-            priority
             {...(heroImageLqip
               ? { placeholder: 'blur' as const, blurDataURL: heroImageLqip }
               : {})}
@@ -198,146 +239,9 @@ export default function PhilanthropyClient({ cms }: { cms?: PhilanthropyView }) 
         </div>
       </section>
 
-      {/* ====================== MAKING A DIFFERENCE ====================== */}
-      <section id="impact" className="scroll-mt-24 bg-white px-[7vw] py-20 md:py-28 lg:py-32">
-        <div className="mx-auto grid max-w-[1200px] grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16">
-          {/* LEFT — image */}
-          <motion.div
-            initial={reduce ? false : { opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-15%' }}
-            transition={{ duration: 1, ease: EASE }}
-            className="relative aspect-[4/5] w-full overflow-hidden rounded-3xl sm:aspect-[5/4] lg:aspect-[4/5]"
-          >
-            <Image
-              src={diffImage}
-              alt="Project Kaamyaab — skilling new mothers to rejoin the workforce"
-              fill
-              sizes="(max-width: 1024px) 92vw, 46vw"
-              style={{ objectFit: 'cover' }}
-              {...(diffImageLqip
-                ? { placeholder: 'blur' as const, blurDataURL: diffImageLqip }
-                : {})}
-            />
-          </motion.div>
-
-          {/* RIGHT — copy */}
-          <div>
-            <motion.h2
-              initial={reduce ? false : { opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-15%' }}
-              transition={{ duration: 0.9, ease: EASE }}
-              className={anton.className}
-              style={{
-                margin: 0,
-                color: INK,
-                fontSize: 'clamp(40px, 5.4vw, 82px)',
-                lineHeight: 0.95,
-                letterSpacing: '0.01em',
-                textTransform: 'uppercase',
-              }}
-            >
-              {diffLine1}
-              <br />
-              {diffLine2}
-              {/* hand-drawn marigold underline flourish */}
-              <span
-                aria-hidden
-                className="mt-3 block"
-                style={{ width: 'clamp(160px, 22vw, 300px)', height: 10 }}
-              >
-                <svg viewBox="0 0 300 12" width="100%" height="100%" fill="none" preserveAspectRatio="none">
-                  <path
-                    d="M2 8C60 3 130 3 180 6C220 8 270 6 298 4"
-                    stroke={KB_YELLOW}
-                    strokeWidth="7"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </span>
-            </motion.h2>
-
-            <motion.div
-              initial={reduce ? false : { opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-15%' }}
-              transition={{ duration: 0.9, ease: EASE, delay: 0.12 }}
-              className={`${dmSans.className} mt-9`}
-              style={{ color: INK }}
-            >
-              <p style={{ margin: 0, maxWidth: '54ch', fontSize: 'clamp(16px, 1.25vw, 19px)', lineHeight: 1.7 }}>
-                {renderWithBrand(diffBody)}
-              </p>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* ========================= IMPACT (5 YEARS) ========================= */}
-      <ImpactSection
-        logo={impactLogo}
-        logoLqip={impactLogoLqip}
-        intro={impactIntro}
-        stats={impactStats}
-        reduce={!!reduce}
-      />
-
-      {/* ========================= PROGRAMS ========================= */}
-      <section
-        className="px-[5vw] py-24 md:py-32"
-        style={{ backgroundColor: KB_BLUE_DEEP, color: '#FFFFFF' }}
-      >
-        {/* centred header block */}
-        <div className="mx-auto max-w-[1180px] text-center">
-          <motion.h2
-            ref={programsHeadingRef}
-            initial={reduce ? false : { opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-15%' }}
-            transition={{ duration: 0.9, ease: EASE, delay: 0.06 }}
-            className={anton.className}
-            style={{
-              margin: 0,
-              color: '#FFFFFF',
-              lineHeight: 0.95,
-              letterSpacing: '0.01em',
-              textTransform: 'uppercase',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {programsHeading}
-          </motion.h2>
-
-          <motion.p
-            initial={reduce ? false : { opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-15%' }}
-            transition={{ duration: 0.9, ease: EASE, delay: 0.12 }}
-            className={dmSans.className}
-            style={{
-              margin: '1.6em auto 0',
-              maxWidth: '58ch',
-              color: 'rgba(255,255,255,0.82)',
-              fontSize: 'clamp(15px, 1.2vw, 19px)',
-              lineHeight: 1.7,
-            }}
-          >
-            {programsIntro}
-          </motion.p>
-        </div>
-
-        {/* cards */}
-        <div className="mx-auto mt-16 grid max-w-[1500px] grid-cols-1 gap-x-5 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 md:mt-20">
-          {stages.map((s, i) => (
-            <ProgramCard key={`${s.title}-${i}`} stage={s} index={i} reduce={!!reduce} />
-          ))}
-        </div>
-      </section>
-
-      {/* Backing matches the section directly above (the blue PROGRAMS band) so
-          the footer's rounded top corners read as a curve, not white notches. */}
-      <div style={{ backgroundColor: KB_BLUE_DEEP }}>
+      {/* Dark backing so the footer's rounded top corners blend with the closing
+          hero above it, rather than showing a bright notch. */}
+      <div style={{ backgroundColor: INK }}>
         <Footer />
       </div>
     </div>
@@ -459,8 +363,9 @@ function ImpactSection({
 
   return (
     <section
+      id="impact"
       ref={sectionRef}
-      className="px-[7vw] pt-4 pb-20 md:pt-6 md:pb-28 lg:pt-8 lg:pb-32"
+      className="scroll-mt-24 px-[7vw] pt-16 pb-20 md:pt-24 md:pb-28 lg:pt-28 lg:pb-32"
       style={{ backgroundColor: '#FFFFFF' }}
     >
       <div className="mx-auto max-w-[1200px]">
