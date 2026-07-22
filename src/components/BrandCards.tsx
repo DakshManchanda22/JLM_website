@@ -20,6 +20,7 @@ function BrandCard({
   brand,
   index,
   isActive,
+  dimmed,
   viewportMode,
   setRef,
   onEnter,
@@ -28,6 +29,8 @@ function BrandCard({
   brand: Brand
   index: number
   isActive: boolean
+  /** Another card is active, so this one has shrunk — its label must shrink too. */
+  dimmed: boolean
   /** Touch devices have no hover — the card is activated when scrolled to centre. */
   viewportMode: boolean
   setRef: (el: HTMLDivElement | null) => void
@@ -78,12 +81,14 @@ function BrandCard({
             (lit-up) card so the tagline can take its place. */}
         {(!viewportMode || !isActive) && (
           <div className="absolute inset-x-6 bottom-6 pointer-events-none">
-            <p
+            <motion.p
               className="text-white/90 font-black uppercase leading-[0.95] tracking-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.4)]"
-              style={{ fontSize: 'clamp(1.85rem, 3.2vw, 3rem)' }}
+              style={{ fontSize: 'clamp(1.85rem, 3.2vw, 3rem)', transformOrigin: 'left bottom' }}
+              animate={{ scale: dimmed ? 0.72 : 1 }}
+              transition={{ duration: 0.6, ease: EASE }}
             >
               {brand.name}
-            </p>
+            </motion.p>
           </div>
         )}
 
@@ -166,6 +171,7 @@ export default function BrandCards({ brands }: { brands?: Brand[] }) {
             brand={brand}
             index={i}
             isActive={activeIndex === i}
+            dimmed={activeIndex !== null && activeIndex !== i}
             viewportMode={viewportMode}
             setRef={(el) => {
               cardRefs.current[i] = el

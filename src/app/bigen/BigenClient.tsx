@@ -532,15 +532,15 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-80px' }}
           transition={{ duration: 0.8, ease: EASE }}
-          className="relative overflow-hidden rounded-[32px] px-8 pt-14 pb-0 md:px-16 md:pt-20 lg:pb-20"
+          className="relative overflow-hidden rounded-[32px] px-8 pt-14 pb-0 md:px-16 md:pt-20"
           style={{
             background:
               'radial-gradient(120% 120% at 82% 50%, #4a3414 0%, #2a1c0b 46%, #160e06 100%)',
           }}
         >
-          <div className="grid items-center gap-12 lg:grid-cols-2">
+          <div className="grid items-center gap-12 lg:grid-cols-2 lg:items-end">
             {/* LEFT: copy */}
-            <div className="max-w-xl">
+            <div className="max-w-xl lg:pb-16">
               {/* punch banner — gold brushstroke highlight on the second line */}
               <div className="leading-[1.05]">
                 <p className="text-[clamp(1.5rem,2.6vw,2.25rem)] font-extrabold uppercase tracking-tight text-[#f6efe0]">
@@ -584,7 +584,7 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
             </div>
 
             {/* RIGHT: product shot with glow */}
-            <div className="relative flex min-h-0 items-center justify-center lg:min-h-[480px]">
+            <div className="relative flex min-h-0 items-end justify-center">
               <div
                 className="pointer-events-none absolute left-1/2 top-1/2 aspect-square w-[80%] max-w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full"
                 style={{
