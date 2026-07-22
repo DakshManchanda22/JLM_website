@@ -32,13 +32,5 @@ export function socialCardFields(platform: Platform, label: string) {
       rows: 2,
       group: 'social',
     }),
-    defineField({
-      name: `${platform}CardImage`,
-      title: `${label} — Card image`,
-      description: 'Optional photo shown on one half of the card.',
-      type: 'image',
-      options: { hotspot: true },
-      group: 'social',
-    }),
   ]
 }
