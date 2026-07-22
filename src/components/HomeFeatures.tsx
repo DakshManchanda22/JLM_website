@@ -86,9 +86,14 @@ function FeatureImages({
                 src={im.url}
                 alt={alt}
                 fill
-                sizes="(max-width: 768px) 100vw, 50vw"
+                // Image column is ~86% of a grid column inside max-w-7xl, so it
+                // never exceeds ~600px on desktop — don't request 50vw.
+                sizes="(max-width: 768px) 92vw, (max-width: 1280px) 46vw, 600px"
                 className="object-cover"
-                priority={order === 0}
+                // These feature sections sit far below the fold (sections 5–6),
+                // so they must NOT be high-priority — that stole bandwidth from
+                // the real LCP (the first brand card). Lazy-load them instead.
+                loading="lazy"
                 {...(im.lqip ? { placeholder: 'blur' as const, blurDataURL: im.lqip } : {})}
               />
             </div>

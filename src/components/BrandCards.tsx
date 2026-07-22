@@ -20,7 +20,9 @@ function BrandCard({
   brand,
   index,
   isActive,
+  dimmed,
   viewportMode,
+  priority,
   setRef,
   onEnter,
   onLeave,
@@ -28,9 +30,15 @@ function BrandCard({
   brand: Brand
   index: number
   isActive: boolean
+  /** Desktop only: another card is hover-expanded, so this card is squeezed
+      narrow. We scale its name down so long words don't clip at the edges. */
+  dimmed: boolean
   /** Touch / mobile: cards keep an equal share (no hover-expand), but the card
       scrolled to the centre of the screen "lights up" — its image brightens. */
   viewportMode: boolean
+  /** The homepage has no hero, so the first brand card is the LCP element.
+      Load it eagerly with high priority instead of lazily. */
+  priority: boolean
   setRef: (el: HTMLDivElement | null) => void
   onEnter: () => void
   onLeave: () => void
@@ -56,7 +64,11 @@ function BrandCard({
           src={brand.image}
           alt={brand.name}
           fill
-          sizes="(max-width: 768px) 100vw, 40vw"
+          priority={priority}
+          // Resting state: ~22vw (4-up row). Desktop hover-expands one card to
+          // ~2.5×, so allow up to ~45vw. Cap the top end at 620px so 4K / high-DPR
+          // screens don't fetch the 1600px source for a physically ~600px card.
+          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 45vw, (max-width: 1600px) 40vw, 620px"
           className="object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.04]"
           {...(brand.lqip
             ? { placeholder: 'blur' as const, blurDataURL: brand.lqip }
@@ -78,15 +90,22 @@ function BrandCard({
             without darkening the whole photo. */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/55 to-transparent" />
 
-        {/* Brand name — always visible (never replaced by the tagline), no scaling. */}
-        <div className="absolute inset-x-6 bottom-6 pointer-events-none">
+        {/* Brand name — always visible (never replaced by the tagline). When an
+            adjacent card is hover-expanded this one is squeezed narrow, so the
+            name scales down (anchored bottom-left) to keep long words from
+            clipping at the card edges. */}
+        <motion.div
+          className="absolute inset-x-6 bottom-6 pointer-events-none origin-bottom-left"
+          animate={{ scale: dimmed ? 0.56 : 1 }}
+          transition={{ duration: 0.6, ease: EASE }}
+        >
           <p
             className="text-white/90 font-black uppercase leading-[0.95] tracking-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.4)]"
             style={{ fontSize: 'clamp(1.85rem, 3.2vw, 3rem)' }}
           >
             {brand.name}
           </p>
-        </div>
+        </motion.div>
       </Link>
     </motion.div>
   )
@@ -161,7 +180,11 @@ export default function BrandCards({
             brand={brand}
             index={i}
             isActive={activeIndex === i}
+            // Desktop: some other card is expanded, so this one is squeezed.
+            dimmed={!viewportMode && activeIndex !== null && activeIndex !== i}
             viewportMode={viewportMode}
+            // First card is the above-the-fold LCP element on the homepage.
+            priority={i === 0}
             setRef={(el) => {
               cardRefs.current[i] = el
             }}
