@@ -31,6 +31,9 @@ export default function InlineVideo({
   const [aspect, setAspect] = useState(fallbackAspect)
   const [isTouch, setIsTouch] = useState(false)
   const [showControls, setShowControls] = useState(false)
+  // The thumbnail stays on top until the video actually starts playing, so on a
+  // slow connection the visitor always sees the thumbnail instead of a black box.
+  const [playing, setPlaying] = useState(false)
 
   useEffect(() => {
     setIsTouch(window.matchMedia('(hover: none)').matches)
@@ -50,15 +53,18 @@ export default function InlineVideo({
     const readAspect = () => {
       if (el.videoWidth && el.videoHeight) setAspect(`${el.videoWidth} / ${el.videoHeight}`)
     }
+    const onPlaying = () => setPlaying(true)
     tryPlay()
     readAspect()
     el.addEventListener('loadedmetadata', tryPlay, { once: true })
     el.addEventListener('loadedmetadata', readAspect, { once: true })
     el.addEventListener('canplay', tryPlay, { once: true })
+    el.addEventListener('playing', onPlaying)
     return () => {
       el.removeEventListener('loadedmetadata', tryPlay)
       el.removeEventListener('loadedmetadata', readAspect)
       el.removeEventListener('canplay', tryPlay)
+      el.removeEventListener('playing', onPlaying)
     }
   }, [videoUrl])
 
@@ -151,6 +157,28 @@ export default function InlineVideo({
         controls={isTouch && showControls}
         onClick={isTouch ? () => setShowControls(true) : undefined}
       />
+
+      {/* Thumbnail overlay — shown while the video is still loading, then fades
+          out the moment playback begins. Keeps a clean still on screen during
+          slow loads instead of a black frame. */}
+      {poster && (
+        <div
+          aria-hidden
+          className={`pointer-events-none absolute inset-0 transition-opacity duration-500 ${
+            playing ? 'opacity-0' : 'opacity-100'
+          }`}
+        >
+          <Image
+            src={poster}
+            alt=""
+            fill
+            sizes="100vw"
+            className="object-contain"
+            priority
+            {...(posterLqip ? { placeholder: 'blur' as const, blurDataURL: posterLqip } : {})}
+          />
+        </div>
+      )}
 
       {/* Mute / unmute */}
       <button

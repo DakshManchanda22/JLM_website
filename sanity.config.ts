@@ -110,6 +110,15 @@ export default defineConfig({
                           .defaultOrdering([{ field: 'order', direction: 'asc' }]),
                       ),
                     S.listItem()
+                      .title('Leadership order')
+                      .id('leadershipTeam')
+                      .child(
+                        S.editor()
+                          .id('leadershipTeam')
+                          .schemaType('leadershipTeam')
+                          .documentId('leadershipTeam'),
+                      ),
+                    S.listItem()
                       .title('Life at JLM')
                       .id('lifeAtJlm')
                       .child(

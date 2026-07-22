@@ -72,7 +72,7 @@ export default function PhilanthropyClient({
   video,
 }: {
   cms?: PhilanthropyView
-  video?: { videoUrl?: string; poster?: string }
+  video?: { videoUrl?: string; poster?: string; posterLqip?: string }
 }) {
   const reduce = useReducedMotion()
 
@@ -113,7 +113,12 @@ export default function PhilanthropyClient({
     <div className={`${caveatBrush.variable} ${dmSans.variable}`}>
       {/* ========================= KAAMYAAB VIDEO (top) ========================= */}
       <section className="w-full" style={{ backgroundColor: '#FFFFFF' }}>
-        <InlineVideo videoUrl={video?.videoUrl} poster={video?.poster} rounded={false} />
+        <InlineVideo
+          videoUrl={video?.videoUrl}
+          poster={video?.poster}
+          posterLqip={video?.posterLqip}
+          rounded={false}
+        />
       </section>
 
       {/* ========================= IMPACT (5 YEARS) ========================= */}

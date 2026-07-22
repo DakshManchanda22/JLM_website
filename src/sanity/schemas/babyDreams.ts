@@ -142,8 +142,11 @@ export default defineType({
     }),
     defineField({
       name: 'videoPoster',
-      title: 'Video poster image',
+      title: 'Video thumbnail',
       group: 'video',
+      description:
+        'A still image shown in place of the video while it loads (and if it ' +
+        'is slow to start). Use a frame from the video, or a related photo.',
       type: 'image',
       options: { hotspot: true },
     }),

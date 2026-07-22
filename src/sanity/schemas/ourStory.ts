@@ -81,8 +81,10 @@ export default defineType({
         }),
         defineField({
           name: 'poster',
-          title: 'Poster / fallback image (optional)',
-          description: 'Shown while the video loads.',
+          title: 'Video thumbnail',
+          description:
+            'A still image shown in place of the video while it loads (and if it ' +
+            'is slow to start). Use a frame from the video, or a related photo.',
           type: 'image',
           options: { hotspot: true },
         }),

@@ -162,20 +162,13 @@ export default defineType({
       group: 'stats',
     }),
     defineField({
-      name: 'statsNote',
-      title: 'Stats — small note',
-      description: 'Small uppercase note shown to the right of the heading, e.g. "Since 1920".',
-      type: 'string',
-      group: 'stats',
-    }),
-    defineField({
       name: 'stats',
       title: 'Stat cards',
       type: 'array',
       group: 'stats',
       description:
-        'The metric cards in the looping carousel. Add as many as you like; the ' +
-        'carousel keeps scrolling infinitely no matter how many there are.',
+        'The metric cards, shown in a static grid of three per row. The numbers ' +
+        'count up when the section scrolls into view.',
       validation: (Rule) => Rule.min(1).max(20),
       of: [
         defineArrayMember({
@@ -209,19 +202,6 @@ export default defineType({
           },
         }),
       ],
-    }),
-
-    /* ─────────────── Carousel speed ─────────────── */
-    defineField({
-      name: 'carouselSpeed',
-      title: 'Carousel scroll speed',
-      description:
-        'How fast the auto-scrolling metric cards move. 1 = normal, higher = faster ' +
-        '(e.g. 2 = twice as fast, 3 = three times as fast).',
-      type: 'number',
-      group: 'stats',
-      initialValue: 2,
-      validation: (Rule) => Rule.min(0.5).max(5),
     }),
 
     /* ─────────────── Feature sections ─────────────── */

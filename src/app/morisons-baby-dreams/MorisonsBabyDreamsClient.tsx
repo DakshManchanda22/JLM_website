@@ -538,6 +538,9 @@ function BabyVideo({
   const reduce = useReduce()
   const videoRef = useRef<HTMLVideoElement>(null)
   const [showControls, setShowControls] = useState(false)
+  // Keep the thumbnail on top until the video actually starts playing, so a slow
+  // load shows the still image instead of a black box.
+  const [videoPlaying, setVideoPlaying] = useState(false)
   const scrubRef = useRef<HTMLDivElement>(null)
   const frameRef = useRef<HTMLDivElement>(null)
 
@@ -654,23 +657,43 @@ function BabyVideo({
   }, [reduce, fullBleed])
 
   const videoEl = videoUrl ? (
-    <video
-      ref={videoRef}
-      src={videoUrl}
-      poster={poster}
-      autoPlay
-      muted
-      loop
-      playsInline
-      preload="metadata"
-      controls={showControls}
-      // Full-bleed (wide desktop): cover the viewport. When the viewport is taller
-      // than 16:9 the cover-crop is taken from top+bottom, so bias the framing to
-      // the top (`object-top`) to keep heads / on-screen text from being clipped.
-      // Contained (iPad/narrow): the frame already matches the video's ratio, so
-      // cover fills it exactly with no crop and no cream bars.
-      className={`absolute inset-0 h-full w-full object-cover ${fullBleed ? 'object-top' : ''}`}
-    />
+    <>
+      <video
+        ref={videoRef}
+        src={videoUrl}
+        poster={poster}
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="metadata"
+        controls={showControls}
+        onPlaying={() => setVideoPlaying(true)}
+        // Full-bleed (wide desktop): cover the viewport. When the viewport is taller
+        // than 16:9 the cover-crop is taken from top+bottom, so bias the framing to
+        // the top (`object-top`) to keep heads / on-screen text from being clipped.
+        // Contained (iPad/narrow): the frame already matches the video's ratio, so
+        // cover fills it exactly with no crop and no cream bars.
+        className={`absolute inset-0 h-full w-full object-cover ${fullBleed ? 'object-top' : ''}`}
+      />
+      {/* Thumbnail overlay — fades out once playback begins. */}
+      {poster && (
+        <div
+          aria-hidden
+          className={`pointer-events-none absolute inset-0 transition-opacity duration-500 ${
+            videoPlaying ? 'opacity-0' : 'opacity-100'
+          }`}
+        >
+          <Image
+            src={poster}
+            alt=""
+            fill
+            sizes="100vw"
+            className={`object-cover ${fullBleed ? 'object-top' : ''}`}
+          />
+        </div>
+      )}
+    </>
   ) : (
     <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center">
       <span

@@ -114,6 +114,16 @@ export default defineType({
       type: 'url',
       validation: (Rule) => Rule.uri({ scheme: ['https'] }),
     }),
+    defineField({
+      name: 'videoThumbnail',
+      title: 'Video thumbnail',
+      group: 'video',
+      description:
+        'A still image shown in place of the video while it loads (and if it ' +
+        'is slow to start). Use a frame from the video, or a related photo.',
+      type: 'image',
+      options: { hotspot: true },
+    }),
 
     /* ───────────── 10-minute ritual ───────────── */
     defineField({

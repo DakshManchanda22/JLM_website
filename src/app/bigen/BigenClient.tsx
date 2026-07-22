@@ -200,6 +200,9 @@ function MinutesRings() {
 export default function BigenClient({ cms }: { cms: Bigen }) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [showControls, setShowControls] = useState(false)
+  // Keep the thumbnail on top until the video actually starts, so a slow load
+  // shows the still image instead of a black box.
+  const [videoPlaying, setVideoPlaying] = useState(false)
 
   const videoUrl = cms.videoUrl || D.videoUrl
   const ritualImage = cms.ritualImage
@@ -437,16 +440,40 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
             onClick={() => setShowControls((v) => !v)}
           >
             {videoUrl ? (
-              <video
-                ref={videoRef}
-                src={videoUrl}
-                muted
-                loop
-                playsInline
-                preload="metadata"
-                controls={showControls}
-                className="absolute inset-0 h-full w-full object-cover"
-              />
+              <>
+                <video
+                  ref={videoRef}
+                  src={videoUrl}
+                  poster={cms.videoThumbnail}
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                  controls={showControls}
+                  onPlaying={() => setVideoPlaying(true)}
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+                {/* Thumbnail overlay — fades out once playback begins. */}
+                {cms.videoThumbnail && (
+                  <div
+                    aria-hidden
+                    className={`pointer-events-none absolute inset-0 transition-opacity duration-500 ${
+                      videoPlaying ? 'opacity-0' : 'opacity-100'
+                    }`}
+                  >
+                    <Image
+                      src={cms.videoThumbnail}
+                      alt=""
+                      fill
+                      sizes="100vw"
+                      className="object-cover"
+                      {...(cms.videoThumbnailLqip
+                        ? { placeholder: 'blur' as const, blurDataURL: cms.videoThumbnailLqip }
+                        : {})}
+                    />
+                  </div>
+                )}
+              </>
             ) : (
               <div className="absolute inset-0 flex items-center justify-center">
                 <span className="text-sm uppercase tracking-[0.2em] text-[#a99a76]">

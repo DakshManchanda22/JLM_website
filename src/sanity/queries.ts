@@ -225,9 +225,7 @@ export type Homepage = {
   brandsHeading?: string
   brands?: BrandCardData[]
   statsHeading?: string
-  statsNote?: string
   stats?: StatData[]
-  carouselSpeed?: number
   features?: HomeFeatureData[]
 }
 
@@ -258,8 +256,6 @@ export const homepageQuery = groq`*[_type == "homepage"][0]{
     image{ ${imageWithLqip} },
   },
   statsHeading,
-  statsNote,
-  carouselSpeed,
   stats[]{
     number,
     label,
@@ -319,9 +315,30 @@ export const leaderBySlugQuery = groq`*[_type == "leader" && slug.current == $sl
 
 export const leaderSlugsQuery = groq`*[_type == "leader" && defined(slug.current)][].slug.current`
 
+/** Fetches both the drag-ordered list (from the Leadership order singleton) and
+    the full leader list (fallback order by number), in one round-trip. */
+export const leadersOrderedQuery = groq`{
+  "ordered": *[_type == "leadershipTeam"][0].members[]->{ ${leaderProjection} },
+  "all": *[_type == "leader" && defined(slug.current)] | order(order asc) { ${leaderProjection} },
+}`
+
 export async function fetchLeaders(): Promise<Leader[]> {
   if (!client) return []
-  return client.fetch(leaderListQuery)
+  const { ordered, all }: { ordered?: (Leader | null)[]; all?: Leader[] } =
+    await client.fetch(leadersOrderedQuery)
+
+  const allLeaders = all ?? []
+  const orderedLeaders = (ordered ?? []).filter(
+    (l): l is Leader => Boolean(l && l.slug),
+  )
+  // No custom order set yet → keep the historical number ordering.
+  if (orderedLeaders.length === 0) return allLeaders
+
+  // Honour the drag order first, then append anyone not placed in the list so a
+  // newly-added leader never silently disappears from the page.
+  const placed = new Set(orderedLeaders.map((l) => l.slug))
+  const rest = allLeaders.filter((l) => !placed.has(l.slug))
+  return [...orderedLeaders, ...rest]
 }
 
 export async function fetchLeader(slug: string): Promise<Leader | null> {
@@ -485,6 +502,8 @@ export type Bigen = {
   // video
   videoHeadline?: any[]
   videoUrl?: string
+  videoThumbnail?: string
+  videoThumbnailLqip?: string
   // ritual
   ritualHeadlinePlain?: string
   ritualHeadlineItalic1?: string
@@ -522,6 +541,7 @@ export const bigenQuery = groq`*[_type == "bigen"][0]{
   heroCtaLabel, heroCtaHref,
   heroImage{ ${imageWithLqip} },
   videoHeadline, videoUrl,
+  videoThumbnail{ ${imageWithLqip} },
   ritualHeadlinePlain, ritualHeadlineItalic1, ritualHeadlineItalic2, ritualBody,
   ritualFeatures[]{ label, icon },
   ritualImage{ ${imageWithLqip} },
@@ -549,11 +569,14 @@ export async function fetchBigen(): Promise<Bigen | null> {
   const hero = resolveImage(raw.heroImage, 1600)
   const ritual = resolveImage(raw.ritualImage, 1400)
   const shine = resolveImage(raw.shineImage, 1400)
+  const videoThumb = resolveImage(raw.videoThumbnail, 1600)
 
   return {
     ...raw,
     heroImage: hero?.url,
     heroImageLqip: hero?.lqip,
+    videoThumbnail: videoThumb?.url,
+    videoThumbnailLqip: videoThumb?.lqip,
     ritualImage: ritual?.url,
     ritualImageLqip: ritual?.lqip,
     shineImage: shine?.url,
@@ -772,6 +795,7 @@ export type PhilanthropyView = {
   heroImageLqip?: string
   videoUrl?: string
   videoPoster?: string
+  videoPosterLqip?: string
   differenceHeadingLine1?: string
   differenceHeadingLine2?: string
   differenceBody?: string
@@ -822,6 +846,7 @@ export async function fetchPhilanthropy(): Promise<PhilanthropyView | null> {
     heroImageLqip: hero?.lqip,
     videoUrl: raw.videoUrl,
     videoPoster: resolveImage(raw.videoPoster, 2000)?.url,
+    videoPosterLqip: resolveImage(raw.videoPoster, 2000)?.lqip,
     differenceHeadingLine1: raw.differenceHeadingLine1,
     differenceHeadingLine2: raw.differenceHeadingLine2,
     differenceBody: raw.differenceBody,
@@ -867,6 +892,10 @@ export type PhilanthropyStatCard = {
 export type EsgView = {
   purposeEyebrow?: string
   purposeHeading?: string
+  useBannerImage?: boolean
+  bannerImage?: string
+  bannerImageLqip?: string
+  bannerImageAspect?: number
   purposeBackgroundWord?: string
   purposeImages?: { url: string; lqip?: string }[]
   beliefEyebrow?: string
@@ -886,7 +915,13 @@ export type EsgView = {
 }
 
 export const esgQuery = groq`*[_type == "esg"][0]{
-  purposeEyebrow, purposeHeading, purposeBackgroundWord,
+  purposeEyebrow, purposeHeading, useBannerImage,
+  bannerImage{
+    ${imageWithLqip},
+    "dw": asset->metadata.dimensions.width,
+    "dh": asset->metadata.dimensions.height,
+  },
+  purposeBackgroundWord,
   purposeImages[]{ ${imageWithLqip} },
   beliefEyebrow, beliefText,
   statCards[]{ title, value, body, tag, icon, image{ ${imageWithLqip} } },
@@ -913,9 +948,17 @@ export async function fetchEsg(): Promise<EsgView | null> {
   const raw: any = await client.fetch(esgQuery)
   if (!raw) return null
 
+  const banner = resolveImage(raw.bannerImage, 2400)
   return {
     purposeEyebrow: raw.purposeEyebrow,
     purposeHeading: raw.purposeHeading,
+    useBannerImage: raw.useBannerImage,
+    bannerImage: banner?.url,
+    bannerImageLqip: banner?.lqip,
+    bannerImageAspect:
+      raw.bannerImage?.dw && raw.bannerImage?.dh
+        ? raw.bannerImage.dw / raw.bannerImage.dh
+        : undefined,
     purposeBackgroundWord: raw.purposeBackgroundWord,
     purposeImages: (raw.purposeImages || [])
       .map((im: any) => {
