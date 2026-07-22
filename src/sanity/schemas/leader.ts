@@ -31,10 +31,13 @@ export default defineType({
     }),
     defineField({
       name: 'order',
-      title: 'Order (lowest first)',
-      description: 'Controls where this person appears in the grid. 1 = first.',
+      title: 'Fallback order (lowest first)',
+      description:
+        'Only used as a fallback. The real order is set by dragging cards under ' +
+        '“Our People → Leadership order”. This number decides the position for ' +
+        'anyone not placed in that list. 1 = first.',
       type: 'number',
-      validation: (Rule) => Rule.required().min(0),
+      validation: (Rule) => Rule.min(0),
     }),
     defineField({
       name: 'image',

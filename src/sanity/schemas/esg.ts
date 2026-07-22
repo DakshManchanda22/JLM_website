@@ -35,6 +35,27 @@ export default defineType({
       type: 'string',
     }),
     defineField({
+      name: 'useBannerImage',
+      title: 'Show a banner image instead of the heading',
+      group: 'purpose',
+      description:
+        'Turn ON to replace the big "ESG" heading at the top of the page with a ' +
+        'banner image. Turn OFF to show the text heading as usual.',
+      type: 'boolean',
+      initialValue: false,
+    }),
+    defineField({
+      name: 'bannerImage',
+      title: 'Banner image',
+      group: 'purpose',
+      description:
+        'Shown at the top of the page in place of the heading when the switch ' +
+        'above is ON. A wide (landscape) image works best.',
+      type: 'image',
+      options: { hotspot: true },
+      hidden: ({ parent }) => !parent?.useBannerImage,
+    }),
+    defineField({
       name: 'purposeBackgroundWord',
       title: 'Background word',
       group: 'purpose',

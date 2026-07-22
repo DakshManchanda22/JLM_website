@@ -16,7 +16,7 @@ export default async function PhilanthropyPage() {
   // The Kaamyaab film is now managed on the Philanthropy document itself
   // (Sanity → Philanthropy → Video).
   const video = cms?.videoUrl
-    ? { videoUrl: cms.videoUrl, poster: cms.videoPoster }
+    ? { videoUrl: cms.videoUrl, poster: cms.videoPoster, posterLqip: cms.videoPosterLqip }
     : undefined
 
   return <PhilanthropyClient cms={cms ?? undefined} video={video} />

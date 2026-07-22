@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
-import { motion } from 'framer-motion'
+import { useEffect, useRef, useState } from 'react'
+import { animate, motion, useInView, useReducedMotion } from 'framer-motion'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
@@ -12,6 +12,8 @@ export type Stat = {
   label: string
   body: string
 }
+
+const EASE = [0.16, 1, 0.3, 1] as const
 
 /* White scallop bumps that sit on top of the dark brand section above,
    creating the soft curvy intersection. Each tile is a true semicircle
@@ -62,26 +64,29 @@ function useFitLines(lines = 2, maxPx = 84, minPx = 16) {
 export default function StatsSection({
   stats,
   heading,
-  speed,
 }: {
   stats?: Stat[]
   heading?: string
-  note?: string
-  /** Carousel speed multiplier from Sanity. 1 = normal, higher = faster. */
-  speed?: number
 }) {
   // Stat cards come entirely from Sanity — no code defaults.
   const STATS = stats ?? []
-  // Seconds for one full loop, sped up by the Sanity multiplier (default 2×).
-  const loopDuration = 45 / (speed && speed > 0 ? speed : 2)
   const HEADING = heading ?? ''
+  const reduce = useReducedMotion()
   const sectionRef = useRef<HTMLElement>(null)
+
+  // Fire the count-up + reveal as the grid approaches from below (positive
+  // bottom margin extends the root downward), so the numbers animate while the
+  // user is just about to reach the section — the same trigger the Philanthropy
+  // impact metrics use.
+  const gridRef = useRef<HTMLDivElement>(null)
+  const started = useInView(gridRef, { once: true, margin: '0px 0px 15% 0px' })
+
   // Fit the heading into at most two lines, capped at 56px so it reads a touch
   // larger. On desktop it stays one line; on mobile it wraps to two lines at a
   // comfortably large size instead of shrinking to a tiny font.
   const headingRef = useFitLines(2, 56, 22)
 
-  /* Fade-up reveal of the header row (heading + note) */
+  /* Fade-up reveal of the heading */
   useEffect(() => {
     const root = sectionRef.current
     if (!root) return
@@ -123,7 +128,7 @@ export default function StatsSection({
         }}
       />
 
-      <div className="max-w-7xl mx-auto px-6 md:px-12 pt-20 md:pt-28 pb-10 md:pb-14">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 pt-20 md:pt-28 pb-14 md:pb-20">
         {/* Single-line editorial heading */}
         <h2
           ref={headingRef}
@@ -133,54 +138,86 @@ export default function StatsSection({
         >
           {HEADING}
         </h2>
-      </div>
 
-      {/* Moving metric carousel — cards scroll continuously left. The list is
-          duplicated so a −50% shift loops seamlessly. Edges fade out via a mask
-          so cards enter/exit softly. */}
-      <div
-        className="relative overflow-hidden pb-12 md:pb-16"
-        style={{
-          WebkitMaskImage:
-            'linear-gradient(to right, transparent, black 5%, black 95%, transparent)',
-          maskImage:
-            'linear-gradient(to right, transparent, black 5%, black 95%, transparent)',
-        }}
-      >
-        <motion.div
-          className="flex w-max"
-          animate={{ x: ['0%', '-50%'] }}
-          transition={{ duration: loopDuration, ease: 'linear', repeat: Infinity }}
-          style={{ willChange: 'transform' }}
+        {/* Static metric grid — three cards per row on desktop, stacking to two
+            then one on smaller screens. The numbers count up when the grid is
+            about to scroll into view. */}
+        <div
+          ref={gridRef}
+          className="mt-12 md:mt-16 grid grid-cols-1 gap-5 sm:grid-cols-2 md:gap-6 lg:grid-cols-3"
         >
-          {/* Two identical groups. Every card carries its own right margin (incl.
-              the last one in each group), so the two groups are perfectly
-              periodic and a −50% shift loops seamlessly for ANY number of stats. */}
-          {[0, 1].map((group) => (
-            <div className="flex shrink-0" key={group} aria-hidden={group === 1}>
-              {STATS.map((stat, i) => (
-                <div
-                  key={`${stat.label}-${i}`}
-                  className="flex w-[270px] shrink-0 flex-col rounded-[28px] bg-[#F6F3EE] p-8 mr-5 md:mr-6 md:w-[340px] md:p-10"
-                >
-                  <span
-                    className="font-serif font-light leading-none text-[#111111]"
-                    style={{ fontSize: 'clamp(3.25rem, 6vw, 5.5rem)' }}
-                  >
-                    {stat.number}
-                  </span>
-                  <span className="mt-4 text-[#111111] text-sm font-medium tracking-[0.18em] uppercase">
-                    {stat.label}
-                  </span>
-                  <p className="mt-4 text-[#555555] text-sm leading-relaxed">
-                    {stat.body}
-                  </p>
-                </div>
-              ))}
-            </div>
+          {STATS.map((stat, i) => (
+            <motion.div
+              key={`${stat.label}-${i}`}
+              initial={reduce ? false : { opacity: 0, y: 28 }}
+              animate={started || reduce ? { opacity: 1, y: 0 } : undefined}
+              transition={{ duration: 0.7, ease: EASE, delay: (i % 3) * 0.1 }}
+              className="flex flex-col rounded-[28px] bg-[#F6F3EE] p-8 md:p-10"
+            >
+              <span
+                className="font-serif font-light leading-none text-[#111111]"
+                style={{ fontSize: 'clamp(3.25rem, 6vw, 5.5rem)' }}
+              >
+                <CountUp value={stat.number} reduce={!!reduce} start={started} />
+              </span>
+              <span className="mt-4 text-[#111111] text-sm font-medium tracking-[0.18em] uppercase">
+                {stat.label}
+              </span>
+              <p className="mt-4 text-[#555555] text-sm leading-relaxed">
+                {stat.body}
+              </p>
+            </motion.div>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
+  )
+}
+
+/* Counts a value up from zero once its grid scrolls into view. Animates the
+   first run of digits it finds and preserves any surrounding text (e.g. a
+   leading "₹", a trailing "+", "Cr" or "%"), formatting with Indian digit
+   grouping. Values with no digits (or under reduced motion) render as-is. */
+function CountUp({
+  value,
+  reduce,
+  start,
+}: {
+  value: string
+  reduce: boolean
+  /** Begins the count when the parent grid comes into view. */
+  start: boolean
+}) {
+  const match = value.match(/[\d,]*\d/)
+  const target = match ? parseInt(match[0].replace(/,/g, ''), 10) : NaN
+  const [display, setDisplay] = useState(reduce ? target : 0)
+
+  useEffect(() => {
+    if (Number.isNaN(target)) return
+    if (reduce) {
+      setDisplay(target)
+      return
+    }
+    if (!start) return
+    const controls = animate(0, target, {
+      duration: 1.6,
+      ease: EASE,
+      onUpdate: (v) => setDisplay(Math.round(v)),
+    })
+    return () => controls.stop()
+  }, [start, target, reduce])
+
+  // No number to animate — show the raw value.
+  if (!match || Number.isNaN(target)) return <span>{value}</span>
+
+  const prefix = value.slice(0, match.index)
+  const suffix = value.slice((match.index ?? 0) + match[0].length)
+
+  return (
+    <span>
+      {prefix}
+      {display.toLocaleString('en-IN')}
+      {suffix}
+    </span>
   )
 }

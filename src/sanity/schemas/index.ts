@@ -11,6 +11,7 @@ import esg from './esg'
 import homepage from './homepage'
 import investorRelations from './investorRelations'
 import leader from './leader'
+import leadershipTeam from './leadershipTeam'
 import lifeAtJlm from './lifeAtJlm'
 import morisons from './morisons'
 import ourStory from './ourStory'
@@ -26,6 +27,7 @@ export const schemaTypes: SchemaTypeDefinition[] = [
   blockContent,
   homepage,
   leader,
+  leadershipTeam,
   lifeAtJlm,
   ourStory,
   babyDreams,

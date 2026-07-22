@@ -96,12 +96,7 @@ export default async function Home() {
       {/* 1 · Brand tiles */}
       <BrandCards brands={brands} heading={homepage?.brandsHeading} />
       {/* 2 · Data points */}
-      <StatsSection
-        stats={stats}
-        heading={homepage?.statsHeading}
-        note={homepage?.statsNote}
-        speed={homepage?.carouselSpeed}
-      />
+      <StatsSection stats={stats} heading={homepage?.statsHeading} />
       {/* 3 · Vision */}
       <VisionSection label={homepage?.vision?.label} text={homepage?.vision?.text} />
       {/* 4 · Core values */}

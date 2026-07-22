@@ -65,6 +65,9 @@ export default function EsgClient({ cms }: { cms?: EsgView }) {
 
   const purposeHeading = cms?.purposeHeading ?? ''
   const esgHeadingRef = useFitText(220)
+  // When the banner switch is ON and an image is set, the banner replaces the
+  // text heading entirely (no empty heading section is rendered, so no gap).
+  const showBanner = Boolean(cms?.useBannerImage && cms?.bannerImage)
 
   const beliefEyebrow = cms?.beliefEyebrow
   const beliefText = cms?.beliefText ?? ''
@@ -103,23 +106,45 @@ export default function EsgClient({ cms }: { cms?: EsgView }) {
 
   return (
     <div className={dmSans.variable}>
-      {/* ================ ESG — TITLE ================ */}
-      <section className="overflow-hidden bg-white px-[7vw] pt-16 text-center md:pt-24">
-        <h1
-          ref={esgHeadingRef}
-          className={anton.className}
-          style={{
-            margin: '0 auto',
-            color: INK,
-            lineHeight: 0.98,
-            letterSpacing: '0.02em',
-            textTransform: 'uppercase',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {purposeHeading}
-        </h1>
-      </section>
+      {/* ================ ESG — TITLE / BANNER ================ */}
+      {showBanner ? (
+        <section className="bg-white">
+          <div
+            className="relative w-full overflow-hidden"
+            style={cms?.bannerImageAspect ? { aspectRatio: cms.bannerImageAspect } : undefined}
+          >
+            <Image
+              src={cms!.bannerImage as string}
+              alt={purposeHeading || 'ESG'}
+              {...(cms?.bannerImageAspect
+                ? { fill: true, style: { objectFit: 'cover' as const } }
+                : { width: 2400, height: 900, className: 'h-auto w-full' })}
+              sizes="100vw"
+              priority
+              {...(cms?.bannerImageLqip
+                ? { placeholder: 'blur' as const, blurDataURL: cms.bannerImageLqip }
+                : {})}
+            />
+          </div>
+        </section>
+      ) : (
+        <section className="overflow-hidden bg-white px-[7vw] pt-16 text-center md:pt-24">
+          <h1
+            ref={esgHeadingRef}
+            className={anton.className}
+            style={{
+              margin: '0 auto',
+              color: INK,
+              lineHeight: 0.98,
+              letterSpacing: '0.02em',
+              textTransform: 'uppercase',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {purposeHeading}
+          </h1>
+        </section>
+      )}
 
       {/* ========================= OUR COMMITMENT + STAT CARDS ========================= */}
       <section className="bg-white px-[7vw] pb-24 pt-10 text-center md:pb-32 md:pt-14">
