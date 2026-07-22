@@ -19,23 +19,28 @@ export default async function OurStoryPage() {
     }
   })
 
+  const videoPoster = resolveImage(data?.introVideo?.poster, 1600)
+
   const cms: OurStoryCms = {
     eyebrow: data?.eyebrow,
     headlineTop: data?.headlineTop,
     headlineBottom: data?.headlineBottom,
     heroTagline: data?.heroTagline,
     establishedMark: data?.establishedMark,
+    videoUrl: data?.introVideo?.videoUrl,
+    videoPoster: videoPoster?.url,
+    videoPosterLqip: videoPoster?.lqip,
     journeyEyebrow: data?.journeyEyebrow,
     journeyHeadline: data?.journeyHeadline,
     journeyStages: data?.journeyStages,
     erasEyebrow: data?.erasEyebrow,
     erasHeadline: data?.erasHeadline,
     eras,
-    pillarsEyebrow: data?.pillarsEyebrow,
-    pillarsHeadline: data?.pillarsHeadline,
     pillars: data?.pillars,
     closingLine: data?.closingLine,
     closingSubline: data?.closingSubline,
+    signatureName: data?.signatureName,
+    signatureNote: data?.signatureNote,
   }
 
   return <OurStoryClient cms={cms} />

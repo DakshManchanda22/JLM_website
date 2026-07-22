@@ -23,7 +23,6 @@ export type LifeCms = {
   heroLine2?: string
   heroCaptionSmall?: string
   heroCaptionLarge?: string
-  anchors?: { num: string; label: string; targetId: string; image: string }[]
   captionStrip?: { src: string; caption?: string; aspect?: number; lqip?: string }[]
   introStatement?: string
   arentHeadline?: string
@@ -403,9 +402,8 @@ function IntroParagraph() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-80px' }}
         transition={{ duration: 0.9, ease: EASE }}
-        className={`${cormorant.className} max-w-[1000px] mx-auto text-center`}
+        className={`${cormorant.className} mx-auto text-center max-w-[1000px] text-[clamp(22px,2.4vw,34px)] lg:max-w-none lg:whitespace-nowrap lg:text-[clamp(19px,1.95vw,32px)]`}
         style={{
-          fontSize: 'clamp(22px, 2.4vw, 34px)',
           lineHeight: 1.45,
           fontWeight: 300,
           color: INK,
@@ -543,7 +541,7 @@ function QuoteCard({
 
     const fit = () => {
       // Cap scales with card width so quotes read smaller on narrow phones.
-      let size = Math.min(27, Math.max(20, box.clientWidth * 0.078))
+      let size = Math.min(23, Math.max(17, box.clientWidth * 0.074))
       q.style.fontSize = `${size}px`
       // Shrink until the quote fits the fixed quote box.
       while (q.scrollHeight > box.clientHeight && size > 12) {
@@ -562,33 +560,33 @@ function QuoteCard({
     <figure
       className="flex flex-col overflow-hidden"
       style={{
-        width: 'min(80vw, 380px)',
-        height: 'clamp(376px, 95vw, 440px)',
+        width: 'min(74vw, 328px)',
+        height: 'clamp(320px, 84vw, 384px)',
         backgroundColor: s.bg,
         color: s.fg,
         border: s.border,
-        borderRadius: 20,
-        padding: 'clamp(24px, 6vw, 32px) clamp(22px, 5.5vw, 30px)',
+        borderRadius: 18,
+        padding: 'clamp(20px, 5vw, 28px) clamp(18px, 4.5vw, 26px)',
       }}
     >
       <div ref={boxRef} className="min-h-0 flex-1 overflow-hidden">
         <blockquote
           ref={quoteRef}
           className={dmSans.className}
-          style={{ fontSize: 27, lineHeight: 1.42, fontWeight: 400 }}
+          style={{ fontSize: 23, lineHeight: 1.42, fontWeight: 400 }}
         >
           “{t.quote}”
         </blockquote>
       </div>
-      <figcaption className="mt-6 shrink-0">
+      <figcaption className="mt-5 shrink-0">
         <div
           className={dmSans.className}
-          style={{ fontSize: 'clamp(19px, 4.8vw, 24px)', fontWeight: 600, letterSpacing: '-0.01em' }}
+          style={{ fontSize: 'clamp(17px, 4.4vw, 21px)', fontWeight: 600, letterSpacing: '-0.01em' }}
         >
           {t.name}
         </div>
         {t.role && (
-          <div className={`${dmSans.className} mt-1`} style={{ fontSize: 14, color: s.sub }}>
+          <div className={`${dmSans.className} mt-1`} style={{ fontSize: 13, color: s.sub }}>
             {t.role}
           </div>
         )}

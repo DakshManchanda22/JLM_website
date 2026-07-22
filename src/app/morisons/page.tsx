@@ -22,6 +22,7 @@ export default async function MorisonsPage() {
       poster={cms?.poster}
       posterLqip={cms?.posterLqip}
       posterAlt={cms?.posterAlt}
+      posterAspect={cms?.posterAspect}
     />
   )
 }

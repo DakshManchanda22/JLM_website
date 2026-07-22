@@ -2,12 +2,13 @@ import { createClient } from 'next-sanity'
 
 import { apiVersion, dataset, isSanityConfigured, projectId, useCdn } from './env'
 
-// Server-only read token. `SANITY_API_TOKEN` has no NEXT_PUBLIC_ prefix, so
-// Next.js never inlines it into the browser bundle — it resolves to undefined on
-// the client (where we never fetch anyway). Server Components fetch WITH the token
-// so we can read documents the project restricts from anonymous public access
-// (the leadership team docs are published but not publicly readable). Combined
-// with perspective:'published' this reads published content only — never drafts.
+// Anonymous, read-only client — no API token. The dataset is public, so every
+// published document (homepage, brands, leadership, etc.) is readable over the
+// public API without credentials. Leadership docs must use plain, dot-free _ids
+// (e.g. `leader-sakshi-mody`, never `leader.sakshi-mody`): Sanity treats any
+// path-prefixed id (one containing a `.`, like the `drafts.` prefix) as private
+// and hides it from the public API, which is what previously forced a token.
+// perspective:'published' keeps drafts out of the site.
 export const client = isSanityConfigured
   ? createClient({
       projectId,
@@ -15,7 +16,6 @@ export const client = isSanityConfigured
       apiVersion,
       useCdn,
       perspective: 'published',
-      token: process.env.SANITY_API_TOKEN,
     })
   : null
 
