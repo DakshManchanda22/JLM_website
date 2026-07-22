@@ -281,9 +281,8 @@ function Hero() {
 
   return (
     <section
-      className="relative w-full"
+      className="relative w-full min-h-[82svh] md:min-h-[92vh]"
       style={{
-        minHeight: '92vh',
         backgroundColor: FAINT,
         overflow: 'hidden',
       }}
@@ -370,7 +369,7 @@ function Hero() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8, delay: HERO_REVEAL_DELAY + 1.0 }}
-        className="absolute bottom-[6vh] left-0 right-0 flex flex-col items-center z-10"
+        className="absolute bottom-[5svh] md:bottom-[6vh] left-0 right-0 flex flex-col items-center z-10"
       >
         <span
           className={`${dmSans.className} uppercase tracking-[0.24em]`}
