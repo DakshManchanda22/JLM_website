@@ -1,5 +1,6 @@
 import { defineType, defineField, defineArrayMember } from 'sanity'
 import { socialCardFields } from './socialCard'
+import { factoryFields } from './factory'
 
 /* Shared pastel tint options for the product-category tiles. */
 const TINTS = [
@@ -24,6 +25,7 @@ export default defineType({
     { name: 'products', title: 'Product categories' },
     { name: 'video', title: 'Video' },
     { name: 'range', title: 'Explore range' },
+    { name: 'factory', title: 'Factory' },
     { name: 'blogs', title: 'Doctor blogs' },
     { name: 'social', title: 'Social links' },
   ],
@@ -160,6 +162,9 @@ export default defineType({
       type: 'text',
       rows: 2,
     }),
+
+    /* ───────────── Factory ───────────── */
+    ...factoryFields('factory'),
 
     /* ───────────── Doctor blogs ───────────── */
     defineField({

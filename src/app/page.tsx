@@ -1,4 +1,3 @@
-import HeroSlideshow, { type Slide, type HeroVideo } from '@/components/HeroSlideshow'
 import BrandCards, { type Brand } from '@/components/BrandCards'
 import StatsSection, { type Stat } from '@/components/StatsSection'
 import HomeFeatures, { type HomeFeature } from '@/components/HomeFeatures'
@@ -6,33 +5,13 @@ import VisionSection from '@/components/VisionSection'
 import ValuesImage from '@/components/ValuesImage'
 import Footer from '@/components/Footer'
 import { fetchHomepage } from '@/sanity/queries'
-import { resolveImage, resolveImageUrl } from '@/sanity/resolveImage'
+import { resolveImage } from '@/sanity/resolveImage'
 
 // Revalidate every 60s so Sanity edits surface without redeploys
 export const revalidate = 60
 
 export default async function Home() {
   const homepage = await fetchHomepage()
-
-  /* Resolve Sanity image asset refs into URLs for the client components */
-  const heroSlides: Slide[] | undefined = homepage?.heroSlides?.flatMap((s) => {
-    const r = resolveImage(s.image, 2000)
-    return r ? [{ image: r.url, lqip: r.lqip, brand: s.brand, tagline: s.tagline }] : []
-  })
-
-  /* The Sanity switch decides the hero: OFF = video, ON = photo carousel.
-     The video only plays when the carousel is OFF and a link/file is set. */
-  const useCarousel = homepage?.heroUseCarousel ?? false
-  const hv = homepage?.heroVideo
-  const heroVideo: HeroVideo | undefined =
-    !useCarousel && hv?.videoUrl
-      ? {
-          videoUrl: hv.videoUrl,
-          poster: resolveImageUrl(hv.poster, 2000),
-          brand: hv.brand,
-          tagline: hv.tagline,
-        }
-      : undefined
 
   // Canonical routes for the known brands. Sanity content historically seeded
   // some hrefs with a `/brands/…` prefix that doesn't exist as a route, so we
@@ -114,12 +93,18 @@ export default async function Home() {
 
   return (
     <>
-      <HeroSlideshow
-        slides={heroSlides}
-        video={heroVideo}
-        intervalMs={(homepage?.heroSlideInterval ?? 5) * 1000}
+      {/* 1 · Brand tiles */}
+      <BrandCards brands={brands} heading={homepage?.brandsHeading} />
+      {/* 2 · Data points */}
+      <StatsSection
+        stats={stats}
+        heading={homepage?.statsHeading}
+        note={homepage?.statsNote}
+        speed={homepage?.carouselSpeed}
       />
+      {/* 3 · Vision */}
       <VisionSection label={homepage?.vision?.label} text={homepage?.vision?.text} />
+      {/* 4 · Core values */}
       {valuesResolved && (
         <ValuesImage
           image={valuesResolved.url}
@@ -127,13 +112,7 @@ export default async function Home() {
           aspect={valuesAspect}
         />
       )}
-      <BrandCards brands={brands} />
-      <StatsSection
-        stats={stats}
-        heading={homepage?.statsHeading}
-        note={homepage?.statsNote}
-        speed={homepage?.carouselSpeed}
-      />
+      {/* 5 · Life at JLM · 6 · Mission & impact (ordered in Sanity → Features) */}
       <HomeFeatures features={features} />
       <div style={{ backgroundColor: '#FFFFFF' }}>
         <Footer />

@@ -9,6 +9,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Nunito } from 'next/font/google'
 import Footer from '@/components/Footer'
 import SocialStamps, { type SocialStampCard } from '@/components/SocialStamps'
+import FactorySection from '@/components/FactorySection'
 import type { BabyCategory, BabyDreams, BabyTint, SocialCardContent } from '@/sanity/queries'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -210,6 +211,9 @@ export default function MorisonsBabyDreamsClient({
         intro={cms.productsIntro || D.productsIntro}
         categories={categories}
       />
+
+      {/* OUR FACTORY — photo, description, certifications */}
+      <FactorySection factory={cms.factory} />
 
       {/* DOCTOR BLOGS — moving carousel */}
       <DoctorBlogs

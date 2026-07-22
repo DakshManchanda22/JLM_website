@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import PhilanthropyClient from './PhilanthropyClient'
-import { fetchPhilanthropy, fetchHomepage } from '@/sanity/queries'
-import { resolveImageUrl } from '@/sanity/resolveImage'
+import { fetchPhilanthropy } from '@/sanity/queries'
 
 export const metadata: Metadata = {
   title: 'Philanthropy | JL Morison',
@@ -12,13 +11,12 @@ export const metadata: Metadata = {
 export const revalidate = 60
 
 export default async function PhilanthropyPage() {
-  // The Kaamyaab video is the same one configured for the homepage hero, so we
-  // pull it from the homepage document and reuse it at the top of this page.
-  const [cms, homepage] = await Promise.all([fetchPhilanthropy(), fetchHomepage()])
+  const cms = await fetchPhilanthropy()
 
-  const hv = homepage?.heroVideo
-  const video = hv?.videoUrl
-    ? { videoUrl: hv.videoUrl, poster: resolveImageUrl(hv.poster, 2000) }
+  // The Kaamyaab film is now managed on the Philanthropy document itself
+  // (Sanity → Philanthropy → Video).
+  const video = cms?.videoUrl
+    ? { videoUrl: cms.videoUrl, poster: cms.videoPoster }
     : undefined
 
   return <PhilanthropyClient cms={cms ?? undefined} video={video} />

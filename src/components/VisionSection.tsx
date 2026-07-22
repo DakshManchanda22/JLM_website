@@ -44,7 +44,7 @@ export default function VisionSection({
   if (!text) return null
 
   return (
-    <section ref={sectionRef} className="w-full bg-white px-4 pt-16 pb-6 md:px-8 md:pt-24 md:pb-8">
+    <section ref={sectionRef} className="w-full bg-white px-4 pt-4 pb-6 md:px-8 md:pt-8 md:pb-8">
       <div className="mx-auto max-w-6xl text-center">
         {label && (
           <span

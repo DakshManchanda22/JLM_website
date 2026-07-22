@@ -8,7 +8,15 @@ import localFont from 'next/font/local'
 import { PortableText, type PortableTextComponents } from '@portabletext/react'
 import Footer from '@/components/Footer'
 import SocialStamps from '@/components/SocialStamps'
-import type { Bigen, BigenReel, BigenFeature, BigenProduct, SocialCardContent } from '@/sanity/queries'
+import FactorySection from '@/components/FactorySection'
+import type {
+  Bigen,
+  BigenReel,
+  BigenFeature,
+  BigenProduct,
+  SocialCardContent,
+  FactoryContent,
+} from '@/sanity/queries'
 
 // Google Sans (self-hosted) — bold, modern sans for a confident, manly look
 const googleSans = localFont({
@@ -615,6 +623,7 @@ export default function BigenClient({ cms }: { cms: Bigen }) {
         reels={cms.reels && cms.reels.length ? cms.reels : DEFAULT_REELS}
         rangeHeadline={cms.rangeHeadline}
         products={cms.products ?? []}
+        factory={cms.factory}
         instagramUrl={cms.instagramUrl || D.instagramUrl}
         facebookUrl={cms.facebookUrl || D.facebookUrl}
         instagramCard={cms.instagramCard}
@@ -637,6 +646,7 @@ function ReelsSection({
   reels,
   rangeHeadline,
   products,
+  factory,
   instagramUrl,
   facebookUrl,
   instagramCard,
@@ -648,6 +658,7 @@ function ReelsSection({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   rangeHeadline?: any[]
   products: BigenProduct[]
+  factory?: FactoryContent
   instagramUrl: string
   facebookUrl: string
   instagramCard?: SocialCardContent
@@ -783,6 +794,7 @@ function ReelsSection({
         <ProductRange
           headline={rangeHeadline}
           products={products}
+          factory={factory}
           instagramUrl={instagramUrl}
           facebookUrl={facebookUrl}
           instagramCard={instagramCard}
@@ -798,6 +810,7 @@ function ReelsSection({
 function ProductRange({
   headline,
   products,
+  factory,
   instagramUrl,
   facebookUrl,
   instagramCard,
@@ -806,6 +819,7 @@ function ProductRange({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   headline?: any[]
   products: BigenProduct[]
+  factory?: FactoryContent
   instagramUrl: string
   facebookUrl: string
   instagramCard?: SocialCardContent
@@ -895,6 +909,13 @@ function ProductRange({
           </motion.div>
         ))}
       </div>
+
+      {/* Our Factory — sits on the same cream panel, right after the range */}
+      {factory && (
+        <div className="mt-20 md:mt-28">
+          <FactorySection factory={factory} background="transparent" />
+        </div>
+      )}
 
       {/* Follow us */}
       {/* TODO: replace the placeholder counts with real follower numbers. */}

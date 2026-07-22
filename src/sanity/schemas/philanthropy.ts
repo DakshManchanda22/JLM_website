@@ -14,6 +14,7 @@ export default defineType({
   type: 'document',
   groups: [
     { name: 'hero', title: 'Hero' },
+    { name: 'video', title: 'Video' },
     { name: 'difference', title: 'Making a difference' },
     { name: 'programs', title: 'Programmes' },
     { name: 'impact', title: 'Impact (5 years)' },
@@ -38,6 +39,37 @@ export default defineType({
       name: 'heroImage',
       title: 'Hero background image',
       group: 'hero',
+      type: 'image',
+      options: { hotspot: true },
+    }),
+
+    /* ───────────── Video (the Kaamyaab film) ───────────── */
+    defineField({
+      name: 'videoFile',
+      title: 'Upload video',
+      group: 'video',
+      description:
+        'Upload an MP4 here — the easiest option. Keep it under ~50MB for fast ' +
+        'loading. For very large videos, use the “Video link” field below instead.',
+      type: 'file',
+      options: { accept: 'video/*' },
+    }),
+    defineField({
+      name: 'videoUrl',
+      title: 'Video link (optional)',
+      group: 'video',
+      description:
+        'Alternative to uploading: paste a direct MP4 link (e.g. a Google Cloud ' +
+        'Storage URL). Used only if no video is uploaded above. Leave everything ' +
+        'empty to hide the video.',
+      type: 'url',
+      validation: (Rule) => Rule.uri({ scheme: ['https'] }),
+    }),
+    defineField({
+      name: 'videoPoster',
+      title: 'Video poster image',
+      group: 'video',
+      description: 'Shown while the video loads.',
       type: 'image',
       options: { hotspot: true },
     }),
