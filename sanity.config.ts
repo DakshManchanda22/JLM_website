@@ -104,6 +104,7 @@ export default defineConfig({
                       ),
                     S.listItem()
                       .title('Leadership Team')
+                      .id('leaderList')
                       .child(
                         S.documentTypeList('leader')
                           .title('Leadership Team')
@@ -111,7 +112,7 @@ export default defineConfig({
                       ),
                     S.listItem()
                       .title('Leadership order')
-                      .id('leadershipTeam')
+                      .id('leadershipOrder')
                       .child(
                         S.editor()
                           .id('leadershipTeam')
