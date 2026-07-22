@@ -139,7 +139,7 @@ export default function StatsSection({
           duplicated so a −50% shift loops seamlessly. Edges fade out via a mask
           so cards enter/exit softly. */}
       <div
-        className="relative overflow-hidden pb-24 md:pb-32"
+        className="relative overflow-hidden pb-12 md:pb-16"
         style={{
           WebkitMaskImage:
             'linear-gradient(to right, transparent, black 5%, black 95%, transparent)',

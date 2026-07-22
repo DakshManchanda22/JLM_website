@@ -113,8 +113,17 @@ function BrandCard({
   )
 }
 
-export default function BrandCards({ brands }: { brands?: Brand[] }) {
+export default function BrandCards({
+  brands,
+  heading,
+}: {
+  brands?: Brand[]
+  /** May be null (GROQ returns null for an unset Sanity field). */
+  heading?: string | null
+}) {
   const BRANDS = brands ?? []
+  // Fall back to the default when Sanity hasn't set a heading (null / empty).
+  const HEADING = heading?.trim() ? heading : 'Trusted in every Indian home.'
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
   const [viewportMode, setViewportMode] = useState(false)
   const cardRefs = useRef<(HTMLDivElement | null)[]>([])
@@ -154,13 +163,13 @@ export default function BrandCards({ brands }: { brands?: Brand[] }) {
   }, [viewportMode, BRANDS.length])
 
   return (
-    <section className="bg-[#111111] py-20 md:py-28 px-6 md:px-10">
+    <section className="bg-[#111111] pt-8 pb-20 md:pt-10 md:pb-28 px-6 md:px-10">
       <div className="mb-12 md:mb-16 flex justify-center text-center">
         <h2
           className="text-white font-serif font-light tracking-tight leading-[1.05]"
           style={{ fontSize: 'clamp(2rem, 4.5vw, 4.25rem)' }}
         >
-          Trusted in every Indian home.
+          {HEADING}
         </h2>
       </div>
 

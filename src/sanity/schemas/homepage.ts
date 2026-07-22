@@ -12,143 +12,14 @@ export default defineType({
   // Singleton behaviour is enforced by the Studio structure config
   // (see sanity.config.ts), which pins this to a single document id.
   groups: [
-    { name: 'heroMode', title: 'Hero mode' },
-    { name: 'heroVideo', title: 'Hero · Video' },
-    { name: 'hero', title: 'Hero · Photo carousel' },
-    { name: 'vision', title: 'Our Vision' },
-    { name: 'quote', title: 'Quote' },
-    { name: 'values', title: 'Values image' },
     { name: 'brands', title: 'Brand cards' },
     { name: 'stats', title: 'Stats' },
+    { name: 'vision', title: 'Our Vision' },
+    { name: 'values', title: 'Values image' },
     { name: 'features', title: 'Feature sections' },
+    { name: 'quote', title: 'Quote' },
   ],
   fields: [
-    /* ─────────────── Hero mode switch ─────────────── */
-    defineField({
-      name: 'heroUseCarousel',
-      title: 'Show photo carousel instead of video',
-      description:
-        'OFF  →  the hero is a single video (set it up under the “Hero · Video” tab). ' +
-        'ON  →  the hero becomes a photo carousel (add photos under the “Hero · Photo carousel” tab). ' +
-        'This switch decides which one visitors see.',
-      type: 'boolean',
-      group: 'heroMode',
-      initialValue: false,
-      options: { layout: 'switch' },
-    }),
-
-    /* ─────────────── Hero video (shown when the switch is OFF) ─────────────── */
-    defineField({
-      name: 'heroVideo',
-      title: 'Hero video',
-      description:
-        'Shown when “Show photo carousel instead of video” is OFF. ' +
-        'Add a video link (or upload a file) and it plays full-screen at the top of the homepage.',
-      type: 'object',
-      group: 'heroVideo',
-      options: { collapsible: true, collapsed: false },
-      fields: [
-        defineField({
-          name: 'videoFile',
-          title: 'Upload video',
-          description:
-            'Upload an MP4 video here. This is the easiest option — just click and choose a file. ' +
-            'Keep it under ~50MB for fast loading. For very large videos, use the “Video link” field below instead.',
-          type: 'file',
-          options: { accept: 'video/*' },
-        }),
-        defineField({
-          name: 'videoUrl',
-          title: 'Video link (optional)',
-          description:
-            'Alternative to uploading: paste a direct link to an MP4 video (e.g. a Google Cloud Storage URL). ' +
-            'Used only if no video is uploaded above.',
-          type: 'url',
-        }),
-        defineField({
-          name: 'poster',
-          title: 'Poster / fallback image (optional)',
-          description:
-            'Shown while the video loads. Recommended so visitors never see a blank box.',
-          type: 'image',
-          options: { hotspot: true },
-        }),
-        defineField({
-          name: 'brand',
-          title: 'Headline text',
-          description: 'Big headline shown over the video, e.g. a brand name.',
-          type: 'string',
-        }),
-        defineField({
-          name: 'tagline',
-          title: 'Small text above headline',
-          description: 'Small caption shown above the headline, e.g. a tagline.',
-          type: 'string',
-        }),
-      ],
-      preview: {
-        select: { title: 'brand', subtitle: 'tagline', media: 'poster' },
-        prepare: ({ title, subtitle, media }) => ({
-          title: title || 'Hero video',
-          subtitle: subtitle || 'Plays instead of the slideshow when set',
-          media,
-        }),
-      },
-    }),
-
-    /* ─────────────── Hero slideshow ─────────────── */
-    defineField({
-      name: 'heroSlideInterval',
-      title: 'Seconds each photo stays on screen',
-      description:
-        'How long each photo shows before the carousel moves to the next one. ' +
-        'Only used when “Show photo carousel instead of video” is ON.',
-      type: 'number',
-      group: 'hero',
-      initialValue: 5,
-      validation: (Rule) => Rule.min(1).max(30),
-    }),
-    defineField({
-      name: 'heroSlides',
-      title: 'Hero photos',
-      description:
-        'The crossfading photos at the top of the homepage (used when the carousel is ON). ' +
-        'Add as many as you like, drag to reorder, and give each one its own headline and caption.',
-      type: 'array',
-      group: 'hero',
-      validation: (Rule) => Rule.min(1).max(20),
-      of: [
-        defineArrayMember({
-          type: 'object',
-          name: 'heroSlide',
-          fields: [
-            defineField({
-              name: 'image',
-              title: 'Image',
-              type: 'image',
-              options: { hotspot: true },
-              validation: (Rule) => Rule.required(),
-            }),
-            defineField({
-              name: 'brand',
-              title: 'Brand name',
-              type: 'string',
-              validation: (Rule) => Rule.required(),
-            }),
-            defineField({
-              name: 'tagline',
-              title: 'Tagline',
-              type: 'string',
-              validation: (Rule) => Rule.required(),
-            }),
-          ],
-          preview: {
-            select: { title: 'brand', subtitle: 'tagline', media: 'image' },
-          },
-        }),
-      ],
-    }),
-
     /* ─────────────── Our Vision ─────────────── */
     defineField({
       name: 'vision',
@@ -221,6 +92,15 @@ export default defineType({
     }),
 
     /* ─────────────── Brand cards ─────────────── */
+    defineField({
+      name: 'brandsHeading',
+      title: 'Brand cards — section heading',
+      description:
+        'The large heading shown above the four brand tiles, e.g. ' +
+        '“Trusted in every Indian home.”',
+      type: 'string',
+      group: 'brands',
+    }),
     defineField({
       name: 'brands',
       title: 'Brand cards',

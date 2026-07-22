@@ -29,6 +29,44 @@ function resolveSocialCard(raw: any, p: string): SocialCardContent {
   }
 }
 
+/* ── "Our Factory" section (shared across brand pages) ────────────────── */
+export type FactoryCert = { name: string; logo?: string; logoLqip?: string }
+export type FactoryContent = {
+  heading?: string
+  description?: string
+  image?: string
+  imageLqip?: string
+  certifications?: FactoryCert[]
+}
+
+/** GROQ fragment for the shared factory fields (see schemas/factory.ts). */
+export const factoryProjection = groq`
+  factoryHeading,
+  factoryDescription,
+  factoryImage{ ${imageWithLqip} },
+  certifications[]{ name, logo{ ${imageWithLqip} } },
+`
+
+/** Map the raw factory fields into a FactoryContent, or undefined if empty. */
+function resolveFactory(raw: any): FactoryContent | undefined {
+  if (!raw) return undefined
+  const img = resolveImage(raw.factoryImage, 1800)
+  const certifications = (raw.certifications || []).flatMap((c: any) => {
+    if (!c?.name) return []
+    const logo = resolveImage(c.logo, 400)
+    return [{ name: c.name, logo: logo?.url, logoLqip: logo?.lqip }]
+  })
+  // Nothing to show unless there's at least an image, description or a badge.
+  if (!img && !raw.factoryDescription && certifications.length === 0) return undefined
+  return {
+    heading: raw.factoryHeading,
+    description: raw.factoryDescription,
+    image: img?.url,
+    imageLqip: img?.lqip,
+    certifications,
+  }
+}
+
 export type PostListItem = {
   _id: string
   title: string
@@ -146,12 +184,6 @@ export async function fetchSiteSettings(): Promise<SiteSettings | null> {
 
 /* ─────────────────────── Homepage singleton ─────────────────────── */
 
-export type HeroSlide = {
-  image: any
-  brand: string
-  tagline: string
-}
-
 export type BrandCardData = {
   name: string
   shortName?: string
@@ -178,18 +210,7 @@ export type HomeFeatureData = {
   imageRight?: boolean
 }
 
-export type HeroVideo = {
-  videoUrl?: string
-  poster?: any
-  brand?: string
-  tagline?: string
-}
-
 export type Homepage = {
-  heroUseCarousel?: boolean
-  heroVideo?: HeroVideo
-  heroSlides?: HeroSlide[]
-  heroSlideInterval?: number
   vision?: {
     label?: string
     text?: string
@@ -201,6 +222,7 @@ export type Homepage = {
   }
   showValuesImage?: boolean
   valuesImage?: any
+  brandsHeading?: string
   brands?: BrandCardData[]
   statsHeading?: string
   statsNote?: string
@@ -210,19 +232,6 @@ export type Homepage = {
 }
 
 export const homepageQuery = groq`*[_type == "homepage"][0]{
-  heroUseCarousel,
-  heroSlideInterval,
-  heroVideo{
-    "videoUrl": coalesce(videoFile.asset->url, videoUrl),
-    poster,
-    brand,
-    tagline,
-  },
-  heroSlides[]{
-    image{ ${imageWithLqip} },
-    brand,
-    tagline,
-  },
   vision{
     label,
     text,
@@ -240,6 +249,7 @@ export const homepageQuery = groq`*[_type == "homepage"][0]{
     ${imageWithLqip},
     "aspect": asset->metadata.dimensions.aspectRatio,
   },
+  brandsHeading,
   brands[]{
     name,
     shortName,
@@ -498,6 +508,7 @@ export type Bigen = {
   rangeEyebrow?: string
   rangeHeadline?: any[]
   products?: BigenProduct[]
+  factory?: FactoryContent
   // social
   instagramUrl?: string
   facebookUrl?: string
@@ -521,6 +532,7 @@ export const bigenQuery = groq`*[_type == "bigen"][0]{
   reels[]{ url, name },
   rangeEyebrow, rangeHeadline,
   products[]{ name, desc, href, image{ ${imageWithLqip} } },
+  ${factoryProjection}
   instagramUrl,
   facebookUrl,
   ${socialCardProjection('instagram')},
@@ -550,6 +562,7 @@ export async function fetchBigen(): Promise<Bigen | null> {
       const r = resolveImage(p.image, 800)
       return { ...p, image: r?.url, lqip: r?.lqip }
     }),
+    factory: resolveFactory(raw),
     instagramCard: resolveSocialCard(raw, 'instagram'),
     facebookCard: resolveSocialCard(raw, 'facebook'),
   }
@@ -578,6 +591,7 @@ export type EmoformView = {
   featuresImage?: string
   featuresImageLqip?: string
   steps?: EmoformStepView[]
+  factory?: FactoryContent
   ctaTitle?: string
   ctaSubtext?: string
   ctaButtonLabel?: string
@@ -594,6 +608,7 @@ export const emoformQuery = groq`*[_type == "emoform"][0]{
   featuresTitleTop, featuresTitleBottom, features,
   featuresImage{ ${imageWithLqip} },
   steps[]{ tag, title, sub, image{ ${imageWithLqip} }, points },
+  ${factoryProjection}
   ctaTitle, ctaSubtext, ctaButtonLabel, ctaButtonHref,
   instagramUrl, facebookUrl,
   ${socialCardProjection('instagram')},
@@ -630,6 +645,7 @@ export async function fetchEmoform(): Promise<EmoformView | null> {
         points: st.points,
       }
     }),
+    factory: resolveFactory(raw),
     ctaTitle: raw.ctaTitle,
     ctaSubtext: raw.ctaSubtext,
     ctaButtonLabel: raw.ctaButtonLabel,
@@ -667,6 +683,7 @@ export type BabyDreams = {
   videoPoster?: string
   rangeHeadline?: string
   rangeIntro?: string
+  factory?: FactoryContent
   blogsHeadline?: string
   blogsIntro?: string
   blogsCarouselSpeed?: number
@@ -686,6 +703,7 @@ export const babyDreamsQuery = groq`*[_type == "babyDreams"][0]{
   videoHeadline, videoUrl,
   videoPoster{ ${imageWithLqip} },
   rangeHeadline, rangeIntro,
+  ${factoryProjection}
   blogsHeadline, blogsIntro, blogsCarouselSpeed,
   instagramUrl, facebookUrl, youtubeUrl,
   ${socialCardProjection('instagram')},
@@ -724,6 +742,7 @@ export async function fetchBabyDreams(): Promise<BabyDreams | null> {
     videoPoster: poster?.url,
     rangeHeadline: raw.rangeHeadline,
     rangeIntro: raw.rangeIntro,
+    factory: resolveFactory(raw),
     blogsHeadline: raw.blogsHeadline,
     blogsIntro: raw.blogsIntro,
     blogsCarouselSpeed: raw.blogsCarouselSpeed,
@@ -751,6 +770,8 @@ export type PhilanthropyView = {
   heroLine2?: string
   heroImage?: string
   heroImageLqip?: string
+  videoUrl?: string
+  videoPoster?: string
   differenceHeadingLine1?: string
   differenceHeadingLine2?: string
   differenceBody?: string
@@ -771,6 +792,8 @@ export type PhilanthropyView = {
 export const philanthropyQuery = groq`*[_type == "philanthropy"][0]{
   heroLine1, heroLine2,
   heroImage{ ${imageWithLqip} },
+  "videoUrl": coalesce(videoFile.asset->url, videoUrl),
+  videoPoster{ ${imageWithLqip} },
   differenceHeadingLine1, differenceHeadingLine2, differenceBody,
   differenceCtaLabel, differenceCtaHref,
   differenceImage{ ${imageWithLqip} },
@@ -797,6 +820,8 @@ export async function fetchPhilanthropy(): Promise<PhilanthropyView | null> {
     heroLine2: raw.heroLine2,
     heroImage: hero?.url,
     heroImageLqip: hero?.lqip,
+    videoUrl: raw.videoUrl,
+    videoPoster: resolveImage(raw.videoPoster, 2000)?.url,
     differenceHeadingLine1: raw.differenceHeadingLine1,
     differenceHeadingLine2: raw.differenceHeadingLine2,
     differenceBody: raw.differenceBody,

@@ -1,5 +1,6 @@
 import { defineType, defineField, defineArrayMember } from 'sanity'
 import { socialCardFields } from './socialCard'
+import { factoryFields } from './factory'
 
 /**
  * Emoform brand page — every headline, label, caption, link and image on the
@@ -15,6 +16,7 @@ export default defineType({
     { name: 'hero', title: 'Hero' },
     { name: 'features', title: '5-in-1 section' },
     { name: 'steps', title: 'Scroll sections' },
+    { name: 'factory', title: 'Factory' },
     { name: 'cta', title: 'Closing CTA' },
     { name: 'social', title: 'Social links' },
   ],
@@ -117,6 +119,9 @@ export default defineType({
         }),
       ],
     }),
+
+    /* ─────────────── Factory ─────────────── */
+    ...factoryFields('factory'),
 
     /* ─────────────── Closing CTA ─────────────── */
     defineField({

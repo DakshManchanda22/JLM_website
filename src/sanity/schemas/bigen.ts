@@ -1,5 +1,6 @@
 import { defineType, defineField, defineArrayMember } from 'sanity'
 import { socialCardFields } from './socialCard'
+import { factoryFields } from './factory'
 
 /**
  * Inline rich text for headlines / copy: lets editors make selected words
@@ -43,6 +44,7 @@ export default defineType({
     { name: 'shine', title: 'Natural shine' },
     { name: 'testimonials', title: 'Reels / testimonials' },
     { name: 'range', title: 'Product range' },
+    { name: 'factory', title: 'Factory' },
     { name: 'social', title: 'Social links' },
   ],
   fields: [
@@ -294,6 +296,9 @@ export default defineType({
         }),
       ],
     }),
+
+    /* ───────────── Factory ───────────── */
+    ...factoryFields('factory'),
 
     /* ───────────── Social links ───────────── */
     defineField({

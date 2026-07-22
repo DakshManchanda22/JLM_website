@@ -161,14 +161,17 @@ function SectionLabel({ children }: { children: ReactNode }) {
 
 function StoryVideo({ cms }: { cms: OurStoryCms }) {
   return (
-    <section className="w-full bg-white px-6 pt-24 md:px-8 md:pt-28">
-      <div className="mx-auto max-w-[1100px]">
-        <InlineVideo
-          videoUrl={cms.videoUrl}
-          poster={cms.videoPoster}
-          posterLqip={cms.videoPosterLqip}
-        />
-      </div>
+    // Full-bleed, exactly like the homepage hero video: sits flush at the top
+    // (the body already offsets for the fixed navbar) and the frame takes the
+    // video's own aspect ratio so it fills the width edge-to-edge with no
+    // rounded box and no black letterbox bars.
+    <section className="w-full bg-white">
+      <InlineVideo
+        videoUrl={cms.videoUrl}
+        poster={cms.videoPoster}
+        posterLqip={cms.videoPosterLqip}
+        rounded={false}
+      />
     </section>
   )
 }

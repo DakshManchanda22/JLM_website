@@ -9,6 +9,7 @@ import EmoformScrollytelling from './EmoformScrollytelling'
 import EmoformGumCare from './EmoformGumCare'
 import Footer from '@/components/Footer'
 import SocialStamps from '@/components/SocialStamps'
+import FactorySection from '@/components/FactorySection'
 import type { EmoformView } from '@/sanity/queries'
 
 /* "Sensitivity ka" → Inter (Latin); "अंत, तुरंत" → Noto Sans Devanagari,
@@ -141,6 +142,9 @@ export default function EmoformClient({ cms }: { cms?: EmoformView }) {
       <EmoformFeatures cms={cms} />
 
       <EmoformScrollytelling cms={cms} />
+
+      {/* OUR FACTORY — after the doctor-developed toothpaste sections */}
+      <FactorySection factory={cms?.factory} />
 
       <EmoformGumCare cms={cms} />
 

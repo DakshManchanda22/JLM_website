@@ -130,12 +130,16 @@ export default function InlineVideo({
 
   return (
     <div
+      // The frame takes the video's own aspect ratio, so the whole video is
+      // always visible (no cropping) and its height flexes with the viewport —
+      // identical to the homepage hero video.
       className={`relative w-full overflow-hidden bg-[#111111] ${radius}`}
       style={{ aspectRatio: aspect }}
     >
       <video
         ref={videoRef}
-        className="absolute inset-0 h-full w-full object-cover"
+        className="absolute inset-0 h-full w-full object-contain"
+        style={{ objectPosition: 'center' }}
         src={videoUrl}
         poster={poster}
         autoPlay
@@ -143,6 +147,7 @@ export default function InlineVideo({
         loop
         playsInline
         preload="auto"
+        // Touch devices: a tap brings up the browser's native player controls.
         controls={isTouch && showControls}
         onClick={isTouch ? () => setShowControls(true) : undefined}
       />
@@ -152,16 +157,16 @@ export default function InlineVideo({
         onClick={toggleMute}
         aria-label={muted ? 'Unmute video' : 'Mute video'}
         title={muted ? 'Sound off' : 'Sound on'}
-        className="absolute top-4 left-4 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-black/30 backdrop-blur text-white/90 hover:bg-black/50 hover:text-white transition-colors"
+        className="absolute top-5 left-5 z-20 flex h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-black/30 backdrop-blur text-white/90 hover:bg-black/50 hover:text-white transition-colors"
       >
         {muted ? (
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
             <path d="M11 5L6 9H2v6h4l5 4V5Z" />
             <line x1="22" y1="9" x2="16" y2="15" />
             <line x1="16" y1="9" x2="22" y2="15" />
           </svg>
         ) : (
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
             <path d="M11 5L6 9H2v6h4l5 4V5Z" />
             <path d="M15.5 8.5a5 5 0 0 1 0 7" />
             <path d="M18.5 5.5a9 9 0 0 1 0 13" />
@@ -174,9 +179,10 @@ export default function InlineVideo({
         onClick={enterFullscreen}
         aria-label="Play video full screen"
         title="Full screen"
-        className="absolute bottom-4 right-4 z-20 hidden h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-black/30 backdrop-blur text-white/90 hover:bg-black/50 hover:text-white transition-colors md:flex"
+        className="absolute bottom-5 right-5 z-20 hidden h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-black/30 backdrop-blur text-white/90 hover:bg-black/50 hover:text-white transition-colors md:flex"
+        style={{ bottom: 'max(1.25rem, env(safe-area-inset-bottom))' }}
       >
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
           <path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3" />
         </svg>
       </button>

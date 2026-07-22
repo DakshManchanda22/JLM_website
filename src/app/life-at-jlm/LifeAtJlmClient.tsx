@@ -402,8 +402,9 @@ function IntroParagraph() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-80px' }}
         transition={{ duration: 0.9, ease: EASE }}
-        className={`${cormorant.className} mx-auto text-center max-w-[1000px] text-[clamp(22px,2.4vw,34px)] lg:max-w-none lg:whitespace-nowrap lg:text-[clamp(19px,1.95vw,32px)]`}
+        className={`${cormorant.className} max-w-[1000px] mx-auto text-center`}
         style={{
+          fontSize: 'clamp(22px, 2.4vw, 34px)',
           lineHeight: 1.45,
           fontWeight: 300,
           color: INK,
@@ -648,8 +649,12 @@ function TestimonialsBlock() {
           </span>
         </h2>
         <p
-          className={`${dmSans.className} mt-6 max-w-[52ch]`}
-          style={{ color: 'rgba(255,255,255,0.72)', fontSize: 15, lineHeight: 1.7 }}
+          className={`${dmSans.className} mt-6 max-w-[52ch] lg:max-w-none lg:w-max lg:whitespace-nowrap`}
+          style={{
+            color: 'rgba(255,255,255,0.72)',
+            fontSize: 'clamp(15px, 1.35vw, 18px)',
+            lineHeight: 1.7,
+          }}
         >
           {BODY}
         </p>
