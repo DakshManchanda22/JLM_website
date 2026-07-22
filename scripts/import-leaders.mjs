@@ -158,7 +158,9 @@ async function main() {
   LEADERS.forEach((leader, i) => {
     const slug = slugify(leader.name)
     const doc = {
-      _id: `leader.${slug}`,
+      // Dot-free id: a `.`-prefixed id (like `leader.${slug}`) is treated as
+      // private by Sanity and hidden from the public/tokenless API. Use a hyphen.
+      _id: `leader-${slug}`,
       _type: 'leader',
       name: leader.name,
       title: leader.title,

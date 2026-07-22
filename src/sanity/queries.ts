@@ -335,7 +335,6 @@ export type LifeAtJlm = {
   heroLine2?: string
   heroCaptionSmall?: string
   heroCaptionLarge?: string
-  anchors?: { num: string; label: string; targetId: string; image: any }[]
   captionStrip?: { image: any; caption?: string; aspect?: number; lqip?: string }[]
   introStatement?: string
   arentHeadline?: string
@@ -353,7 +352,6 @@ export const lifeAtJlmQuery = groq`*[_type == "lifeAtJlm"][0]{
   heroLine2,
   heroCaptionSmall,
   heroCaptionLarge,
-  anchors[]{ num, label, targetId, image },
   captionStrip[]{ image{ ${imageWithLqip} }, caption, "aspect": image.asset->metadata.dimensions.aspectRatio },
   introStatement,
   arentHeadline, arentBody,
@@ -394,6 +392,7 @@ export type OurStory = {
   headlineBottom?: string
   heroTagline?: string
   establishedMark?: string
+  introVideo?: { videoUrl?: string; poster?: any }
   // Journey
   journeyEyebrow?: string
   journeyHeadline?: string
@@ -403,12 +402,12 @@ export type OurStory = {
   erasHeadline?: string
   eras?: OurStoryEra[]
   // Pillars
-  pillarsEyebrow?: string
-  pillarsHeadline?: string
   pillars?: OurStoryPillar[]
   // Closing
   closingLine?: string
   closingSubline?: string
+  signatureName?: string
+  signatureNote?: string
 }
 
 export const ourStoryQuery = groq`*[_type == "ourStory"][0]{
@@ -417,6 +416,10 @@ export const ourStoryQuery = groq`*[_type == "ourStory"][0]{
   headlineBottom,
   heroTagline,
   establishedMark,
+  introVideo{
+    "videoUrl": coalesce(videoFile.asset->url, videoUrl),
+    poster{ ${imageWithLqip} },
+  },
   journeyEyebrow,
   journeyHeadline,
   journeyStages[]{ period, name, note },
@@ -429,11 +432,11 @@ export const ourStoryQuery = groq`*[_type == "ourStory"][0]{
     body,
     image{ ${imageWithLqip} },
   },
-  pillarsEyebrow,
-  pillarsHeadline,
   pillars[]{ name, description },
   closingLine,
   closingSubline,
+  signatureName,
+  signatureNote,
 }`
 
 export async function fetchOurStory(): Promise<OurStory | null> {
@@ -944,13 +947,15 @@ export type MorisonsView = {
   poster?: string
   posterLqip?: string
   posterAlt?: string
+  /** width / height of the poster, so it can be shown at its true aspect ratio. */
+  posterAspect?: number
   seoTitle?: string
   seoDescription?: string
   ogImage?: string
 }
 
 export const morisonsQuery = groq`*[_type == "morisons"][0]{
-  poster{ ${imageWithLqip} },
+  poster{ ${imageWithLqip}, "dimensions": asset->metadata.dimensions },
   posterAlt,
   seoTitle, seoDescription,
   ogImage{ ${imageWithLqip} },
@@ -963,10 +968,13 @@ export async function fetchMorisons(): Promise<MorisonsView | null> {
 
   const p = resolveImage(raw.poster, 2400)
   const og = resolveImage(raw.ogImage, 1200)
+  const dims = raw.poster?.dimensions
   return {
     poster: p?.url,
     posterLqip: p?.lqip,
     posterAlt: raw.posterAlt,
+    posterAspect:
+      dims?.width && dims?.height ? dims.width / dims.height : undefined,
     seoTitle: raw.seoTitle,
     seoDescription: raw.seoDescription,
     ogImage: og?.url,

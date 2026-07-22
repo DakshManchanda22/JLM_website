@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 import { Cormorant_Garamond, DM_Sans } from 'next/font/google'
 import { motion, useReducedMotion } from 'framer-motion'
 import Footer from '@/components/Footer'
+import InlineVideo from '@/components/InlineVideo'
 
 const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
@@ -59,17 +60,20 @@ export type OurStoryCms = {
   heroTagline?: string
   heroImage?: string
   establishedMark?: string
+  videoUrl?: string
+  videoPoster?: string
+  videoPosterLqip?: string
   journeyEyebrow?: string
   journeyHeadline?: string
   journeyStages?: JourneyStage[]
   erasEyebrow?: string
   erasHeadline?: string
   eras?: Era[]
-  pillarsEyebrow?: string
-  pillarsHeadline?: string
   pillars?: Pillar[]
   closingLine?: string
   closingSubline?: string
+  signatureName?: string
+  signatureNote?: string
 }
 
 /* ─────────────── icons ─────────────── */
@@ -155,9 +159,22 @@ function SectionLabel({ children }: { children: ReactNode }) {
 
 /* ────────────────────────── INTRO ────────────────────────── */
 
+function StoryVideo({ cms }: { cms: OurStoryCms }) {
+  return (
+    <section className="w-full bg-white px-6 pt-24 md:px-8 md:pt-28">
+      <div className="mx-auto max-w-[1100px]">
+        <InlineVideo
+          videoUrl={cms.videoUrl}
+          poster={cms.videoPoster}
+          posterLqip={cms.videoPosterLqip}
+        />
+      </div>
+    </section>
+  )
+}
+
 function Intro({ cms }: { cms: OurStoryCms }) {
   const reduce = useReducedMotion() ?? false
-  const eyebrow = cms.eyebrow ?? ''
   const headline = cms.headlineTop ?? ''
   const tagline = cms.heroTagline ?? ''
 
@@ -171,15 +188,8 @@ function Intro({ cms }: { cms: OurStoryCms }) {
         }
 
   return (
-    <section className="w-full bg-white px-6 pb-16 pt-28 text-center md:px-8 md:pb-20 md:pt-36">
+    <section className="w-full bg-white px-6 pb-16 pt-12 text-center md:px-8 md:pb-20 md:pt-16">
       <div className="mx-auto max-w-[820px]">
-        <motion.p
-          {...rise(0)}
-          className={`${dmSans.className} uppercase`}
-          style={{ margin: '0 0 22px', fontSize: 12, fontWeight: 700, letterSpacing: '0.28em', color: MUTED }}
-        >
-          {eyebrow}
-        </motion.p>
         <motion.h1
           {...rise(0.1)}
           className={cormorant.className}
@@ -226,7 +236,7 @@ function Journey({ cms }: { cms: OurStoryCms }) {
       <div className="mx-auto max-w-[1100px]">
         <SectionLabel>{cms.journeyHeadline ?? ''}</SectionLabel>
 
-        <div className="relative">
+        <div className="relative md:mt-8">
           {/* Connecting thread — runs between the first and last dot centres
               (each column is 20% wide, so 10% → 90%). Sits behind the dots,
               which carry a white ring so the line reads as passing behind. */}
@@ -257,14 +267,30 @@ function Journey({ cms }: { cms: OurStoryCms }) {
                 >
                   <span
                     aria-hidden
-                    className="shrink-0 rounded-full"
+                    className="relative shrink-0 rounded-full"
                     style={{
                       width: 14,
                       height: 14,
                       backgroundColor: tone,
                       boxShadow: `0 0 0 6px #fff, 0 0 0 7px ${HAIRLINE}`,
                     }}
-                  />
+                  >
+                    {/* Period date, sat above the dot on the desktop track. */}
+                    {s.period && (
+                      <span
+                        className={`${dmSans.className} absolute left-1/2 hidden -translate-x-1/2 whitespace-nowrap md:block`}
+                        style={{
+                          bottom: 'calc(100% + 12px)',
+                          fontSize: 13,
+                          fontWeight: 700,
+                          letterSpacing: '0.06em',
+                          color: tone,
+                        }}
+                      >
+                        {s.period}
+                      </span>
+                    )}
+                  </span>
                   <span
                     aria-hidden
                     className="flex shrink-0 items-center justify-center rounded-full md:mt-6"
@@ -272,11 +298,23 @@ function Journey({ cms }: { cms: OurStoryCms }) {
                   >
                     <Svg>{STEP_ICONS[i % STEP_ICONS.length]}</Svg>
                   </span>
-                  <span
-                    className={dmSans.className}
-                    style={{ marginTop: 0, fontSize: 15, fontWeight: 700, letterSpacing: '0.01em', color: INK }}
-                  >
-                    {s.name}
+                  {/* On desktop this wrapper collapses (display:contents) so the name
+                      stays a direct flex-col child; on mobile the date sits above the name. */}
+                  <span className="flex flex-col md:contents">
+                    {s.period && (
+                      <span
+                        className={`${dmSans.className} md:hidden`}
+                        style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.06em', color: tone, marginBottom: 2 }}
+                      >
+                        {s.period}
+                      </span>
+                    )}
+                    <span
+                      className={dmSans.className}
+                      style={{ marginTop: 0, fontSize: 15, fontWeight: 700, letterSpacing: '0.01em', color: INK }}
+                    >
+                      {s.name}
+                    </span>
                   </span>
                 </motion.li>
               )
@@ -395,17 +433,23 @@ function PullQuote({ cms }: { cms: OurStoryCms }) {
           >
             {quote}
           </p>
-          <div className="relative md:text-right">
-            <div className={cormorant.className} style={{ fontSize: 22, letterSpacing: '0.04em' }}>
-              J.L. Morison
+          {(cms.signatureName || cms.signatureNote) && (
+            <div className="relative md:text-right">
+              {cms.signatureName && (
+                <div className={cormorant.className} style={{ fontSize: 22, letterSpacing: '0.04em' }}>
+                  {cms.signatureName}
+                </div>
+              )}
+              {cms.signatureNote && (
+                <div
+                  className={`${dmSans.className} uppercase`}
+                  style={{ marginTop: 4, fontSize: 11, letterSpacing: '0.2em', color: 'rgba(251,250,247,0.62)' }}
+                >
+                  {cms.signatureNote}
+                </div>
+              )}
             </div>
-            <div
-              className={`${dmSans.className} uppercase`}
-              style={{ marginTop: 4, fontSize: 11, letterSpacing: '0.2em', color: 'rgba(251,250,247,0.62)' }}
-            >
-              Since 1920
-            </div>
-          </div>
+          )}
         </motion.div>
       </div>
     </section>
@@ -452,6 +496,7 @@ function Values({ cms }: { cms: OurStoryCms }) {
 export default function OurStoryClient({ cms = {} }: { cms?: OurStoryCms }) {
   return (
     <div className={`${cormorant.variable} ${dmSans.variable} bg-white`}>
+      <StoryVideo cms={cms} />
       <Intro cms={cms} />
       <Journey cms={cms} />
       <Eras cms={cms} />

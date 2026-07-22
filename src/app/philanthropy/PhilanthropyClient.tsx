@@ -10,6 +10,7 @@ import {
 } from 'framer-motion'
 import { Anton, Caveat_Brush, DM_Sans } from 'next/font/google'
 import Footer from '@/components/Footer'
+import InlineVideo from '@/components/InlineVideo'
 import type { PhilanthropyView } from '@/sanity/queries'
 
 // Handwritten hero quote — the "Now i've got the support" brush style.
@@ -66,7 +67,13 @@ function useFitText(maxPx = 200) {
 
 type CardImage = { url: string; lqip?: string }
 
-export default function PhilanthropyClient({ cms }: { cms?: PhilanthropyView }) {
+export default function PhilanthropyClient({
+  cms,
+  video,
+}: {
+  cms?: PhilanthropyView
+  video?: { videoUrl?: string; poster?: string }
+}) {
   const reduce = useReducedMotion()
 
   // ── All content comes from Sanity (Philanthropy document) ──
@@ -104,6 +111,11 @@ export default function PhilanthropyClient({ cms }: { cms?: PhilanthropyView }) 
 
   return (
     <div className={`${caveatBrush.variable} ${dmSans.variable}`}>
+      {/* ========================= KAAMYAAB VIDEO (top) ========================= */}
+      <section className="w-full" style={{ backgroundColor: '#FFFFFF' }}>
+        <InlineVideo videoUrl={video?.videoUrl} poster={video?.poster} rounded={false} />
+      </section>
+
       {/* ========================= IMPACT (5 YEARS) ========================= */}
       <ImpactSection
         logo={impactLogo}
@@ -151,6 +163,7 @@ export default function PhilanthropyClient({ cms }: { cms?: PhilanthropyView }) 
               color: 'rgba(255,255,255,0.82)',
               fontSize: 'clamp(15px, 1.2vw, 19px)',
               lineHeight: 1.7,
+              textAlign: 'center',
             }}
           >
             {programsIntro}
@@ -380,21 +393,21 @@ function ImpactSection({
       style={{ backgroundColor: '#FFFFFF' }}
     >
       <div className="mx-auto max-w-[1200px]">
-        {/* centred logo + intro */}
+        {/* logo on the left, intro on the right (stacks + centres on mobile) */}
         <motion.div
           initial={reduce ? false : { opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-15%' }}
           transition={{ duration: 0.8, ease: EASE }}
-          className="mx-auto flex max-w-[820px] flex-col items-center text-center"
+          className="flex flex-col items-center gap-8 text-center md:flex-row md:items-center md:justify-center md:gap-14 md:text-left lg:gap-20"
         >
           <Image
             src={logo}
             alt="Project Kaamyaab"
             width={1208}
             height={423}
-            sizes="(max-width: 640px) 340px, 560px"
-            className="h-auto w-[340px] sm:w-[460px] md:w-[560px]"
+            sizes="(max-width: 640px) 300px, 460px"
+            className="h-auto w-[280px] shrink-0 sm:w-[360px] md:w-[420px]"
             priority={false}
             {...(logoLqip ? { placeholder: 'blur' as const, blurDataURL: logoLqip } : {})}
           />
@@ -402,8 +415,8 @@ function ImpactSection({
             <p
               className={dmSans.className}
               style={{
-                margin: '1.4em auto 0',
-                maxWidth: '52ch',
+                margin: 0,
+                maxWidth: '60ch',
                 color: '#3F4A5C',
                 fontSize: 'clamp(16px, 1.25vw, 19px)',
                 lineHeight: 1.7,

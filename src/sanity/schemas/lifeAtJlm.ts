@@ -13,7 +13,6 @@ export default defineType({
   groups: [
     { name: 'intro', title: 'Intro curtain' },
     { name: 'hero', title: 'Hero' },
-    { name: 'anchors', title: 'Anchor menu' },
     { name: 'caption', title: 'Photo carousel' },
     { name: 'people', title: 'Intro statement' },
     { name: 'arent', title: 'Employee testimonials' },
@@ -81,33 +80,6 @@ export default defineType({
       title: 'Italic tagline below hero (e.g. "A century of building goodness…")',
       group: 'hero',
       type: 'string',
-    }),
-
-    /* ───── Anchor menu ───── */
-    defineField({
-      name: 'anchors',
-      title: 'Anchor menu (the 4 numbered jumps)',
-      group: 'anchors',
-      type: 'array',
-      validation: (Rule) => Rule.max(6),
-      of: [
-        defineArrayMember({
-          type: 'object',
-          name: 'anchor',
-          fields: [
-            defineField({ name: 'num', title: 'Number label (e.g. "/1")', type: 'string' }),
-            defineField({ name: 'label', title: 'Label (e.g. "People")', type: 'string' }),
-            defineField({
-              name: 'targetId',
-              title: 'Section anchor id',
-              description: 'Must match a section below, one of: people, values, workplace, together',
-              type: 'string',
-            }),
-            defineField({ name: 'image', title: 'Hover image', type: 'image', options: { hotspot: true } }),
-          ],
-          preview: { select: { title: 'label', subtitle: 'num', media: 'image' } },
-        }),
-      ],
     }),
 
     /* ───── Photo carousel (below the intro statement) ───── */

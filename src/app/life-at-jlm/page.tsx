@@ -1,6 +1,6 @@
 import LifeAtJlmClient, { type LifeCms } from './LifeAtJlmClient'
 import { fetchLifeAtJlm } from '@/sanity/queries'
-import { resolveImage, resolveImageUrl } from '@/sanity/resolveImage'
+import { resolveImage } from '@/sanity/resolveImage'
 
 export const revalidate = 60
 
@@ -28,16 +28,6 @@ export default async function LifeAtJlmPage() {
         heroLine2: data.heroLine2,
         heroCaptionSmall: data.heroCaptionSmall,
         heroCaptionLarge: data.heroCaptionLarge,
-        anchors: data.anchors
-          ?.map((a) => {
-            const url = resolveImageUrl(a.image, 800)
-            if (!url || !a.num || !a.label || !a.targetId) return null
-            return { num: a.num, label: a.label, targetId: a.targetId, image: url }
-          })
-          .filter(
-            (x): x is { num: string; label: string; targetId: string; image: string } =>
-              x !== null,
-          ),
         captionStrip: data.captionStrip
           ?.map((c) => {
             // A photo only needs an image to appear in the carousel; the italic

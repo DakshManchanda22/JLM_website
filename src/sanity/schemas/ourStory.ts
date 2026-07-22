@@ -54,6 +54,40 @@ export default defineType({
       group: 'hero',
       type: 'string',
     }),
+    defineField({
+      name: 'introVideo',
+      title: 'Intro video',
+      description:
+        'Optional video shown at the very top of the page, above the headline. Upload a file or paste a link. ' +
+        'Until one is added, a "Video coming soon" placeholder is shown.',
+      group: 'hero',
+      type: 'object',
+      options: { collapsible: true, collapsed: false },
+      fields: [
+        defineField({
+          name: 'videoFile',
+          title: 'Upload video',
+          description:
+            'Upload an MP4 video here. Keep it under ~50MB for fast loading. For very large videos, use the "Video link" field below instead.',
+          type: 'file',
+          options: { accept: 'video/*' },
+        }),
+        defineField({
+          name: 'videoUrl',
+          title: 'Video link (optional)',
+          description:
+            'Alternative to uploading: paste a direct link to an MP4 video (e.g. a Google Cloud Storage URL). Used only if no video is uploaded above.',
+          type: 'url',
+        }),
+        defineField({
+          name: 'poster',
+          title: 'Poster / fallback image (optional)',
+          description: 'Shown while the video loads.',
+          type: 'image',
+          options: { hotspot: true },
+        }),
+      ],
+    }),
 
     /* ─────────── Journey in a Nutshell ─────────── */
     defineField({
@@ -157,18 +191,6 @@ export default defineType({
 
     /* ─────────── Pillars ─────────── */
     defineField({
-      name: 'pillarsEyebrow',
-      title: 'Pillars eyebrow',
-      group: 'pillars',
-      type: 'string',
-    }),
-    defineField({
-      name: 'pillarsHeadline',
-      title: 'Pillars headline',
-      group: 'pillars',
-      type: 'string',
-    }),
-    defineField({
       name: 'pillars',
       title: 'Pillars (3–8)',
       group: 'pillars',
@@ -199,6 +221,22 @@ export default defineType({
       title: 'Tiny note beneath closing',
       group: 'closing',
       type: 'string',
+    }),
+    defineField({
+      name: 'signatureName',
+      title: 'Closing signature — name',
+      description: 'The signature line on the closing quote card, e.g. "J.L. Morison". Leave blank to hide it.',
+      group: 'closing',
+      type: 'string',
+      initialValue: 'J.L. Morison',
+    }),
+    defineField({
+      name: 'signatureNote',
+      title: 'Closing signature — small note',
+      description: 'The small tracked note under the signature, e.g. "Since 1920". Leave blank to hide it.',
+      group: 'closing',
+      type: 'string',
+      initialValue: 'Since 1920',
     }),
   ],
   preview: { prepare: () => ({ title: 'Our Story' }) },
