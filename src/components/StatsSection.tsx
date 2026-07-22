@@ -76,10 +76,10 @@ export default function StatsSection({
   const loopDuration = 45 / (speed && speed > 0 ? speed : 2)
   const HEADING = heading ?? ''
   const sectionRef = useRef<HTMLElement>(null)
-  // Fit the heading into at most two lines, capped at 48px (3rem) so it matches
-  // the other homepage headings. On desktop it stays one line; on mobile it wraps
-  // to two lines at a comfortably large size instead of shrinking to a tiny font.
-  const headingRef = useFitLines(2, 48, 22)
+  // Fit the heading into at most two lines, capped at 56px so it reads a touch
+  // larger. On desktop it stays one line; on mobile it wraps to two lines at a
+  // comfortably large size instead of shrinking to a tiny font.
+  const headingRef = useFitLines(2, 56, 22)
 
   /* Fade-up reveal of the header row (heading + note) */
   useEffect(() => {
@@ -129,7 +129,7 @@ export default function StatsSection({
           ref={headingRef}
           data-stat-reveal
           className="font-serif font-normal tracking-tight leading-[1.05] text-[#111111] text-center"
-          style={{ fontSize: 'clamp(2rem, 5.5vw, 4rem)' }}
+          style={{ fontSize: 'clamp(2.25rem, 6.2vw, 4.5rem)' }}
         >
           {HEADING}
         </h2>
