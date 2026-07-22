@@ -169,6 +169,8 @@ export type FooterLinkData = { label: string; href: string; external?: boolean }
 
 export type SiteSettings = {
   logoUrl?: string
+  /** width / height of the logo asset — used to reserve space and avoid CLS. */
+  logoAspect?: number
   footerCompanyLinks?: FooterLinkData[]
   footerAddress?: string[]
   footerSocial?: {
@@ -186,6 +188,7 @@ export type SiteSettings = {
 
 export const siteSettingsQuery = groq`*[_type == "siteSettings"][0]{
   "logoUrl": logo.asset->url,
+  "logoAspect": logo.asset->metadata.dimensions.aspectRatio,
   footerCompanyLinks[]{ label, href, external },
   footerAddress,
   footerSocial{ linkedin, instagram, facebook, youtube, twitter },

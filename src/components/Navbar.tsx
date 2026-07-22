@@ -13,11 +13,31 @@ const MotionLink = motion(Link)
 const LOGO_FALLBACK =
   'https://cdn.sanity.io/images/vfv5lxgr/production/789b561991b501203119084ca41e902d11598dc7-391x132.svg'
 
+// Fallback logo is 391×132 (≈2.96); used until Sanity reports the real ratio.
+const LOGO_FALLBACK_ASPECT = 391 / 132
+
 function Logo({ className }: { className?: string }) {
-  const src = useSiteSettings()?.logoUrl || LOGO_FALLBACK
+  const settings = useSiteSettings()
+  const src = settings?.logoUrl || LOGO_FALLBACK
+  const aspect =
+    settings?.logoAspect && settings.logoAspect > 0
+      ? settings.logoAspect
+      : LOGO_FALLBACK_ASPECT
+  // CSS (`h-9 md:h-12 w-auto`) still controls the rendered size; these width/height
+  // attributes only give the browser the aspect ratio so it can reserve the logo's
+  // width up-front and avoid layout shift (CLS) while the image loads.
+  const height = 48
+  const width = Math.round(height * aspect)
   return (
     // eslint-disable-next-line @next/next/no-img-element
-    <img src={src} alt="JL Morison" draggable={false} className={className} />
+    <img
+      src={src}
+      alt="JL Morison"
+      width={width}
+      height={height}
+      draggable={false}
+      className={className}
+    />
   )
 }
 
