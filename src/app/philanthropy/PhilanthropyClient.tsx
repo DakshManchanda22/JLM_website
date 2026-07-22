@@ -120,7 +120,7 @@ export default function PhilanthropyClient({ cms }: { cms?: PhilanthropyView }) 
       {/* ============================= HERO ============================= */}
       <section
         className="relative w-full overflow-hidden"
-        style={{ height: '100svh', backgroundColor: INK }}
+        style={{ height: 'calc(100svh - var(--nav-h))', backgroundColor: INK }}
       >
         {/* background photo */}
         <motion.div

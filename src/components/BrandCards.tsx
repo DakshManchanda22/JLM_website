@@ -3,12 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import {
-  motion,
-  useMotionValue,
-  useSpring,
-  AnimatePresence,
-} from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 
 export type Brand = {
   name: string
@@ -39,67 +34,6 @@ function BrandCard({
   onEnter: () => void
   onLeave: () => void
 }) {
-  const cardRef = useRef<HTMLAnchorElement>(null)
-  const labelRef = useRef<HTMLDivElement>(null)
-  const padRef = useRef({ x: 0, y: 0 })
-
-  const mouseX = useMotionValue(-9999)
-  const mouseY = useMotionValue(-9999)
-  const springX = useSpring(mouseX, { stiffness: 240, damping: 24, mass: 0.5 })
-  const springY = useSpring(mouseY, { stiffness: 240, damping: 24, mass: 0.5 })
-
-  /* Measure label dimensions once it's mounted (active state) so we can
-     clamp the cursor position and keep the label fully inside the card. */
-  useEffect(() => {
-    if (!isActive) return
-
-    const measure = () => {
-      if (!labelRef.current) return
-      const r = labelRef.current.getBoundingClientRect()
-      padRef.current = { x: r.width / 2, y: r.height / 2 }
-    }
-
-    const id = requestAnimationFrame(measure)
-    window.addEventListener('resize', measure)
-    return () => {
-      cancelAnimationFrame(id)
-      window.removeEventListener('resize', measure)
-    }
-  }, [isActive])
-
-  const clamp = (clientX: number, clientY: number) => {
-    const rect = cardRef.current!.getBoundingClientRect()
-    const { x: px, y: py } = padRef.current
-    const x = Math.max(px, Math.min(rect.width - px, clientX - rect.left))
-    const y = Math.max(py, Math.min(rect.height - py, clientY - rect.top))
-    return { x, y }
-  }
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!cardRef.current) return
-    const { x, y } = clamp(e.clientX, e.clientY)
-    mouseX.set(x)
-    mouseY.set(y)
-  }
-
-  const handleEnter = (e: React.MouseEvent) => {
-    if (!cardRef.current) return
-    const ex = e.clientX
-    const ey = e.clientY
-    onEnter()
-
-    /* Wait one frame for the label to mount, then measure + seed the
-       cursor position (clamped) so the label appears already inside the card. */
-    requestAnimationFrame(() => {
-      if (!cardRef.current || !labelRef.current) return
-      const r = labelRef.current.getBoundingClientRect()
-      padRef.current = { x: r.width / 2, y: r.height / 2 }
-      const { x, y } = clamp(ex, ey)
-      mouseX.jump(x)
-      mouseY.jump(y)
-    })
-  }
-
   return (
     <motion.div
       ref={setRef}
@@ -109,11 +43,9 @@ function BrandCard({
       transition={{ duration: 0.6, ease: EASE }}
     >
       <Link
-        ref={cardRef}
         href={brand.href}
-        onMouseEnter={viewportMode ? undefined : handleEnter}
+        onMouseEnter={viewportMode ? undefined : onEnter}
         onMouseLeave={viewportMode ? undefined : onLeave}
-        onMouseMove={viewportMode ? undefined : handleMouseMove}
         className="relative block h-[60vh] md:h-[72vh] overflow-hidden rounded-2xl cursor-pointer group"
       >
         {/* Image */}
@@ -128,57 +60,36 @@ function BrandCard({
             : {})}
         />
 
-        {/* Dark wash — lighter when active so image reads through */}
-        <motion.div
-          className="absolute inset-0 bg-black"
-          animate={{ opacity: isActive ? 0.22 : 0.55 }}
-          transition={{ duration: 0.45, ease: 'easeOut' }}
-        />
-
-        {/* Default brand name — bottom-left, fades out when active */}
-        <AnimatePresence>
-          {!isActive && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.25 }}
-              className="absolute inset-x-6 bottom-6 pointer-events-none"
-            >
-              <p
-                className="text-white/90 font-black uppercase leading-[0.95] tracking-tight"
-                style={{ fontSize: 'clamp(1.85rem, 3.2vw, 3rem)' }}
-              >
-                {brand.name}
-              </p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Cursor-following label — only while active on hover (desktop) */}
-        {isActive && !viewportMode && (
+        {/* Dark wash — touch devices only. On desktop (a real cursor) the image
+            stays clear: no fade. */}
+        {viewportMode && (
           <motion.div
-            ref={labelRef}
-            className="absolute top-0 left-0 pointer-events-none z-10"
-            style={{
-              x: springX,
-              y: springY,
-              translateX: '-50%',
-              translateY: '-50%',
-            }}
-          >
-            <span
-              className="block text-center text-white font-black uppercase leading-[0.92] tracking-tight drop-shadow-[0_4px_24px_rgba(0,0,0,0.45)]"
-              style={{ fontSize: 'clamp(2.25rem, 5vw, 5rem)', maxWidth: '7em' }}
-            >
-              {brand.name}
-            </span>
-          </motion.div>
+            className="absolute inset-0 bg-black"
+            animate={{ opacity: isActive ? 0.22 : 0.55 }}
+            transition={{ duration: 0.45, ease: 'easeOut' }}
+          />
         )}
 
-        {/* Active footer: tagline */}
+        {/* Localised bottom scrim so the brand name stays legible over any image
+            without darkening the whole photo. */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/55 to-transparent" />
+
+        {/* Brand name — always shown on desktop; on touch it hides on the active
+            (lit-up) card so the tagline can take its place. */}
+        {(!viewportMode || !isActive) && (
+          <div className="absolute inset-x-6 bottom-6 pointer-events-none">
+            <p
+              className="text-white/90 font-black uppercase leading-[0.95] tracking-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.4)]"
+              style={{ fontSize: 'clamp(1.85rem, 3.2vw, 3rem)' }}
+            >
+              {brand.name}
+            </p>
+          </div>
+        )}
+
+        {/* Active footer tagline — touch only. */}
         <AnimatePresence>
-          {isActive && (
+          {isActive && viewportMode && (
             <motion.div
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}

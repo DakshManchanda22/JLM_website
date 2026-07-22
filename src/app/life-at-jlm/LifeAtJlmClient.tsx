@@ -266,6 +266,7 @@ function Hero() {
   const [skipIntro] = useState(
     () =>
       cms.showIntro === false ||
+      (cms.introImages?.length ?? 0) === 0 ||
       (typeof window !== 'undefined' && window.matchMedia('(orientation: portrait)').matches),
   )
   const HERO_REVEAL_DELAY = skipIntro
@@ -430,15 +431,16 @@ function CaptionStrip() {
   // constant no matter how many are added (otherwise more photos = faster). The
   // Sanity `carouselSpeed` is the live multiplier — higher = faster, lower =
   // slower. ~14s per photo at speed 1 keeps it calm.
-  const rowDur = (mult: number) => (ITEMS.length * 14 * mult) / speed
+  // Pixel speed stays constant regardless of how many photos land in a row.
+  const rowDur = (count: number, mult: number) => (Math.max(count, 1) * 14 * mult) / speed
 
-  // Three rows, alternating direction, each an infinite loop. Every row shows all
-  // photos (offset per row) so every row stays full even with only a few images.
+  // Split the photos across three rows so NO photo appears in more than one row
+  // (row r takes every 3rd photo). Each row is then its own infinite loop.
   const rows = [
-    { dir: 'left' as const, dur: rowDur(1.0), offset: 0 },
-    { dir: 'right' as const, dur: rowDur(1.14), offset: 1 },
-    { dir: 'left' as const, dur: rowDur(1.07), offset: 2 },
-  ]
+    { dir: 'left' as const, mult: 1.0, items: ITEMS.filter((_, i) => i % 3 === 0) },
+    { dir: 'right' as const, mult: 1.14, items: ITEMS.filter((_, i) => i % 3 === 1) },
+    { dir: 'left' as const, mult: 1.07, items: ITEMS.filter((_, i) => i % 3 === 2) },
+  ].filter((row) => row.items.length > 0)
 
   const card = (it: { src: string; caption?: string; lqip?: string }) => (
     <div
@@ -498,9 +500,9 @@ function CaptionStrip() {
         {rows.map((row, r) => (
           <Marquee
             key={r}
-            items={ITEMS.map((_, i) => ITEMS[(i + row.offset) % ITEMS.length])}
+            items={row.items}
             direction={row.dir}
-            duration={row.dur}
+            duration={rowDur(row.items.length, row.mult)}
             gap={14}
             pauseOnHover={false}
             renderItem={(it) => card(it)}
@@ -674,9 +676,11 @@ function TestimonialsBlock() {
 /* ─────────────────────────── PAGE ─────────────────────────── */
 
 export default function LifeAtJlmClient({ cms = {} }: { cms?: LifeCms }) {
-  /* Marketing can switch the opening curtain animation off in Sanity. When off
+  /* Marketing can switch the opening curtain animation off in Sanity. It also
+     only makes sense when there are actually intro photos to show — with none,
+     an empty curtain would just zoom + lift over a blank frame. Either case:
      the hero + title show straight away (introDone starts true → no curtain). */
-  const introEnabled = cms.showIntro !== false
+  const introEnabled = cms.showIntro !== false && (cms.introImages?.length ?? 0) > 0
   const [introDone, setIntroDone] = useState(!introEnabled)
 
   /* On portrait viewports (taller than wide — phones held upright) skip the
