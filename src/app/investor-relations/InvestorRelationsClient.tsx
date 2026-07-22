@@ -196,7 +196,7 @@ const D = {
     },
     {
       text: 'List of unpaid/unclaimed dividend pursuant to Section 124(2) of the Companies Act, 2013',
-      url: 'https://jlmorison.com/wp-content/uploads/2022/02/List-of-Unpaid-and-Unclaimed-Dividend-Sec-124-2.pdf',
+      url: 'https://storage.googleapis.com/jlm_website_v2/List-of-Unpaid-and-Unclaimed-Dividend-Sec-124-2.pdf',
     },
   ] as IRProcedureItem[],
 }
