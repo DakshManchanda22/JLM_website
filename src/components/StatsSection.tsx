@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import Image from 'next/image'
 import { animate, motion, useInView, useReducedMotion } from 'framer-motion'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -11,6 +12,10 @@ export type Stat = {
   number: string
   label: string
   body: string
+  /** Optional background photo. When set, the card renders like the ESG cards:
+      the image fills the card behind a dark overlay, with white text. */
+  image?: string
+  lqip?: string
 }
 
 const EASE = [0.16, 1, 0.3, 1] as const
@@ -146,28 +151,69 @@ export default function StatsSection({
           ref={gridRef}
           className="mt-12 md:mt-16 grid grid-cols-1 gap-5 sm:grid-cols-2 md:gap-6 lg:grid-cols-3"
         >
-          {STATS.map((stat, i) => (
-            <motion.div
-              key={`${stat.label}-${i}`}
-              initial={reduce ? false : { opacity: 0, y: 28 }}
-              animate={started || reduce ? { opacity: 1, y: 0 } : undefined}
-              transition={{ duration: 0.7, ease: EASE, delay: (i % 3) * 0.1 }}
-              className="flex flex-col rounded-[28px] bg-[#F6F3EE] p-8 md:p-10"
-            >
-              <span
-                className="font-serif font-light leading-none text-[#111111]"
-                style={{ fontSize: 'clamp(3.25rem, 6vw, 5.5rem)' }}
+          {STATS.map((stat, i) => {
+            // Same card layout either way — only the surface changes: a photo
+            // background (with dark overlay + white text, like the ESG cards)
+            // when an image is set, otherwise the plain beige card.
+            const hasImage = Boolean(stat.image)
+            return (
+              <motion.div
+                key={`${stat.label}-${i}`}
+                initial={reduce ? false : { opacity: 0, y: 28 }}
+                animate={started || reduce ? { opacity: 1, y: 0 } : undefined}
+                transition={{ duration: 0.7, ease: EASE, delay: (i % 3) * 0.1 }}
+                className={`flex flex-col rounded-[28px] p-8 md:p-10 ${
+                  hasImage ? 'relative overflow-hidden' : 'bg-[#F6F3EE]'
+                }`}
+                style={hasImage ? { backgroundColor: '#141414' } : undefined}
               >
-                <CountUp value={stat.number} reduce={!!reduce} start={started} />
-              </span>
-              <span className="mt-4 text-[#111111] text-sm font-medium tracking-[0.18em] uppercase">
-                {stat.label}
-              </span>
-              <p className="mt-4 text-[#555555] text-sm leading-relaxed">
-                {stat.body}
-              </p>
-            </motion.div>
-          ))}
+                {hasImage && (
+                  <>
+                    <Image
+                      src={stat.image as string}
+                      alt={stat.label ?? ''}
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
+                      className="object-cover"
+                      {...(stat.lqip
+                        ? { placeholder: 'blur' as const, blurDataURL: stat.lqip }
+                        : {})}
+                    />
+                    <div
+                      aria-hidden
+                      className="absolute inset-0"
+                      style={{
+                        background:
+                          'linear-gradient(180deg, rgba(0,0,0,0.30) 0%, rgba(0,0,0,0.46) 55%, rgba(0,0,0,0.64) 100%)',
+                      }}
+                    />
+                  </>
+                )}
+                <span
+                  className={`relative font-serif font-light leading-none ${
+                    hasImage ? 'text-white' : 'text-[#111111]'
+                  }`}
+                  style={{ fontSize: 'clamp(3.25rem, 6vw, 5.5rem)' }}
+                >
+                  <CountUp value={stat.number} reduce={!!reduce} start={started} />
+                </span>
+                <span
+                  className={`relative mt-4 text-sm font-medium tracking-[0.18em] uppercase ${
+                    hasImage ? 'text-white' : 'text-[#111111]'
+                  }`}
+                >
+                  {stat.label}
+                </span>
+                <p
+                  className={`relative mt-4 text-sm leading-relaxed ${
+                    hasImage ? 'text-white/85' : 'text-[#555555]'
+                  }`}
+                >
+                  {stat.body}
+                </p>
+              </motion.div>
+            )
+          })}
         </div>
       </div>
     </section>

@@ -72,11 +72,16 @@ export default async function Home() {
       ? homepage.valuesImage.aspect
       : undefined
 
-  const stats: Stat[] | undefined = homepage?.stats?.map((s) => ({
-    number: s.number,
-    label: s.label,
-    body: s.body,
-  }))
+  const stats: Stat[] | undefined = homepage?.stats?.map((s) => {
+    const img = resolveImage(s.image, 1000)
+    return {
+      number: s.number,
+      label: s.label,
+      body: s.body,
+      image: img?.url,
+      lqip: img?.lqip,
+    }
+  })
 
   const features: HomeFeature[] | undefined = homepage?.features?.flatMap((f) => {
     // Prefer the rotating `images` array; fall back to the legacy single image.

@@ -216,6 +216,8 @@ export type StatData = {
   number: string
   label: string
   body: string
+  /** Optional background image (like the ESG cards). */
+  image?: any
 }
 
 export type HomeFeatureData = {
@@ -280,6 +282,7 @@ export const homepageQuery = groq`*[_type == "homepage"][0]{
     number,
     label,
     body,
+    image{ ${imageWithLqip} },
   },
   features[]{
     eyebrow,
@@ -423,7 +426,9 @@ export type OurStoryEra = {
   number: string
   dateRange: string
   title: string
-  body: string
+  /** Portable Text (paragraphs + lists). Legacy content may still be a plain
+      string, so the renderer accepts both. */
+  body: any
   image?: any
 }
 
@@ -1137,6 +1142,8 @@ export type ContactUsView = {
   formSuccessHeading?: string
   formSuccessBody?: string
   privacyPolicyUrl?: string
+  /** When false, the "Want to work with us?" photo-wheel section is hidden. */
+  showWheel?: boolean
   wheelHeading?: string
   wheelCtaLabel?: string
   wheelCtaHref?: string
@@ -1148,7 +1155,7 @@ export const contactUsQuery = groq`*[_type == "contactUs"][0]{
   heading, subcopy,
   offices[]{ title, address, phone, phoneHref, email },
   formHeading, formSuccessHeading, formSuccessBody, privacyPolicyUrl,
-  wheelHeading, wheelCtaLabel, wheelCtaHref,
+  showWheel, wheelHeading, wheelCtaLabel, wheelCtaHref,
   portraits[]{ ${imageWithLqip} },
   recipientEmails,
 }`
@@ -1171,6 +1178,7 @@ export async function fetchContactUs(): Promise<ContactUsView | null> {
     formSuccessHeading: raw.formSuccessHeading,
     formSuccessBody: raw.formSuccessBody,
     privacyPolicyUrl: raw.privacyPolicyUrl,
+    showWheel: raw.showWheel,
     wheelHeading: raw.wheelHeading,
     wheelCtaLabel: raw.wheelCtaLabel,
     wheelCtaHref: raw.wheelCtaHref,

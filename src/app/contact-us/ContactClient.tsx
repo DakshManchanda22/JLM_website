@@ -431,13 +431,17 @@ export default function ContactClient({ cms = {} }: { cms?: ContactUsView }) {
         </div>
       </section>
 
-      {/* ── Join the team rotating wheel ── */}
-      <PortraitWheel
-        portraits={portraits}
-        heading={cms.wheelHeading}
-        ctaLabel={cms.wheelCtaLabel}
-        ctaHref={cms.wheelCtaHref}
-      />
+      {/* ── Join the team rotating wheel ──
+          Toggled in Sanity (Contact Us → Photo wheel → "Show the …" switch).
+          Visible by default; only hidden when the switch is explicitly off. */}
+      {cms.showWheel !== false && (
+        <PortraitWheel
+          portraits={portraits}
+          heading={cms.wheelHeading}
+          ctaLabel={cms.wheelCtaLabel}
+          ctaHref={cms.wheelCtaHref}
+        />
+      )}
 
       {/* Footer */}
       <div style={{ backgroundColor: '#FFF8EF' }}>

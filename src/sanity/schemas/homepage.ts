@@ -198,9 +198,20 @@ export default defineType({
               rows: 4,
               validation: (Rule) => Rule.required(),
             }),
+            defineField({
+              name: 'image',
+              title: 'Background image (optional)',
+              description:
+                'Optional. When set, the card uses this photo as its background ' +
+                '(with a dark overlay and white text), like the ESG cards. Leave ' +
+                'empty for the plain beige card.',
+              type: 'image',
+              options: { hotspot: true },
+              fields: [{ name: 'alt', type: 'string', title: 'Alt text' }],
+            }),
           ],
           preview: {
-            select: { title: 'number', subtitle: 'label' },
+            select: { title: 'number', subtitle: 'label', media: 'image' },
           },
         }),
       ],

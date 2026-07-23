@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react'
 import { Cormorant_Garamond, DM_Sans } from 'next/font/google'
 import { motion, useReducedMotion } from 'framer-motion'
+import { PortableText, type PortableTextComponents } from '@portabletext/react'
 import Footer from '@/components/Footer'
 import InlineVideo from '@/components/InlineVideo'
 
@@ -31,13 +32,66 @@ const TONES = ['#16324F', '#14706F', '#55731D', '#8F5B0C', '#5F3F82'] as const
 
 const EASE = [0.16, 1, 0.3, 1] as const
 
+/* ─────────────── era body (rich text) ─────────────── */
+/* Portable Text rendering for an era's body — paragraphs, bulleted / numbered
+   lists and bold / italic. Styled to match the compact muted era column. */
+const eraBodyComponents: PortableTextComponents = {
+  block: {
+    normal: ({ children }) => <p style={{ margin: '0 0 0.7em' }}>{children}</p>,
+  },
+  list: {
+    bullet: ({ children }) => (
+      <ul style={{ margin: '0.35em 0 0.7em', paddingLeft: '1.15em', listStyleType: 'disc' }}>
+        {children}
+      </ul>
+    ),
+    number: ({ children }) => (
+      <ol style={{ margin: '0.35em 0 0.7em', paddingLeft: '1.3em', listStyleType: 'decimal' }}>
+        {children}
+      </ol>
+    ),
+  },
+  listItem: {
+    bullet: ({ children }) => <li style={{ margin: '0.18em 0', paddingLeft: '0.15em' }}>{children}</li>,
+    number: ({ children }) => <li style={{ margin: '0.18em 0', paddingLeft: '0.15em' }}>{children}</li>,
+  },
+  marks: {
+    strong: ({ children }) => <strong style={{ fontWeight: 700, color: INK }}>{children}</strong>,
+    em: ({ children }) => <em style={{ fontStyle: 'italic' }}>{children}</em>,
+  },
+}
+
+/* Renders an era body whether it's Portable Text (new) or a plain string
+   (legacy content that predates the rich-text field). */
+function EraBody({ body }: { body: Era['body'] }): ReactNode {
+  const base = { maxWidth: '62ch', fontSize: 15.5, lineHeight: 1.7, color: MUTED } as const
+  if (Array.isArray(body) && body.length > 0) {
+    return (
+      <div className={`${dmSans.className} [&>*:last-child]:mb-0`} style={base}>
+        <PortableText value={body} components={eraBodyComponents} />
+      </div>
+    )
+  }
+  if (typeof body === 'string' && body.trim()) {
+    return (
+      <p className={dmSans.className} style={{ ...base, margin: 0, textWrap: 'pretty' }}>
+        {body}
+      </p>
+    )
+  }
+  return null
+}
+
 /* ─────────────── types (Sanity-editable) ─────────────── */
 
 export type Era = {
   number: string
   dateRange: string
   title: string
-  body: string
+  /** Portable Text blocks (paragraphs + lists) or, for legacy content, a plain
+      string. {@link EraBody} renders both. */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  body: any
   image?: string
   lqip?: string
 }
@@ -373,12 +427,7 @@ function Eras({ cms }: { cms: OurStoryCms }) {
                   >
                     {e.title}
                   </h3>
-                  <p
-                    className={dmSans.className}
-                    style={{ margin: 0, maxWidth: '62ch', fontSize: 15.5, lineHeight: 1.7, color: MUTED, textWrap: 'pretty' }}
-                  >
-                    {e.body}
-                  </p>
+                  <EraBody body={e.body} />
                 </div>
               </motion.div>
             )
