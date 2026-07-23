@@ -144,7 +144,7 @@ export default function EmoformClient({ cms }: { cms?: EmoformView }) {
       <EmoformScrollytelling cms={cms} />
 
       {/* OUR FACTORY — after the doctor-developed toothpaste sections */}
-      <FactorySection factory={cms?.factory} />
+      <FactorySection factory={cms?.factory} imageSide="right" />
 
       <EmoformGumCare cms={cms} />
 

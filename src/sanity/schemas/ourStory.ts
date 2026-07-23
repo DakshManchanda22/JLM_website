@@ -42,6 +42,19 @@ export default defineType({
       type: 'string',
     }),
     defineField({
+      name: 'headlineEmphasisColor',
+      title: 'Hero headline — highlight colour',
+      description:
+        'Colour applied to the *asterisk-wrapped* words in the headline (e.g. "five reinventions"). ' +
+        'Hex like "#14706F". Leave blank for the default teal.',
+      group: 'hero',
+      type: 'string',
+      validation: (R) =>
+        R.regex(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/, { name: 'hex colour' }).error(
+          'Use a hex colour like #14706F',
+        ),
+    }),
+    defineField({
       name: 'heroTagline',
       title: 'Hero tagline (long-form quote)',
       description: 'Shown under the headline. Sets up the story.',
@@ -120,6 +133,18 @@ export default defineType({
             defineField({ name: 'period', title: 'Period (e.g. "1920s")', type: 'string' }),
             defineField({ name: 'name', title: 'Stage name', type: 'string', validation: (R) => R.required() }),
             defineField({ name: 'note', title: 'Single-line note', type: 'string' }),
+            defineField({
+              name: 'color',
+              title: 'Circle colour',
+              description:
+                'Optional. Hex colour for this stage’s dot, icon and date, e.g. "#16324F". ' +
+                'Leave blank to use the default sequential colour.',
+              type: 'string',
+              validation: (R) =>
+                R.regex(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/, { name: 'hex colour' }).error(
+                  'Use a hex colour like #16324F',
+                ),
+            }),
           ],
           preview: { select: { title: 'name', subtitle: 'period' } },
         }),
@@ -200,6 +225,18 @@ export default defineType({
               ],
             }),
             defineField({
+              name: 'color',
+              title: 'Accent colour',
+              description:
+                'Optional. Hex colour for this era’s big number and date label, e.g. "#14706F". ' +
+                'Leave blank to use the default sequential colour.',
+              type: 'string',
+              validation: (R) =>
+                R.regex(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/, { name: 'hex colour' }).error(
+                  'Use a hex colour like #14706F',
+                ),
+            }),
+            defineField({
               name: 'image',
               title: 'Image',
               type: 'image',
@@ -215,6 +252,12 @@ export default defineType({
     }),
 
     /* ─────────── Pillars ─────────── */
+    defineField({
+      name: 'pillarsHeadline',
+      title: 'Pillars — section headline',
+      type: 'string',
+      group: 'pillars',
+    }),
     defineField({
       name: 'pillars',
       title: 'Pillars (3–8)',
@@ -240,6 +283,29 @@ export default defineType({
       title: 'Closing italic line',
       group: 'closing',
       type: 'string',
+    }),
+    defineField({
+      name: 'closingBackgroundColor',
+      title: 'Closing card — background colour',
+      description:
+        'Background colour of the closing quote card. Hex like "#111111". ' +
+        'Leave blank for the default near-black. Ignored if a background image is set.',
+      group: 'closing',
+      type: 'string',
+      validation: (R) =>
+        R.regex(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/, { name: 'hex colour' }).error(
+          'Use a hex colour like #111111',
+        ),
+    }),
+    defineField({
+      name: 'closingBackgroundImage',
+      title: 'Closing card — background image',
+      description:
+        'Optional. An image behind the closing quote. A dark overlay is added automatically ' +
+        'so the white text stays readable. Overrides the background colour.',
+      group: 'closing',
+      type: 'image',
+      options: { hotspot: true },
     }),
     defineField({
       name: 'closingSubline',

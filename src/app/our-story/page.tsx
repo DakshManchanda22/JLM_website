@@ -28,17 +28,20 @@ export default async function OurStoryPage() {
       dateRange: e.dateRange,
       title: e.title,
       body: e.body,
+      color: e.color,
       image: r?.url,
       lqip: r?.lqip,
     }
   })
 
   const videoPoster = resolveImage(data?.introVideo?.poster, 1600)
+  const closingBg = resolveImage(data?.closingBackgroundImage, 1800)
 
   const cms: OurStoryCms = {
     eyebrow: data?.eyebrow,
     headlineTop: data?.headlineTop,
     headlineBottom: data?.headlineBottom,
+    headlineEmphasisColor: data?.headlineEmphasisColor,
     heroTagline: data?.heroTagline,
     establishedMark: data?.establishedMark,
     videoUrl: data?.introVideo?.videoUrl,
@@ -53,6 +56,9 @@ export default async function OurStoryPage() {
     pillars: data?.pillars,
     closingLine: data?.closingLine,
     closingSubline: data?.closingSubline,
+    closingBackgroundColor: data?.closingBackgroundColor,
+    closingBackgroundImage: closingBg?.url,
+    closingBackgroundImageLqip: closingBg?.lqip,
     signatureName: data?.signatureName,
     signatureNote: data?.signatureNote,
   }

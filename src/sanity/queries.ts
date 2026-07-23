@@ -215,8 +215,10 @@ export type BrandCardData = {
 export type StatData = {
   number: string
   label: string
-  body: string
-  /** Optional background image (like the ESG cards). */
+  /** Optional hex overrides for the number / label text. */
+  numberColor?: string
+  labelColor?: string
+  /** Optional background image; fills the card behind a bottom gradient. */
   image?: any
 }
 
@@ -281,7 +283,8 @@ export const homepageQuery = groq`*[_type == "homepage"][0]{
   stats[]{
     number,
     label,
-    body,
+    numberColor,
+    labelColor,
     image{ ${imageWithLqip} },
   },
   features[]{
@@ -420,6 +423,8 @@ export type OurStoryJourneyStage = {
   period?: string
   name: string
   note?: string
+  /** Optional hex override for this stage's dot/icon/date colour. */
+  color?: string
 }
 
 export type OurStoryEra = {
@@ -430,6 +435,8 @@ export type OurStoryEra = {
       string, so the renderer accepts both. */
   body: any
   image?: any
+  /** Optional hex override for this era's number + date-label colour. */
+  color?: string
 }
 
 export type OurStoryPillar = {
@@ -442,6 +449,7 @@ export type OurStory = {
   eyebrow?: string
   headlineTop?: string
   headlineBottom?: string
+  headlineEmphasisColor?: string
   heroTagline?: string
   establishedMark?: string
   introVideo?: { videoUrl?: string; poster?: any }
@@ -458,6 +466,8 @@ export type OurStory = {
   // Closing
   closingLine?: string
   closingSubline?: string
+  closingBackgroundColor?: string
+  closingBackgroundImage?: any
   signatureName?: string
   signatureNote?: string
 }
@@ -466,6 +476,7 @@ export const ourStoryQuery = groq`*[_type == "ourStory"][0]{
   eyebrow,
   headlineTop,
   headlineBottom,
+  headlineEmphasisColor,
   heroTagline,
   establishedMark,
   introVideo{
@@ -474,7 +485,7 @@ export const ourStoryQuery = groq`*[_type == "ourStory"][0]{
   },
   journeyEyebrow,
   journeyHeadline,
-  journeyStages[]{ period, name, note },
+  journeyStages[]{ period, name, note, color },
   erasEyebrow,
   erasHeadline,
   eras[]{
@@ -482,11 +493,14 @@ export const ourStoryQuery = groq`*[_type == "ourStory"][0]{
     dateRange,
     title,
     body,
+    color,
     image{ ${imageWithLqip} },
   },
   pillars[]{ name, description },
   closingLine,
   closingSubline,
+  closingBackgroundColor,
+  closingBackgroundImage{ ${imageWithLqip} },
   signatureName,
   signatureNote,
 }`

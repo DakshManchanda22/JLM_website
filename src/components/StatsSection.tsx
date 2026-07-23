@@ -11,9 +11,11 @@ gsap.registerPlugin(ScrollTrigger)
 export type Stat = {
   number: string
   label: string
-  body: string
-  /** Optional background photo. When set, the card renders like the ESG cards:
-      the image fills the card behind a dark overlay, with white text. */
+  /** Optional hex overrides for the number / label text colour. */
+  numberColor?: string
+  labelColor?: string
+  /** Optional background photo. When set, the image fills the card behind a
+      bottom-weighted gradient, with the number + label in white over it. */
   image?: string
   lqip?: string
 }
@@ -152,9 +154,10 @@ export default function StatsSection({
           className="mt-12 md:mt-16 grid grid-cols-1 gap-5 sm:grid-cols-2 md:gap-6 lg:grid-cols-3"
         >
           {STATS.map((stat, i) => {
-            // Same card layout either way — only the surface changes: a photo
-            // background (with dark overlay + white text, like the ESG cards)
-            // when an image is set, otherwise the plain beige card.
+            // Photo card, styled like the reference: the image fills the whole
+            // card, content is anchored to the bottom over a gradient that goes
+            // clear at the top and deep at the base so the white text stays
+            // legible. With no image it falls back to a plain beige card.
             const hasImage = Boolean(stat.image)
             return (
               <motion.div
@@ -162,10 +165,13 @@ export default function StatsSection({
                 initial={reduce ? false : { opacity: 0, y: 28 }}
                 animate={started || reduce ? { opacity: 1, y: 0 } : undefined}
                 transition={{ duration: 0.7, ease: EASE, delay: (i % 3) * 0.1 }}
-                className={`flex flex-col rounded-[28px] p-8 md:p-10 ${
-                  hasImage ? 'relative overflow-hidden' : 'bg-[#F6F3EE]'
+                className={`relative flex flex-col justify-end overflow-hidden rounded-[28px] p-8 md:p-9 ${
+                  hasImage ? '' : 'bg-[#F6F3EE]'
                 }`}
-                style={hasImage ? { backgroundColor: '#141414' } : undefined}
+                style={{
+                  minHeight: 'clamp(340px, 32vw, 440px)',
+                  ...(hasImage ? { backgroundColor: '#141414' } : {}),
+                }}
               >
                 {hasImage && (
                   <>
@@ -179,12 +185,42 @@ export default function StatsSection({
                         ? { placeholder: 'blur' as const, blurDataURL: stat.lqip }
                         : {})}
                     />
+                    {/* Frosted base under the number + label. Instead of a live
+                        backdrop-filter (which forces the browser to re-sample and
+                        repaint every frame — that caused the whole page to flicker),
+                        we overlay a *static* blurred copy of the same photo, masked
+                        to fade in toward the bottom. It composites once and never
+                        repaints on scroll. Text is drawn after it, so it stays sharp. */}
                     <div
                       aria-hidden
-                      className="absolute inset-0"
+                      className="pointer-events-none absolute inset-0 overflow-hidden"
+                      style={{
+                        WebkitMaskImage:
+                          'linear-gradient(180deg, transparent 36%, #000 60%, #000 100%)',
+                        maskImage:
+                          'linear-gradient(180deg, transparent 36%, #000 60%, #000 100%)',
+                      }}
+                    >
+                      {/* The blurred copy is inset negatively and scaled up so its
+                          own soft blur fringe lands well outside the card and gets
+                          clipped — the frost then reaches the full left/right edges
+                          instead of fading before them. */}
+                      <Image
+                        src={stat.image as string}
+                        alt=""
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
+                        className="object-cover"
+                        style={{ filter: 'blur(18px)', transform: 'scale(1.22)' }}
+                      />
+                    </div>
+                    {/* Darkening wash so the white number + label stay legible */}
+                    <div
+                      aria-hidden
+                      className="pointer-events-none absolute inset-0"
                       style={{
                         background:
-                          'linear-gradient(180deg, rgba(0,0,0,0.30) 0%, rgba(0,0,0,0.46) 55%, rgba(0,0,0,0.64) 100%)',
+                          'linear-gradient(180deg, rgba(15,15,17,0) 46%, rgba(15,15,17,0.42) 74%, rgba(15,15,17,0.66) 100%)',
                       }}
                     />
                   </>
@@ -193,24 +229,21 @@ export default function StatsSection({
                   className={`relative font-serif font-light leading-none ${
                     hasImage ? 'text-white' : 'text-[#111111]'
                   }`}
-                  style={{ fontSize: 'clamp(3.25rem, 6vw, 5.5rem)' }}
+                  style={{
+                    fontSize: 'clamp(3.25rem, 6vw, 5.5rem)',
+                    ...(stat.numberColor ? { color: stat.numberColor } : {}),
+                  }}
                 >
                   <CountUp value={stat.number} reduce={!!reduce} start={started} />
                 </span>
                 <span
-                  className={`relative mt-4 text-sm font-medium tracking-[0.18em] uppercase ${
+                  className={`relative mt-3 text-sm font-medium tracking-[0.18em] uppercase ${
                     hasImage ? 'text-white' : 'text-[#111111]'
                   }`}
+                  style={stat.labelColor ? { color: stat.labelColor } : undefined}
                 >
                   {stat.label}
                 </span>
-                <p
-                  className={`relative mt-4 text-sm leading-relaxed ${
-                    hasImage ? 'text-white/85' : 'text-[#555555]'
-                  }`}
-                >
-                  {stat.body}
-                </p>
               </motion.div>
             )
           })}

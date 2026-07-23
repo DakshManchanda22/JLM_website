@@ -94,12 +94,16 @@ export type Era = {
   body: any
   image?: string
   lqip?: string
+  /** Optional hex override for the number + date-label colour. */
+  color?: string
 }
 
 export type JourneyStage = {
   period?: string
   name: string
   note?: string
+  /** Optional hex override for the dot / icon / date colour. */
+  color?: string
 }
 
 export type Pillar = {
@@ -111,6 +115,7 @@ export type OurStoryCms = {
   eyebrow?: string
   headlineTop?: string
   headlineBottom?: string
+  headlineEmphasisColor?: string
   heroTagline?: string
   heroImage?: string
   establishedMark?: string
@@ -126,6 +131,9 @@ export type OurStoryCms = {
   pillars?: Pillar[]
   closingLine?: string
   closingSubline?: string
+  closingBackgroundColor?: string
+  closingBackgroundImage?: string
+  closingBackgroundImageLqip?: string
   signatureName?: string
   signatureNote?: string
 }
@@ -261,7 +269,7 @@ function Intro({ cms }: { cms: OurStoryCms }) {
             textWrap: 'balance',
           }}
         >
-          <Emphasis text={headline} color={TONES[1]} />
+          <Emphasis text={headline} color={cms.headlineEmphasisColor || TONES[1]} />
         </motion.h1>
         <motion.p
           {...rise(0.24)}
@@ -287,6 +295,7 @@ function Intro({ cms }: { cms: OurStoryCms }) {
 function Journey({ cms }: { cms: OurStoryCms }) {
   const reduce = useReducedMotion() ?? false
   const stages = (cms.journeyStages ?? []).slice(0, 5)
+  const threadTones = stages.map((s, i) => s.color || TONES[i % TONES.length])
 
   return (
     <section className="w-full bg-white px-6 pb-24 pt-4 md:px-8 md:pb-28">
@@ -306,13 +315,13 @@ function Journey({ cms }: { cms: OurStoryCms }) {
               right: '10%',
               height: 2,
               opacity: 0.6,
-              background: `linear-gradient(90deg, ${TONES.join(', ')})`,
+              background: `linear-gradient(90deg, ${(threadTones.length > 1 ? threadTones : TONES).join(', ')})`,
             }}
           />
 
           <ol className="m-0 grid list-none grid-cols-1 gap-9 p-0 md:grid-cols-5 md:gap-0">
             {stages.map((s, i) => {
-              const tone = TONES[i % TONES.length]
+              const tone = s.color || TONES[i % TONES.length]
               return (
                 <motion.li
                   key={`${s.name}-${i}`}
@@ -396,7 +405,7 @@ function Eras({ cms }: { cms: OurStoryCms }) {
 
         <div>
           {eras.map((e, i) => {
-            const tone = TONES[i % TONES.length]
+            const tone = e.color || TONES[i % TONES.length]
             const last = i === eras.length - 1
             return (
               <motion.div
@@ -443,6 +452,8 @@ function Eras({ cms }: { cms: OurStoryCms }) {
 function PullQuote({ cms }: { cms: OurStoryCms }) {
   const reduce = useReducedMotion() ?? false
   const quote = cms.closingLine ?? ''
+  const bgImage = cms.closingBackgroundImage
+  const bgColor = cms.closingBackgroundColor || INK
 
   return (
     <section className="w-full bg-white px-6 pb-24 md:px-8 md:pb-28">
@@ -454,12 +465,28 @@ function PullQuote({ cms }: { cms: OurStoryCms }) {
           transition={{ duration: 0.7, ease: EASE }}
           className="relative grid grid-cols-1 items-center gap-8 overflow-hidden md:grid-cols-[auto_1fr_auto] md:gap-9"
           style={{
-            backgroundColor: INK,
+            backgroundColor: bgColor,
             color: '#FBFAF7',
             borderRadius: '24px 24px 96px 24px',
             padding: 'clamp(40px, 6vw, 66px) clamp(28px, 5vw, 58px)',
           }}
         >
+          {/* Optional background photo + dark overlay so white text stays legible */}
+          {bgImage && (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={bgImage}
+                alt=""
+                aria-hidden
+                className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+                {...(cms.closingBackgroundImageLqip
+                  ? { style: { backgroundImage: `url(${cms.closingBackgroundImageLqip})`, backgroundSize: 'cover' } }
+                  : {})}
+              />
+              <div aria-hidden className="pointer-events-none absolute inset-0" style={{ backgroundColor: 'rgba(10,8,6,0.6)' }} />
+            </>
+          )}
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0"
