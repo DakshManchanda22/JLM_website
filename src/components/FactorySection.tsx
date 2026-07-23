@@ -19,19 +19,33 @@ export default function FactorySection({
   /** Section background — pass a brand tone (e.g. a cream) to blend into an
    *  existing panel. Defaults to the site's white surface. */
   background = '#FFFFFF',
+  /** 'plain' = content sits directly on the section background.
+   *  'card'  = content sits inside a rounded black panel (used on Bigen),
+   *            with text/badges inverted for legibility on black. */
+  variant = 'plain',
+  /** Which side the factory photo sits on (desktop). Defaults to 'left'. */
+  imageSide = 'left',
 }: {
   factory?: FactoryContent
   headingFallback?: string
   background?: string
+  variant?: 'plain' | 'card'
+  imageSide?: 'left' | 'right'
 }) {
   if (!factory) return null
 
   const { heading, description, image, imageLqip, certifications } = factory
   const certs = certifications ?? []
+  const dark = variant === 'card'
+  const imageRight = imageSide === 'right'
 
   return (
     <section className="w-full px-6 md:px-12 py-16 md:py-24" style={{ background }}>
-      <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 md:grid-cols-2 md:gap-16">
+      <div
+        className={`mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 md:grid-cols-2 md:gap-16${
+          dark ? ' rounded-[2rem] bg-[#0c0703] p-8 md:p-14' : ''
+        }`}
+      >
         {/* Factory photo */}
         {image && (
           <motion.div
@@ -39,7 +53,9 @@ export default function FactorySection({
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-80px' }}
             transition={{ duration: 0.75, ease: EASE }}
-            className="relative w-full overflow-hidden rounded-2xl aspect-[4/3]"
+            className={`relative w-full overflow-hidden rounded-2xl aspect-[4/3]${
+              imageRight ? ' md:order-2' : ''
+            }`}
           >
             <Image
               src={image}
@@ -58,39 +74,59 @@ export default function FactorySection({
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-80px' }}
           transition={{ duration: 0.75, ease: EASE, delay: 0.08 }}
-          className={image ? '' : 'mx-auto max-w-2xl text-center md:col-span-2'}
+          className={
+            image
+              ? imageRight
+                ? 'md:order-1'
+                : ''
+              : 'mx-auto max-w-2xl text-center md:col-span-2'
+          }
         >
           <h2
-            className="font-semibold leading-[1.05] tracking-tight text-[#111111]"
+            className={`font-semibold leading-[1.05] tracking-tight ${
+              dark ? 'text-white' : 'text-[#111111]'
+            }`}
             style={{ fontSize: 'clamp(1.9rem, 3.4vw, 3rem)' }}
           >
             {heading || headingFallback}
           </h2>
 
           {description && (
-            <p className="mt-5 max-w-prose text-sm leading-relaxed text-[#555555] md:text-base">
+            <p
+              className={`mt-5 max-w-prose text-sm leading-relaxed md:text-base ${
+                dark ? 'text-white/70' : 'text-[#555555]'
+              }`}
+            >
               {description}
             </p>
           )}
 
           {certs.length > 0 && (
             <div className="mt-8">
-              <p className="mb-4 text-[11px] uppercase tracking-[0.28em] text-[#555555]">
+              <p
+                className={`mb-4 text-[11px] uppercase tracking-[0.28em] ${
+                  dark ? 'text-white/55' : 'text-[#555555]'
+                }`}
+              >
                 Certifications
               </p>
-              <div className={`flex flex-wrap gap-3 ${image ? '' : 'justify-center'}`}>
+              <div className={`flex flex-wrap gap-3.5 ${image ? '' : 'justify-center'}`}>
                 {certs.map((c, i) => (
                   <div
                     key={`${c.name}-${i}`}
-                    className="flex items-center gap-2.5 rounded-full border border-[#E8E0D5] bg-white px-4 py-2"
+                    className={`flex items-center gap-3 rounded-full border px-5 py-3 ${
+                      dark
+                        ? 'border-white/30 bg-white/[0.16]'
+                        : 'border-[#111111] bg-[#111111]'
+                    }`}
                   >
                     {c.logo && (
-                      <span className="relative block h-6 w-6 shrink-0 overflow-hidden">
+                      <span className="relative block h-8 w-8 shrink-0 overflow-hidden">
                         <Image
                           src={c.logo}
                           alt={c.name}
                           fill
-                          sizes="24px"
+                          sizes="32px"
                           className="object-contain"
                           {...(c.logoLqip
                             ? { placeholder: 'blur' as const, blurDataURL: c.logoLqip }
@@ -98,7 +134,7 @@ export default function FactorySection({
                         />
                       </span>
                     )}
-                    <span className="text-xs font-medium text-[#111111]">{c.name}</span>
+                    <span className="text-sm font-medium text-white">{c.name}</span>
                   </div>
                 ))}
               </div>

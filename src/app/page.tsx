@@ -77,7 +77,8 @@ export default async function Home() {
     return {
       number: s.number,
       label: s.label,
-      body: s.body,
+      numberColor: s.numberColor,
+      labelColor: s.labelColor,
       image: img?.url,
       lqip: img?.lqip,
     }

@@ -939,8 +939,8 @@ function ProductRange({
 
       {/* Our Factory — sits on the same cream panel, right after the range */}
       {factory && (
-        <div className="mt-20 md:mt-28">
-          <FactorySection factory={factory} background="transparent" />
+        <div className="mt-2 md:mt-4">
+          <FactorySection factory={factory} background="transparent" variant="card" />
         </div>
       )}
 

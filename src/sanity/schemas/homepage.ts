@@ -22,6 +22,15 @@ export default defineType({
     { name: 'seo', title: 'SEO' },
   ],
   fields: [
+    /* Legacy field kept only so old documents don't raise an "Unknown field"
+       warning in the Studio. Not rendered anywhere — safe to leave or clear. */
+    defineField({
+      name: 'image',
+      title: 'Image (legacy — unused)',
+      type: 'image',
+      hidden: true,
+    }),
+
     /* ─────────────── Our Vision ─────────────── */
     defineField({
       name: 'vision',
@@ -192,13 +201,6 @@ export default defineType({
               validation: (Rule) => Rule.required(),
             }),
             defineField({
-              name: 'body',
-              title: 'Body copy',
-              type: 'text',
-              rows: 4,
-              validation: (Rule) => Rule.required(),
-            }),
-            defineField({
               name: 'image',
               title: 'Background image (optional)',
               description:
@@ -208,6 +210,30 @@ export default defineType({
               type: 'image',
               options: { hotspot: true },
               fields: [{ name: 'alt', type: 'string', title: 'Alt text' }],
+            }),
+            defineField({
+              name: 'numberColor',
+              title: 'Number colour',
+              description:
+                'Optional. Hex colour for the big number, e.g. "#111111". ' +
+                'Leave blank to use white on photo cards / near-black on plain cards.',
+              type: 'string',
+              validation: (Rule) =>
+                Rule.regex(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/, { name: 'hex colour' }).error(
+                  'Use a hex colour like #111111',
+                ),
+            }),
+            defineField({
+              name: 'labelColor',
+              title: 'Label colour',
+              description:
+                'Optional. Hex colour for the label text, e.g. "#555555". ' +
+                'Leave blank to use white on photo cards / near-black on plain cards.',
+              type: 'string',
+              validation: (Rule) =>
+                Rule.regex(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/, { name: 'hex colour' }).error(
+                  'Use a hex colour like #555555',
+                ),
             }),
           ],
           preview: {
