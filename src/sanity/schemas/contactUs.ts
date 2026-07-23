@@ -97,10 +97,21 @@ export default defineType({
 
     /* ───────────── Photo wheel ───────────── */
     defineField({
+      name: 'showWheel',
+      title: 'Show the “Want to work with us?” section',
+      description:
+        'Turn off to completely hide the rotating photo wheel and its button at ' +
+        'the bottom of the Contact page. On by default.',
+      group: 'wheel',
+      type: 'boolean',
+      initialValue: true,
+    }),
+    defineField({
       name: 'wheelHeading',
       title: 'Wheel heading (e.g. "Want to work with us?")',
       group: 'wheel',
       type: 'string',
+      hidden: ({ parent }) => parent?.showWheel === false,
     }),
     defineField({
       name: 'wheelCtaLabel',

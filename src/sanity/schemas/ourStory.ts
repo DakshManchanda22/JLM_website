@@ -173,10 +173,31 @@ export default defineType({
             }),
             defineField({
               name: 'body',
-              title: 'Body paragraph',
-              type: 'text',
-              rows: 5,
+              title: 'Body',
+              description:
+                'The era’s description. Use the toolbar for paragraphs, bulleted or ' +
+                'numbered lists, and bold / italic text.',
+              type: 'array',
               validation: (R) => R.required(),
+              of: [
+                defineArrayMember({
+                  type: 'block',
+                  // Keep it focused: paragraphs + lists, no headings/images —
+                  // this body sits in a compact editorial column.
+                  styles: [{ title: 'Paragraph', value: 'normal' }],
+                  lists: [
+                    { title: 'Bulleted', value: 'bullet' },
+                    { title: 'Numbered', value: 'number' },
+                  ],
+                  marks: {
+                    decorators: [
+                      { title: 'Bold', value: 'strong' },
+                      { title: 'Italic', value: 'em' },
+                    ],
+                    annotations: [],
+                  },
+                }),
+              ],
             }),
             defineField({
               name: 'image',
