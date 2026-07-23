@@ -196,9 +196,9 @@ export default function StatsSection({
                       className="pointer-events-none absolute inset-0 overflow-hidden"
                       style={{
                         WebkitMaskImage:
-                          'linear-gradient(180deg, transparent 36%, #000 60%, #000 100%)',
+                          'linear-gradient(180deg, transparent 42%, #000 68%, #000 100%)',
                         maskImage:
-                          'linear-gradient(180deg, transparent 36%, #000 60%, #000 100%)',
+                          'linear-gradient(180deg, transparent 42%, #000 68%, #000 100%)',
                       }}
                     >
                       {/* The blurred copy is inset negatively and scaled up so its
