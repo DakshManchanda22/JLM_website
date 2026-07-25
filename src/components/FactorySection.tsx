@@ -40,7 +40,12 @@ export default function FactorySection({
   const imageRight = imageSide === 'right'
 
   return (
-    <section className="w-full px-6 md:px-12 py-16 md:py-24" style={{ background }}>
+    <section
+      className={`w-full py-16 md:py-24 ${
+        dark ? 'px-4 md:px-6' : 'px-6 md:px-12'
+      }`}
+      style={{ background }}
+    >
       <div
         className={`mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 md:grid-cols-2 md:gap-16${
           dark ? ' rounded-[2rem] bg-[#0c0703] p-8 md:p-14' : ''
@@ -116,8 +121,8 @@ export default function FactorySection({
                     key={`${c.name}-${i}`}
                     className={`flex items-center gap-3 rounded-full border px-5 py-3 ${
                       dark
-                        ? 'border-white/30 bg-white/[0.16]'
-                        : 'border-[#111111] bg-[#111111]'
+                        ? 'border-white/30 bg-white'
+                        : 'border-[#111111]/15 bg-white'
                     }`}
                   >
                     {c.logo && (
@@ -134,7 +139,7 @@ export default function FactorySection({
                         />
                       </span>
                     )}
-                    <span className="text-sm font-medium text-white">{c.name}</span>
+                    <span className="text-sm font-medium text-[#111111]">{c.name}</span>
                   </div>
                 ))}
               </div>

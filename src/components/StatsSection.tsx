@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import Image from 'next/image'
 import { animate, motion, useInView, useReducedMotion } from 'framer-motion'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -11,14 +10,26 @@ gsap.registerPlugin(ScrollTrigger)
 export type Stat = {
   number: string
   label: string
-  /** Optional hex overrides for the number / label text colour. */
-  numberColor?: string
-  labelColor?: string
-  /** Optional background photo. When set, the image fills the card behind a
-      bottom-weighted gradient, with the number + label in white over it. */
-  image?: string
-  lqip?: string
+  /** Short supporting line under the label. */
+  body?: string
+  /** Inlined icon SVG markup (colours stripped so it inherits currentColor). */
+  iconSvg?: string
+  /** Card background colour. Defaults to the warm beige. */
+  cardColor?: string
+  /** Whether to show the coloured box behind the icon (default true). */
+  showIconBox?: boolean
+  /** Icon box background colour. */
+  iconBgColor?: string
+  /** Icon glyph colour. */
+  iconColor?: string
+  /** Icon glyph size in px (default 28). */
+  iconSize?: number
 }
+
+const CARD_FALLBACK = '#F6F3EE'
+const ICON_BG_FALLBACK = '#E8E0D5'
+const ICON_FALLBACK = '#111111'
+const ICON_SIZE_FALLBACK = 34
 
 const EASE = [0.16, 1, 0.3, 1] as const
 
@@ -135,13 +146,13 @@ export default function StatsSection({
         }}
       />
 
-      <div className="max-w-7xl mx-auto px-6 md:px-12 pt-20 md:pt-28 pb-14 md:pb-20">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 pt-12 md:pt-16 pb-10 md:pb-14">
         {/* Single-line editorial heading */}
         <h2
           ref={headingRef}
           data-stat-reveal
           className="font-serif font-normal tracking-tight leading-[1.05] text-[#111111] text-center"
-          style={{ fontSize: 'clamp(2.25rem, 6.2vw, 4.5rem)' }}
+          style={{ fontSize: 'clamp(1.9rem, 4.4vw, 3rem)' }}
         >
           {HEADING}
         </h2>
@@ -151,102 +162,64 @@ export default function StatsSection({
             about to scroll into view. */}
         <div
           ref={gridRef}
-          className="mt-12 md:mt-16 grid grid-cols-1 gap-5 sm:grid-cols-2 md:gap-6 lg:grid-cols-3"
+          className="mt-8 md:mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-5 lg:grid-cols-3 mx-auto w-[95%]"
         >
-          {STATS.map((stat, i) => {
-            // Photo card, styled like the reference: the image fills the whole
-            // card, content is anchored to the bottom over a gradient that goes
-            // clear at the top and deep at the base so the white text stays
-            // legible. With no image it falls back to a plain beige card.
-            const hasImage = Boolean(stat.image)
-            return (
-              <motion.div
-                key={`${stat.label}-${i}`}
-                initial={reduce ? false : { opacity: 0, y: 28 }}
-                animate={started || reduce ? { opacity: 1, y: 0 } : undefined}
-                transition={{ duration: 0.7, ease: EASE, delay: (i % 3) * 0.1 }}
-                className={`relative flex flex-col justify-end overflow-hidden rounded-[28px] p-8 md:p-9 ${
-                  hasImage ? '' : 'bg-[#F6F3EE]'
-                }`}
-                style={{
-                  minHeight: 'clamp(340px, 32vw, 440px)',
-                  ...(hasImage ? { backgroundColor: '#141414' } : {}),
-                }}
-              >
-                {hasImage && (
-                  <>
-                    <Image
-                      src={stat.image as string}
-                      alt={stat.label ?? ''}
-                      fill
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
-                      className="object-cover"
-                      {...(stat.lqip
-                        ? { placeholder: 'blur' as const, blurDataURL: stat.lqip }
-                        : {})}
-                    />
-                    {/* Frosted base under the number + label. Instead of a live
-                        backdrop-filter (which forces the browser to re-sample and
-                        repaint every frame — that caused the whole page to flicker),
-                        we overlay a *static* blurred copy of the same photo, masked
-                        to fade in toward the bottom. It composites once and never
-                        repaints on scroll. Text is drawn after it, so it stays sharp. */}
-                    <div
+          {STATS.map((stat, i) => (
+            <motion.div
+              key={`${stat.label}-${i}`}
+              initial={reduce ? false : { opacity: 0, y: 28 }}
+              animate={started || reduce ? { opacity: 1, y: 0 } : undefined}
+              transition={{ duration: 0.7, ease: EASE, delay: (i % 3) * 0.1 }}
+              className="flex flex-col rounded-[22px] p-5 md:p-6"
+              style={{ backgroundColor: stat.cardColor || CARD_FALLBACK }}
+            >
+              {stat.iconSvg &&
+                (() => {
+                  const size = stat.iconSize || ICON_SIZE_FALLBACK
+                  // The icon SVG is inlined with its fills stripped, so it
+                  // inherits `currentColor` from the wrapper's text colour.
+                  const glyph = (
+                    <span
                       aria-hidden
-                      className="pointer-events-none absolute inset-0 overflow-hidden"
+                      className="block [&>svg]:block [&>svg]:h-full [&>svg]:w-full"
                       style={{
-                        WebkitMaskImage:
-                          'linear-gradient(180deg, transparent 42%, #000 68%, #000 100%)',
-                        maskImage:
-                          'linear-gradient(180deg, transparent 42%, #000 68%, #000 100%)',
+                        width: size,
+                        height: size,
+                        color: stat.iconColor || ICON_FALLBACK,
                       }}
+                      dangerouslySetInnerHTML={{ __html: stat.iconSvg }}
+                    />
+                  )
+                  // No box: show the icon on its own.
+                  if (stat.showIconBox === false) {
+                    return <div className="mb-4">{glyph}</div>
+                  }
+                  // Boxed: coloured tile that grows with the icon size.
+                  return (
+                    <div
+                      className="mb-4 inline-flex w-max items-center justify-center rounded-xl p-2.5"
+                      style={{ backgroundColor: stat.iconBgColor || ICON_BG_FALLBACK }}
                     >
-                      {/* The blurred copy is inset negatively and scaled up so its
-                          own soft blur fringe lands well outside the card and gets
-                          clipped — the frost then reaches the full left/right edges
-                          instead of fading before them. */}
-                      <Image
-                        src={stat.image as string}
-                        alt=""
-                        fill
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
-                        className="object-cover"
-                        style={{ filter: 'blur(18px)', transform: 'scale(1.22)' }}
-                      />
+                      {glyph}
                     </div>
-                    {/* Darkening wash so the white number + label stay legible */}
-                    <div
-                      aria-hidden
-                      className="pointer-events-none absolute inset-0"
-                      style={{
-                        background:
-                          'linear-gradient(180deg, rgba(15,15,17,0) 46%, rgba(15,15,17,0.42) 74%, rgba(15,15,17,0.66) 100%)',
-                      }}
-                    />
-                  </>
-                )}
-                <span
-                  className={`relative font-serif font-light leading-none ${
-                    hasImage ? 'text-white' : 'text-[#111111]'
-                  }`}
-                  style={{
-                    fontSize: 'clamp(3.25rem, 6vw, 5.5rem)',
-                    ...(stat.numberColor ? { color: stat.numberColor } : {}),
-                  }}
-                >
-                  <CountUp value={stat.number} reduce={!!reduce} start={started} />
-                </span>
-                <span
-                  className={`relative mt-3 text-sm font-medium tracking-[0.18em] uppercase ${
-                    hasImage ? 'text-white' : 'text-[#111111]'
-                  }`}
-                  style={stat.labelColor ? { color: stat.labelColor } : undefined}
-                >
-                  {stat.label}
-                </span>
-              </motion.div>
-            )
-          })}
+                  )
+                })()}
+              <span
+                className="font-serif font-light leading-none text-[#111111]"
+                style={{ fontSize: 'clamp(2.25rem, 3.6vw, 3.25rem)' }}
+              >
+                <CountUp value={stat.number} reduce={!!reduce} start={started} />
+              </span>
+              <span className="mt-3 text-[#111111] text-[13px] font-medium tracking-[0.16em] uppercase">
+                {stat.label}
+              </span>
+              {stat.body && (
+                <p className="mt-2 text-[#555555] text-[13px] leading-snug">
+                  {stat.body}
+                </p>
+              )}
+            </motion.div>
+          ))}
         </div>
       </div>
     </section>

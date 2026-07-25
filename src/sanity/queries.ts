@@ -215,11 +215,18 @@ export type BrandCardData = {
 export type StatData = {
   number: string
   label: string
-  /** Optional hex overrides for the number / label text. */
-  numberColor?: string
-  labelColor?: string
-  /** Optional background image; fills the card behind a bottom gradient. */
-  image?: any
+  /** Short supporting line under the label. */
+  body?: string
+  /** Uploaded icon SVG; `url` is the raw asset URL, inlined server-side. */
+  icon?: { url?: string }
+  /** Optional hex colours for the card, icon box and icon glyph. */
+  cardColor?: string
+  /** Whether to show the coloured box behind the icon (default true). */
+  showIconBox?: boolean
+  iconBgColor?: string
+  iconColor?: string
+  /** Icon glyph size in px (default 28). */
+  iconSize?: number
 }
 
 export type HomeFeatureData = {
@@ -283,9 +290,13 @@ export const homepageQuery = groq`*[_type == "homepage"][0]{
   stats[]{
     number,
     label,
-    numberColor,
-    labelColor,
-    image{ ${imageWithLqip} },
+    body,
+    icon{ "url": asset->url },
+    cardColor,
+    showIconBox,
+    iconBgColor,
+    iconColor,
+    iconSize,
   },
   features[]{
     eyebrow,

@@ -23,6 +23,31 @@ export async function generateMetadata(): Promise<Metadata> {
   })
 }
 
+/**
+ * Fetches an uploaded stat-card icon SVG and strips its hard-coded colours so
+ * the glyph inherits `currentColor` (set per card via the icon-colour field).
+ * We inline the markup (rather than using the Sanity URL as a CSS mask) because
+ * a cross-origin mask image gets CORS-tainted and renders blank. Returns the
+ * cleaned SVG string, or undefined when there's no icon / the fetch fails.
+ */
+async function fetchIconSvg(url?: string): Promise<string | undefined> {
+  if (!url) return undefined
+  try {
+    const res = await fetch(url)
+    if (!res.ok) return undefined
+    const raw = await res.text()
+    return raw
+      .replace(/<\?xml[\s\S]*?\?>/gi, '')
+      .replace(/<!--[\s\S]*?-->/g, '')
+      .replace(/<style[\s\S]*?<\/style>/gi, '')
+      .replace(/\sfill="(?!none")[^"]*"/gi, '')
+      .replace(/fill:\s*[^;"']+;?/gi, '')
+      .replace(/<svg\b/i, '<svg fill="currentColor"')
+  } catch {
+    return undefined
+  }
+}
+
 export default async function Home() {
   const homepage = await fetchHomepage()
 
@@ -72,17 +97,21 @@ export default async function Home() {
       ? homepage.valuesImage.aspect
       : undefined
 
-  const stats: Stat[] | undefined = homepage?.stats?.map((s) => {
-    const img = resolveImage(s.image, 1000)
-    return {
-      number: s.number,
-      label: s.label,
-      numberColor: s.numberColor,
-      labelColor: s.labelColor,
-      image: img?.url,
-      lqip: img?.lqip,
-    }
-  })
+  const stats: Stat[] | undefined = homepage?.stats
+    ? await Promise.all(
+        homepage.stats.map(async (s) => ({
+          number: s.number,
+          label: s.label,
+          body: s.body,
+          iconSvg: await fetchIconSvg(s.icon?.url),
+          cardColor: s.cardColor,
+          showIconBox: s.showIconBox,
+          iconBgColor: s.iconBgColor,
+          iconColor: s.iconColor,
+          iconSize: s.iconSize,
+        })),
+      )
+    : undefined
 
   const features: HomeFeature[] | undefined = homepage?.features?.flatMap((f) => {
     // Prefer the rotating `images` array; fall back to the legacy single image.

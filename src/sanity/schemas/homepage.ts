@@ -201,22 +201,57 @@ export default defineType({
               validation: (Rule) => Rule.required(),
             }),
             defineField({
-              name: 'image',
-              title: 'Background image (optional)',
-              description:
-                'Optional. When set, the card uses this photo as its background ' +
-                '(with a dark overlay and white text), like the ESG cards. Leave ' +
-                'empty for the plain beige card.',
-              type: 'image',
-              options: { hotspot: true },
-              fields: [{ name: 'alt', type: 'string', title: 'Alt text' }],
+              name: 'body',
+              title: 'Body copy',
+              description: 'Short supporting line shown under the label.',
+              type: 'text',
+              rows: 3,
             }),
             defineField({
-              name: 'numberColor',
-              title: 'Number colour',
+              name: 'icon',
+              title: 'Icon',
               description:
-                'Optional. Hex colour for the big number, e.g. "#111111". ' +
-                'Leave blank to use white on photo cards / near-black on plain cards.',
+                'Icon shown in the top-left of the card. Upload a single-colour SVG — ' +
+                'its colour is set by "Icon colour" below, not by the file itself.',
+              type: 'image',
+              options: { accept: '.svg' },
+            }),
+            defineField({
+              name: 'cardColor',
+              title: 'Card background colour',
+              description: 'Hex colour for the card background, e.g. "#F6F3EE". Leave blank for the default beige.',
+              type: 'string',
+              validation: (Rule) =>
+                Rule.regex(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/, { name: 'hex colour' }).error(
+                  'Use a hex colour like #F6F3EE',
+                ),
+            }),
+            defineField({
+              name: 'showIconBox',
+              title: 'Show box behind icon',
+              description:
+                'Turn off to remove the coloured box behind the icon and show the ' +
+                'icon on its own.',
+              type: 'boolean',
+              initialValue: true,
+            }),
+            defineField({
+              name: 'iconBgColor',
+              title: 'Icon background colour',
+              description:
+                'Hex colour for the box behind the icon, e.g. "#E8E0D5". ' +
+                'Only used when "Show box behind icon" is on.',
+              type: 'string',
+              hidden: ({ parent }) => parent?.showIconBox === false,
+              validation: (Rule) =>
+                Rule.regex(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/, { name: 'hex colour' }).error(
+                  'Use a hex colour like #E8E0D5',
+                ),
+            }),
+            defineField({
+              name: 'iconColor',
+              title: 'Icon colour',
+              description: 'Hex colour for the icon itself, e.g. "#111111".',
               type: 'string',
               validation: (Rule) =>
                 Rule.regex(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/, { name: 'hex colour' }).error(
@@ -224,20 +259,15 @@ export default defineType({
                 ),
             }),
             defineField({
-              name: 'labelColor',
-              title: 'Label colour',
-              description:
-                'Optional. Hex colour for the label text, e.g. "#555555". ' +
-                'Leave blank to use white on photo cards / near-black on plain cards.',
-              type: 'string',
-              validation: (Rule) =>
-                Rule.regex(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/, { name: 'hex colour' }).error(
-                  'Use a hex colour like #555555',
-                ),
+              name: 'iconSize',
+              title: 'Icon size (px)',
+              description: 'Size of the icon in pixels. Leave blank for the default (28).',
+              type: 'number',
+              validation: (Rule) => Rule.min(12).max(96),
             }),
           ],
           preview: {
-            select: { title: 'number', subtitle: 'label', media: 'image' },
+            select: { title: 'number', subtitle: 'label' },
           },
         }),
       ],
