@@ -173,44 +173,47 @@ export default function StatsSection({
               className="flex flex-col rounded-[22px] p-5 md:p-6"
               style={{ backgroundColor: stat.cardColor || CARD_FALLBACK }}
             >
-              {stat.iconSvg &&
-                (() => {
-                  const size = stat.iconSize || ICON_SIZE_FALLBACK
-                  // The icon SVG is inlined with its fills stripped, so it
-                  // inherits `currentColor` from the wrapper's text colour.
-                  const glyph = (
-                    <span
-                      aria-hidden
-                      className="block [&>svg]:block [&>svg]:h-full [&>svg]:w-full"
-                      style={{
-                        width: size,
-                        height: size,
-                        color: stat.iconColor || ICON_FALLBACK,
-                      }}
-                      dangerouslySetInnerHTML={{ __html: stat.iconSvg }}
-                    />
-                  )
-                  // No box: show the icon on its own.
-                  if (stat.showIconBox === false) {
-                    return <div className="mb-4">{glyph}</div>
-                  }
-                  // Boxed: coloured tile that grows with the icon size.
-                  return (
-                    <div
-                      className="mb-4 inline-flex w-max items-center justify-center rounded-xl p-2.5"
-                      style={{ backgroundColor: stat.iconBgColor || ICON_BG_FALLBACK }}
-                    >
-                      {glyph}
-                    </div>
-                  )
-                })()}
-              <span
-                className="font-serif font-light leading-none text-[#111111]"
-                style={{ fontSize: 'clamp(2.25rem, 3.6vw, 3.25rem)' }}
-              >
-                <CountUp value={stat.number} reduce={!!reduce} start={started} />
-              </span>
-              <span className="mt-3 text-[#111111] text-[13px] font-medium tracking-[0.16em] uppercase">
+              {/* Top row: number on the left, icon on the right */}
+              <div className="flex items-start justify-between gap-4">
+                <span
+                  className="font-serif font-light leading-none text-[#111111]"
+                  style={{ fontSize: 'clamp(2.25rem, 3.6vw, 3.25rem)' }}
+                >
+                  <CountUp value={stat.number} reduce={!!reduce} start={started} />
+                </span>
+                {stat.iconSvg &&
+                  (() => {
+                    const size = stat.iconSize || ICON_SIZE_FALLBACK
+                    // The icon SVG is inlined with its fills stripped, so it
+                    // inherits `currentColor` from the wrapper's text colour.
+                    const glyph = (
+                      <span
+                        aria-hidden
+                        className="block [&>svg]:block [&>svg]:h-full [&>svg]:w-full"
+                        style={{
+                          width: size,
+                          height: size,
+                          color: stat.iconColor || ICON_FALLBACK,
+                        }}
+                        dangerouslySetInnerHTML={{ __html: stat.iconSvg }}
+                      />
+                    )
+                    // No box: show the icon on its own.
+                    if (stat.showIconBox === false) {
+                      return <div className="shrink-0">{glyph}</div>
+                    }
+                    // Boxed: coloured tile that grows with the icon size.
+                    return (
+                      <div
+                        className="inline-flex w-max shrink-0 items-center justify-center rounded-xl p-2.5"
+                        style={{ backgroundColor: stat.iconBgColor || ICON_BG_FALLBACK }}
+                      >
+                        {glyph}
+                      </div>
+                    )
+                  })()}
+              </div>
+              <span className="mt-4 text-[#111111] text-[13px] font-medium tracking-[0.16em] uppercase">
                 {stat.label}
               </span>
               {stat.body && (
