@@ -79,6 +79,12 @@ Three environments via Vercel + GitHub branches:
 
 ---
 
+## Git & Commit Conventions
+
+- Do **not** add a `Co-Authored-By: Claude …` trailer (or any AI/Claude co-author) to commit messages. Commits should be attributed to the human author only.
+
+---
+
 ## Sanity CMS Setup Rules
 
 Sanity is the admin panel. Marketing uses it to swap content without touching code.
