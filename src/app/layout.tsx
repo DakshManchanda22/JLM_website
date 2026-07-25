@@ -5,6 +5,8 @@ import { SiteSettingsProvider } from '@/components/SiteSettingsProvider'
 import OrganizationSchema from '@/components/seo/OrganizationSchema'
 import { fetchSiteSettings } from '@/sanity/queries'
 import { SITE_URL } from '@/sanity/seo'
+import { Analytics } from '@vercel/analytics/next'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -119,6 +121,8 @@ export default async function RootLayout({
             {children}
           </main>
         </SiteSettingsProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )
