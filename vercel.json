@@ -2,37 +2,37 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "redirects": [
     {
-      "source": "/mr-anand-laxmanan",
+      "source": "/leadership-team/mr-anand-laxmanan",
       "destination": "/leadership-team/anand-laxmanan",
       "statusCode": 301
     },
     {
-      "source": "/mr-ashwani-kumar",
+      "source": "/leadership-team/mr-ashwani-kumar",
       "destination": "/leadership-team/ashwani-kumar",
       "statusCode": 301
     },
     {
-      "source": "/mr-nitin-manchanda",
+      "source": "/leadership-team/mr-nitin-manchanda",
       "destination": "/leadership-team/nitin-manchanda",
       "statusCode": 301
     },
     {
-      "source": "/mr-sohan-sarda",
+      "source": "/leadership-team/mr-sohan-sarda",
       "destination": "/leadership-team/sohan-sarda",
       "statusCode": 301
     },
     {
-      "source": "/mrs-kavita-wagh",
+      "source": "/leadership-team/mrs-kavita-wagh",
       "destination": "/leadership-team/kavita-wagh",
       "statusCode": 301
     },
     {
-      "source": "/mrs-sakshi-mody",
+      "source": "/leadership-team/mrs-sakshi-mody",
       "destination": "/leadership-team/sakshi-mody",
       "statusCode": 301
     },
     {
-      "source": "/mr-pratap-nikam",
+      "source": "/leadership-team/mr-pratap-nikam",
       "destination": "/leadership-team/pratap-nikam",
       "statusCode": 301
     },
