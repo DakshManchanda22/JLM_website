@@ -1,0 +1,95 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [
+    {
+      "source": "/mr-anand-laxmanan",
+      "destination": "/leadership-team/anand-laxmanan",
+      "statusCode": 301
+    },
+    {
+      "source": "/mr-ashwani-kumar",
+      "destination": "/leadership-team/ashwani-kumar",
+      "statusCode": 301
+    },
+    {
+      "source": "/mr-nitin-manchanda",
+      "destination": "/leadership-team/nitin-manchanda",
+      "statusCode": 301
+    },
+    {
+      "source": "/mr-sohan-sarda",
+      "destination": "/leadership-team/sohan-sarda",
+      "statusCode": 301
+    },
+    {
+      "source": "/mrs-kavita-wagh",
+      "destination": "/leadership-team/kavita-wagh",
+      "statusCode": 301
+    },
+    {
+      "source": "/mrs-sakshi-mody",
+      "destination": "/leadership-team/sakshi-mody",
+      "statusCode": 301
+    },
+    {
+      "source": "/mr-pratap-nikam",
+      "destination": "/leadership-team/pratap-nikam",
+      "statusCode": 301
+    },
+    {
+      "source": "/about-us",
+      "destination": "/our-story",
+      "statusCode": 301
+    },
+    {
+      "source": "/our-people",
+      "destination": "/life-at-jlm",
+      "statusCode": 301
+    },
+    {
+      "source": "/financial-results",
+      "destination": "/investor-relations",
+      "statusCode": 301
+    },
+    {
+      "source": "/governance",
+      "destination": "/esg",
+      "statusCode": 301
+    },
+    {
+      "source": "/environment",
+      "destination": "/esg",
+      "statusCode": 301
+    },
+    {
+      "source": "/breast-feeding",
+      "destination": "/morisons-baby-dreams",
+      "statusCode": 301
+    },
+    {
+      "source": "/feeding-range",
+      "destination": "/morisons-baby-dreams",
+      "statusCode": 301
+    },
+    {
+      "source": "/life-jlm",
+      "destination": "/life-at-jlm",
+      "statusCode": 301
+    },
+    {
+      "source": "/lifeatjlm",
+      "destination": "/life-at-jlm",
+      "statusCode": 301
+    },
+    {
+      "source": "/why-jlm",
+      "destination": "/life-at-jlm",
+      "statusCode": 301
+    },
+    {
+      "source": "/join-us",
+      "destination": "/careers",
+      "statusCode": 301
+    }
+  ]
+}

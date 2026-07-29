@@ -45,16 +45,18 @@ function FeatureImages({
   const n = images.length
   const [front, setFront] = useState(0)
   const deckRef = useRef<HTMLDivElement>(null)
-  // Only shuffle while this section is actually on screen — the timer is paused
-  // before the user reaches it and the moment they scroll past.
-  const inView = useInView(deckRef, { amount: 0.5 })
+  // Start the slideshow once the user first reaches this section, then keep it
+  // cycling from there — it does NOT pause when they scroll past. `once: true`
+  // latches to true on first entry and never flips back, so the timer below
+  // stays armed for the rest of the session.
+  const started = useInView(deckRef, { amount: 0.5, once: true })
 
   useEffect(() => {
-    if (n <= 1 || !inView) return
+    if (n <= 1 || !started) return
     // Bring the back card to the front each tick.
     const id = window.setTimeout(() => setFront((f) => (f - 1 + n) % n), intervalMs)
     return () => window.clearTimeout(id)
-  }, [front, n, intervalMs, inView])
+  }, [front, n, intervalMs, started])
 
   return (
     <div ref={deckRef} className="absolute inset-0">
