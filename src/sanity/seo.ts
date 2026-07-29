@@ -5,8 +5,11 @@ import { groq } from 'next-sanity'
 import { client } from './client'
 import { imageWithLqip, resolveImage } from './resolveImage'
 
-/** Canonical production origin — no trailing slash. */
-export const SITE_URL = 'https://www.jlmorison.com'
+/** Canonical production origin — no trailing slash. Must match the PRIMARY
+ * domain Vercel serves (apex, non-www). www.jlmorison.com 308-redirects here,
+ * so canonicals/sitemap/OG all point at the apex to avoid Search Console's
+ * "Duplicate without user-selected canonical" / "Page with redirect". */
+export const SITE_URL = 'https://jlmorison.com'
 
 /** Default social share image (lives in /public). */
 export const DEFAULT_OG_IMAGE = '/og-default.jpg'

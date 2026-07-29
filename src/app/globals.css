@@ -58,9 +58,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-body {
-  padding-top: var(--nav-h);
-}
+/* The nav-height top offset now lives in SiteChrome (around <main>) instead of
+   on <body>, so it never applies to the embedded Sanity Studio at /studio. */
 
 /* Hide the main scrollbar for the clean full-bleed look (content still scrolls). */
 html,

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import Navbar from '@/components/Navbar'
+import SiteChrome from '@/components/SiteChrome'
 import SmoothScroll from '@/components/SmoothScroll'
 import { SiteSettingsProvider } from '@/components/SiteSettingsProvider'
 import OrganizationSchema from '@/components/seo/OrganizationSchema'
@@ -102,24 +102,7 @@ export default async function RootLayout({
         <OrganizationSchema sameAs={sameAs} />
         <SmoothScroll />
         <SiteSettingsProvider value={settings}>
-          <Navbar />
-
-          {/* The rounded white "card" the page lives in. It flows in the normal
-              document so the WINDOW scrolls natively (mobile toolbars collapse like
-              Apple). `overflow: clip` clips children to the rounded corners without
-              making this a scroll container — so position:sticky / GSAP pins inside
-              still resolve against the viewport. */}
-          <main
-            style={{
-              minHeight: 'calc(100dvh - var(--nav-h))',
-              backgroundColor: '#FFFFFF',
-              borderTopLeftRadius: '24px',
-              borderTopRightRadius: '24px',
-              overflow: 'clip',
-            }}
-          >
-            {children}
-          </main>
+          <SiteChrome>{children}</SiteChrome>
         </SiteSettingsProvider>
         <Analytics />
         <SpeedInsights />
