@@ -72,6 +72,16 @@
       "statusCode": 301
     },
     {
+      "source": "/mbd",
+      "destination": "/morisons-baby-dreams",
+      "statusCode": 301
+    },
+    {
+      "source": "/oldmbd",
+      "destination": "/morisons-baby-dreams",
+      "statusCode": 301
+    },
+    {
       "source": "/life-jlm",
       "destination": "/life-at-jlm",
       "statusCode": 301

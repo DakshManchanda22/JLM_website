@@ -2,6 +2,18 @@
 
 This file contains all technical decisions, architecture choices, and requirements for the JL Morison website revamp. Read this before writing any code.
 
+> **Full handover docs live in [`/docs`](docs/).** Start at [README.md](README.md) and [docs/02-COMPONENT-MAP.md](docs/02-COMPONENT-MAP.md).
+
+## Implementation notes (reality vs. the spec below)
+
+Parts of the original spec below were aspirational; the shipped site differs in a few places. Where they conflict, these notes win:
+
+- **Fonts are loaded per-page via `next/font`, not one global pair.** Cormorant Garamond + DM Sans is only used on the blog and Our Story. The homepage uses the Tailwind default `font-serif`; Emoform uses Inter/Noto Devanagari; Baby Dreams uses Nunito; Bigen uses a local Google Sans; Philanthropy uses Anton/Caveat Brush. See [docs/11-DESIGN-SYSTEM.md](docs/11-DESIGN-SYSTEM.md).
+- **The homepage has no hero section** — it opens on the brand cards. The "Hero Section" spec further down is not implemented.
+- **Migration redirects live in `vercel.json`, not `next.config.js`.**
+- **Analytics is Vercel Analytics + Speed Insights, not GA4.** (The unused `NEXT_PUBLIC_GA_MEASUREMENT_ID` env var was removed.)
+- **Video/large files** are served via the branded `videos.jlmorison.com` (GCS bucket `jlm_website_v2`). See [docs/05-MEDIA.md](docs/05-MEDIA.md).
+
 ---
 
 ## Project Overview
@@ -49,7 +61,7 @@ GoDaddy Domain → Vercel → Next.js 14 → Sanity CMS → Google Cloud Storage
 | UI animations | Framer Motion | For page transitions, hovers, modals |
 | CMS / Admin panel | Sanity | Free tier (20GB). All content managed here |
 | Video storage | Google Cloud Storage | Only if not using YouTube/Vimeo embeds |
-| Analytics | Google Analytics 4 | Free |
+| Analytics | Vercel Analytics + Speed Insights | Shipped choice (not GA4; the GA4 env var is unused) |
 | Uptime monitoring | UptimeRobot | Free — 5-min checks, email alerts |
 | Code repository | GitHub (JLM Organisation) | All code under JL Morison's GitHub org |
 
@@ -190,7 +202,7 @@ The site must feel as seamless and polished as apple.com on **every major browse
 
 ## Redirects
 
-- Migration redirects (old URL → new URL) go in `next.config.js` under `redirects`
+- Migration redirects (old URL → new URL) live in `vercel.json` under `redirects` (edge-level; not `next.config.js`)
 - Post-launch redirects can be added via Vercel dashboard — no code needed
 - Since sitemap stays the same, migration redirect work will be minimal
 
@@ -246,9 +258,8 @@ Required variables:
 NEXT_PUBLIC_SANITY_PROJECT_ID=
 NEXT_PUBLIC_SANITY_DATASET=
 SANITY_API_TOKEN=
-NEXT_PUBLIC_GA_MEASUREMENT_ID=
-RESEND_API_KEY=  (or FORMSPREE_ENDPOINT)
-GCS_BUCKET_NAME=  (only if using video storage)
+RESEND_API_KEY=
+# See .env.example for the full, current list (Resend sender/recipient vars, Search Console token, etc.)
 ```
 
 ---
@@ -302,7 +313,7 @@ Not needed now. When the time comes:
 - `next-sitemap` config — auto-generates sitemap on every build
 - Vercel deployment pipeline — push to GitHub = live in 30 seconds
 - GCS bucket + CORS — if using video storage
-- GA4 + UptimeRobot — configured once, runs forever
+- Vercel Analytics + UptimeRobot — configured once, runs forever
 
 ---
 
@@ -314,7 +325,7 @@ Not needed now. When the time comes:
 - Update brand pages (copy, images, descriptions)
 - Update SEO metadata per page (title, description, OG image)
 - Add redirects via Vercel dashboard
-- Monitor traffic in GA4
+- Monitor traffic in Vercel Analytics
 - Receive form leads via email or Google Sheet
 
 **What still needs a developer:** new page layout templates, new features, code-level changes.
@@ -380,3 +391,13 @@ Offset editorial layout, inspired by Lightship image grid:
   - Bottom left: medium image
 - All images: `rounded-2xl`, `object-cover`
 - GSAP ScrollTrigger: each image fades + slides up staggered on scroll
+
+---
+
+## Documentation Maintenance Rules
+
+These keep the `/docs` handover accurate as the code changes:
+
+- **When you add a component, or change where a component's content comes from, update [`docs/02-COMPONENT-MAP.md`](docs/02-COMPONENT-MAP.md)** in the same change (add/edit its row).
+- **When you change the stack** (add/remove/upgrade a core library or service, change hosting/CMS/build), **reflect it in [`docs/01-ARCHITECTURE.md`](docs/01-ARCHITECTURE.md)** and in this file's Tech Stack section.
+- Keep the "Implementation notes" block near the top of this file in sync with reality.

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import { Cormorant_Garamond, DM_Sans } from 'next/font/google'
@@ -67,9 +67,57 @@ export default function CareersClient({ cms = {} }: { cms?: CareersView }) {
   const [status, setStatus] = useState<FormState>('idle')
   const [errorMsg, setErrorMsg] = useState<string>('')
   const [fileName, setFileName] = useState<string>('')
+  // Resume upload UX: 'loading' shows a little progress bar while the picked
+  // file is read; 'ready' swaps it for a green check + a remove (×) button.
+  const [resumeState, setResumeState] = useState<'idle' | 'loading' | 'ready'>('idle')
+  const [resumeProgress, setResumeProgress] = useState(0)
   const [errors, setErrors] = useState<Set<string>>(new Set())
   const formRef = useRef<HTMLFormElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const progressTimer = useRef<number | null>(null)
+
+  const stopProgress = () => {
+    if (progressTimer.current !== null) {
+      window.clearInterval(progressTimer.current)
+      progressTimer.current = null
+    }
+  }
+
+  // Clear the timer if the component unmounts mid-animation.
+  useEffect(() => stopProgress, [])
+
+  function handleResumeChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0]
+    if (!f) {
+      removeResume()
+      return
+    }
+    setFileName(f.name)
+    clearError('resume')
+    // The file only actually uploads on submit; here we run a short, honest
+    // "reading your file" progress so the user gets confirmation it was taken.
+    setResumeState('loading')
+    setResumeProgress(0)
+    stopProgress()
+    const start = Date.now()
+    const DURATION = 900
+    progressTimer.current = window.setInterval(() => {
+      const pct = Math.min(100, ((Date.now() - start) / DURATION) * 100)
+      setResumeProgress(pct)
+      if (pct >= 100) {
+        stopProgress()
+        setResumeState('ready')
+      }
+    }, 30)
+  }
+
+  function removeResume() {
+    stopProgress()
+    setFileName('')
+    setResumeState('idle')
+    setResumeProgress(0)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
 
   const hasHeroImage = Boolean(cms.heroImage)
   const heroTextColor = hasHeroImage ? '#FFFFFF' : INK
@@ -121,7 +169,7 @@ export default function CareersClient({ cms = {} }: { cms?: CareersView }) {
       }
       setStatus('success')
       formRef.current?.reset()
-      setFileName('')
+      removeResume()
     } catch (err) {
       // Network/server error — keep user input intact
       setStatus('error')
@@ -353,7 +401,7 @@ export default function CareersClient({ cms = {} }: { cms?: CareersView }) {
               name="resume"
               error={errors.has('resume')}
             >
-              <div className="flex items-center gap-4">
+              <div className="flex flex-wrap items-center gap-4">
                 <label
                   className={`${dmSans.className} cursor-pointer inline-block`}
                   style={{
@@ -366,26 +414,117 @@ export default function CareersClient({ cms = {} }: { cms?: CareersView }) {
                     backgroundColor: errors.has('resume') ? 'rgba(201,58,58,0.05)' : '#FFFFFF',
                   }}
                 >
-                  Choose file
+                  {resumeState === 'idle' ? 'Choose file' : 'Change file'}
                   <input
                     ref={fileInputRef}
                     name="resume"
                     type="file"
                     accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                    onChange={(e) => {
-                      const f = e.target.files?.[0]
-                      setFileName(f?.name || '')
-                      if (f) clearError('resume')
-                    }}
+                    onChange={handleResumeChange}
                     className="hidden"
                   />
                 </label>
-                <span
-                  className={`${dmSans.className}`}
-                  style={{ fontSize: 13, color: fileName ? INK : MUTED }}
-                >
-                  {fileName || 'No file chosen'}
-                </span>
+
+                {/* No file yet */}
+                {resumeState === 'idle' && (
+                  <span
+                    className={`${dmSans.className}`}
+                    style={{ fontSize: 13, color: MUTED }}
+                  >
+                    No file chosen
+                  </span>
+                )}
+
+                {/* Picked → show the filename + (loading bar) then (green check + remove ×) */}
+                {resumeState !== 'idle' && (
+                  <div className="flex items-center gap-3 min-w-0">
+                    {resumeState === 'ready' && (
+                      <span
+                        aria-label="Resume ready"
+                        title="Resume ready"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: 22,
+                          height: 22,
+                          borderRadius: 999,
+                          backgroundColor: '#16a34a',
+                          flexShrink: 0,
+                        }}
+                      >
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                          <path d="M20 6 9 17l-5-5" />
+                        </svg>
+                      </span>
+                    )}
+
+                    <span
+                      className={`${dmSans.className}`}
+                      style={{
+                        fontSize: 13,
+                        color: INK,
+                        maxWidth: 220,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {fileName}
+                    </span>
+
+                    {resumeState === 'loading' && (
+                      <span
+                        aria-hidden
+                        style={{
+                          display: 'inline-block',
+                          width: 90,
+                          height: 4,
+                          borderRadius: 999,
+                          backgroundColor: 'rgba(17,17,17,0.12)',
+                          overflow: 'hidden',
+                          flexShrink: 0,
+                        }}
+                      >
+                        <span
+                          style={{
+                            display: 'block',
+                            height: '100%',
+                            width: `${resumeProgress}%`,
+                            backgroundColor: INK,
+                            transition: 'width 60ms linear',
+                          }}
+                        />
+                      </span>
+                    )}
+
+                    {resumeState === 'ready' && (
+                      <button
+                        type="button"
+                        onClick={removeResume}
+                        aria-label="Remove resume"
+                        title="Remove resume"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: 22,
+                          height: 22,
+                          borderRadius: 999,
+                          border: '1px solid rgba(17,17,17,0.25)',
+                          color: MUTED,
+                          backgroundColor: '#FFFFFF',
+                          cursor: 'pointer',
+                          flexShrink: 0,
+                        }}
+                      >
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden>
+                          <path d="M6 6l12 12M18 6 6 18" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             </Field>
           </div>
